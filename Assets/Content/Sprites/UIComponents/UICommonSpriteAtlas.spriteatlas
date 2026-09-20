@@ -1,0 +1,169 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UICommonSpriteAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 1024
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 1
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    - serializedVersion: 3
+      m_BuildTarget: Android
+      m_MaxTextureSize: 1024
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 65
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 1
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 67f504c1ad2f1411884198a096f0ed72, type: 3}
+    - {fileID: 102900000, guid: 995574e44e59c45758638b6462329301, type: 3}
+    - {fileID: 102900000, guid: faf496b06e2b9470594ca2f1fdfa3d02, type: 3}
+    - {fileID: 102900000, guid: 10b9cdab6324f4a28a0b87c18137e48c, type: 3}
+    - {fileID: 102900000, guid: 5695d6959b77c483e874d5374ab295b1, type: 3}
+    - {fileID: 102900000, guid: 4a61fc767e2554116b3e1b528d1e16f2, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 93c93e80f179c4cae911a48ab2fc913b, type: 3}
+  - {fileID: 21300000, guid: 7f5077902f34e4dcda6e69df4ced83a7, type: 3}
+  - {fileID: 21300000, guid: 1f44cb90b6ae648c783dac573bfe9cd0, type: 3}
+  - {fileID: 21300000, guid: eb165af05aa2e4ab2bcad217611774b8, type: 3}
+  - {fileID: 21300000, guid: 82857232218d743c0bdd3f145cd1120f, type: 3}
+  - {fileID: 21300000, guid: 362cdbc283a1c43a7abec33080b04398, type: 3}
+  - {fileID: 21300000, guid: ae032443c5c224a3599fb8927bccb7ab, type: 3}
+  - {fileID: 21300000, guid: 391584432233c4e0a864435a50a098c5, type: 3}
+  - {fileID: 21300000, guid: 51bc7f9398cc24aff81f13855411d2d4, type: 3}
+  - {fileID: 21300000, guid: 86ad28a37b0134b33b88df67b42b7fe0, type: 3}
+  - {fileID: 21300000, guid: f6291ac32d4e54875a041965865c030b, type: 3}
+  - {fileID: 21300000, guid: 2d7fdac3db28340148be3c66450e375e, type: 3}
+  - {fileID: 21300000, guid: 4c95714486ef949438634bdbd26b8887, type: 3}
+  - {fileID: 21300000, guid: b78e1c94f1bcb42a7996ce616745e100, type: 3}
+  - {fileID: 21300000, guid: fbc232a40047843fba0231c2a71ef457, type: 3}
+  - {fileID: 21300000, guid: bb686ea4c141046129a10074d93b72fd, type: 3}
+  - {fileID: 21300000, guid: af96c8555362c4b7fba005304d49b573, type: 3}
+  - {fileID: 21300000, guid: 78757b0623f3b4309b7cc69c4769ae37, type: 3}
+  - {fileID: 21300000, guid: 70f78e062098c4496b852abefff63acf, type: 3}
+  - {fileID: 21300000, guid: c0947046604294781a54818d5efaa1ea, type: 3}
+  - {fileID: 21300000, guid: 8204a346530a44e11a8f7a16aed74e85, type: 3}
+  - {fileID: 21300000, guid: a57275a6a3430124fad1fc2aab45f74d, type: 3}
+  - {fileID: 21300000, guid: 26d029d646f6e4627ab7b853e7b043fc, type: 3}
+  - {fileID: 21300000, guid: 3fb23bf6552b44aafb168ed0584e1641, type: 3}
+  - {fileID: 21300000, guid: 7d4c1f07557354a049424648dd8f1a88, type: 3}
+  - {fileID: 21300000, guid: 455d14777d4904404b4f056333d64766, type: 3}
+  - {fileID: 21300000, guid: de4b2777d088c49dea1bbd2c0f5d295d, type: 3}
+  - {fileID: 21300000, guid: 228b09b7fa1c5455eab8432a85fac4ee, type: 3}
+  - {fileID: 21300000, guid: 209e0eb770bd94bc4ac1cf106de18eb7, type: 3}
+  - {fileID: 21300000, guid: e92b76e84019e4f3a8b7373222e14fb0, type: 3}
+  - {fileID: 21300000, guid: 4aba112900030463594e2e009ed230aa, type: 3}
+  - {fileID: 21300000, guid: 852e8aa9257ad44d3914c67e159ae8b2, type: 3}
+  - {fileID: 21300000, guid: 00d268f9870dd41d1ab0c13d9f0149fd, type: 3}
+  - {fileID: 21300000, guid: 6124341aca5a24f1c8ffa878bf205e93, type: 3}
+  - {fileID: 21300000, guid: b1f42bbbfffc44202b66381ab8b622ee, type: 3}
+  - {fileID: 21300000, guid: a4771f2cf68494470ab5d3d0bb83abad, type: 3}
+  - {fileID: 21300000, guid: 2323358c16953446e9b2cb27fde07104, type: 3}
+  - {fileID: 21300000, guid: 901d64fc6ad9d44799c2ad0fd4f182d2, type: 3}
+  - {fileID: 21300000, guid: c965160d8643b4ceb8a96e344d4fe2ff, type: 3}
+  - {fileID: 21300000, guid: 11682c1eab384411d9d22f54d5e646a7, type: 3}
+  - {fileID: 21300000, guid: 6bbcba4e267be464998897741b81d508, type: 3}
+  - {fileID: 21300000, guid: 299f326ea0f4443bb8aede4cccf6bc77, type: 3}
+  - {fileID: 21300000, guid: 5dfb16ae0220748c98c6d5ab5220b70a, type: 3}
+  - {fileID: 21300000, guid: 804461bef59b141dba258fc997c8ca15, type: 3}
+  - {fileID: 21300000, guid: 30af861f4c8c141159c3c1ff5b424c3c, type: 3}
+  - {fileID: 21300000, guid: 2a395c4f5dd914dd2b50468e92772309, type: 3}
+  - {fileID: 21300000, guid: b7d7e36f0c41c4316a6ea75d0a9321a6, type: 3}
+  - {fileID: 21300000, guid: 1c003fff2a78f4a4fa6e0a7be1fb3cbd, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Btn_OtherButton_Square05
+  - Icon_Boxing Gloves
+  - Slider11_Fill_Blue
+  - Icon_PictoIcon_Music_on
+  - Icon_ImageIcon_Star02_l
+  - Btn_MainButton_Sky
+  - Icon_ImageIcon_Star01_l
+  - Icon_ImageIcon_Ad_00_s
+  - LineFrame_TitleLine_Right
+  - Btn_MainButton_Purple
+  - Slider12_Fill
+  - Slider03_Fill_Focus
+  - Slider05_Fill
+  - Icon_PictoIcon_Back
+  - Frame_ItemFrame06_Blue
+  - Icon_PictoIcon_Setting
+  - LineFrame_TitleLine_Left
+  - Icon_PictoIcon_Sound_off
+  - Icon_PictoIcon_Close01
+  - Frame_ItemFrame03_f
+  - Slider05_Icon
+  - "Popup_Frame01_Navy \u2014 \u043A\u043E\u043F\u0438\u044F-fotor-20250203143623"
+  - Frame_BasicFrame_Square03
+  - Icon_Gold
+  - Frame_ListFrame09_n
+  - Frame_ListFrame_Square04_f
+  - Label_BasicLabel03_White
+  - Popup_00_TitleLIne
+  - Icon_Chest
+  - Frame_ItemFrame05_n
+  - Label_TitleRibbon_00_Icon
+  - Popup_00_LIne
+  - Icon_PictoIcon_Lock00
+  - Slider12_Handle
+  - Icon_PictoIcon_Music_off
+  - Frame_ItemFrame03_Navy
+  - Label_TitleRibbon_Orange
+  - Icon_PictoIcon_Sound_on
+  - Frame_StageFrame_s
+  - Frame_ListFrame02_s
+  - Btn_MainButton_Blue
+  - Frame_ItemFrame03_Purple
+  - Icon_Gem01_Purple
+  - Btn_MainButton_Yellow
+  - Frame_CardFrame00_BackGlow
+  - Icon_Energy_Green
+  - Icon_Energy_Yellow
+  - Slider05_Frame
+  m_RenderDataMap: {}
+  m_Tag: UICommonSpriteAtlas
+  m_IsVariant: 0

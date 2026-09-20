@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e634bc688b9048a7945222456cedd854, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: 
+  GameModes:
+  - {fileID: 11400000, guid: a7aa4aee30b1bde4da025d034093f936, type: 2}
+  - {fileID: 11400000, guid: 0fcfe895c9f548440985c3594df0883b, type: 2}
+  StateConfigs:
+  - {fileID: 11400000, guid: b21a5fec9573d4c4f8572152c5cf6197, type: 2}
+  - {fileID: 11400000, guid: 451ca5a74b61fb14b9e97e47504f2c2b, type: 2}
+  - {fileID: 11400000, guid: 4f64e2a33e8c17a499bcb7af80d68044, type: 2}
+  - {fileID: 11400000, guid: 878f8e42f0b2b3543bd1bccc980dafb4, type: 2}
+  - {fileID: 11400000, guid: e3226d796d629e2488eb79d776c7b15d, type: 2}
+  Themes:
+  - {fileID: 11400000, guid: f44e75fe2f7f2dc479181e60bf11e762, type: 2}
+  - {fileID: 11400000, guid: 62e4259944a70b94190f362a284ddef6, type: 2}
+  - {fileID: 11400000, guid: efad52d7dad21a14f9d0c384875a8870, type: 2}
+  InitialEnergy: 5
+  MaxEnergy: 10
+  EnergyRecoveryIntervalHours: 1
+  InitialStars: 80
+  DefaultUnlockedThemes:
+  - Dogs
+  AudioClipsCollection:
+  - AudioClip: {fileID: 8300000, guid: 956ad2f73332544fd87365087825cc4f, type: 3}
+    Key: Background
+  - AudioClip: {fileID: 8300000, guid: 32d4b1811dda14a6cb9e059ee8ad17d2, type: 3}
+    Key: MenuClick
+  - AudioClip: {fileID: 8300000, guid: 19f89c6e740e7447f9e12a8310d3e973, type: 3}
+    Key: WrongClick
+  - AudioClip: {fileID: 8300000, guid: 2667a0a008b044e218b63df62e2be749, type: 3}
+    Key: Win
+  - AudioClip: {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
+    Key: RightTap
+  - AudioClip: {fileID: 8300000, guid: 7bd6b897eb5ca4b7d88a205c4a51640c, type: 3}
+    Key: PopUp
+  BoardPrefab: Prefabs/GamePlayElements/Board
+  TilePrefab: Prefabs/GamePlayElements/Tile

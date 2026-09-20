@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d56b5fb5af84ab5b7b294ee7ef47120, type: 3}
+  m_Name: SettingsMenuState
+  m_EditorClassIdentifier: 
+  StateName: 4
+  ScreenPrefab: Prefabs/UI/Screens/SettingsPopUpScreen
+  IsPopup: 1
+  AllowedTransitions:
+  - {fileID: 11400000, guid: b21a5fec9573d4c4f8572152c5cf6197, type: 2}

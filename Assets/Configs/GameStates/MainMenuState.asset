@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d56b5fb5af84ab5b7b294ee7ef47120, type: 3}
+  m_Name: MainMenuState
+  m_EditorClassIdentifier: 
+  StateName: 2
+  ScreenPrefab: Prefabs/UI/Screens/MainMenuScreen
+  AllowedTransitions:
+  - {fileID: 11400000, guid: 451ca5a74b61fb14b9e97e47504f2c2b, type: 2}
+  - {fileID: 11400000, guid: 878f8e42f0b2b3543bd1bccc980dafb4, type: 2}
