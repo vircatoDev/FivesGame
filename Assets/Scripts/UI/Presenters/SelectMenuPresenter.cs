@@ -61,16 +61,17 @@ namespace Scripts.UI.Presenters
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
-            if (!TrySpendEnergy())
-                return;
-
             var imageData = GetPuzzleData(selectedImg);
             if (imageData == null)
             {
                 return;
             }
 
+            if (!TrySpendEnergy())
+                return;
+
             SetSelectedGameSettings(imageData);
+            _gameSession.BeginRun();
             await HideCurrentView();
             ChangeGameState(GameStateType.Playing);
         }
@@ -209,7 +210,12 @@ namespace Scripts.UI.Presenters
                 return;
             }
 
-            if (!_starService.Spend(theme.UnlockCost))
+            if (IsThemeUnlocked(theme))
+            {
+                return;
+            }
+
+            if (theme.UnlockCost < 0 || (theme.UnlockCost > 0 && !_starService.Spend(theme.UnlockCost)))
             {
                 PlaySoundEffect(AudioKeyCollection.WrongClick);
                 ShowNoStarsAnimation();
@@ -226,11 +232,11 @@ namespace Scripts.UI.Presenters
 
         private void UnlockTheme(ThemeConfig theme)
         {
-            _starService.Spend(theme.UnlockCost);
             UpdateStarBalance(-theme.UnlockCost);
             SaveStarData();
 
             _playerProgressService.UnlockTheme(theme.ThemeName);
+            SaveProgressData();
             var updatedTile = new MenuItemData
             {
                 Id = theme.ThemeName,
@@ -278,5 +284,6 @@ namespace Scripts.UI.Presenters
             _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService, amount).Execute();
 
         private void SaveStarData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_starService).Execute();
+        private void SaveProgressData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_playerProgressService).Execute();
     }
 }

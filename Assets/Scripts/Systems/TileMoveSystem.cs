@@ -8,13 +8,10 @@ namespace Scripts.Systems
 {
     class TileMoveSystem : IEcsRunSystem
     {
-        private EcsWorld _world;
         private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter = null;
         private readonly EcsFilter<TileComponent, EmptyTileComponent> _emptyTileFilter = null;
         private readonly GameSession _gameSettings;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
-
-        private Vector2 _startPositionOnBoard;
 
         public void Run()
         {
@@ -87,7 +84,7 @@ namespace Scripts.Systems
 
         private Vector2 CalculateUIPosition(Vector2 gridPosition)
         {
-            return _startPositionOnBoard + new Vector2(
+            return new Vector2(
                 gridPosition.x * (_gameSettings.SelectedGameMode.TileSize + _gameSettings.SelectedGameMode.TileSpacing),
                 -gridPosition.y * (_gameSettings.SelectedGameMode.TileSize + _gameSettings.SelectedGameMode.TileSpacing)
             );

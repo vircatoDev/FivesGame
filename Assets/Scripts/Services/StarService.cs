@@ -1,3 +1,5 @@
+using System;
+using Fives.Domain;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services.Interfaces;
@@ -6,37 +8,34 @@ namespace Scripts.Services
 {
     public class StarService : ICurrencyService, IStorable
     {
-        private int _currentStars;
+        private readonly CurrencyWallet _wallet;
 
         public StarService(PlayerDataSaveHelper saveHelper)
         {
-            _currentStars = saveHelper.GetPlayerData().Stars;
+            _wallet = new CurrencyWallet(Math.Max(0, saveHelper.GetPlayerData().Stars));
         }
 
         public int GetBalance()
         {
-            return _currentStars;
+            return _wallet.Balance;
         }
 
         public void Add(int amount)
         {
-            _currentStars += amount;
+            if (!_wallet.TryCredit(amount))
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount));
+            }
         }
 
         public bool Spend(int amount)
         {
-            if (_currentStars >= amount)
-            {
-                _currentStars -= amount;
-                return true;
-            }
-
-            return false;
+            return _wallet.TrySpend(amount);
         }
 
         public void UpdatePlayerData(GameSaveData playerData)
         {
-            playerData.Stars = _currentStars;
+            playerData.Stars = _wallet.Balance;
         }
     }
 }

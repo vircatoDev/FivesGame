@@ -58,6 +58,7 @@ namespace Scripts.UI.Presenters
             var nextPuzzle = FindNextUncompletedPuzzle(theme);
             _gameSession.SetSelectedTheme(theme);
             _gameSession.SetSelectedImage(nextPuzzle);
+            _gameSession.BeginRun();
             
             await _view.PlayHideAnimation();
             

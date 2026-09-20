@@ -46,7 +46,7 @@ namespace Scripts.Helpers
             _gameSaveData.Energy = new EnergyData
             {
                 CurrentEnergy = gameSettings.InitialEnergy,
-                LastRecoveryTime = DateTime.Now
+                LastRecoveryTime = DateTime.UtcNow
             };
 
             _gameSaveData.PlayerProgress = new PlayerProgressData

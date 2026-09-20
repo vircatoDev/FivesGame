@@ -5,31 +5,26 @@ using UnityEngine;
 
 namespace Scripts.Systems
 {
-    public class TileClickSystem : IEcsRunSystem, IEcsInitSystem
+    public class TileClickSystem : IEcsRunSystem
     {
         private EcsWorld _world;
         private readonly EcsFilter<TileClickEvent> _uiClickEvents;
         private readonly EcsFilter<TileComponent> _tileFilter;
         private readonly EcsFilter<TileComponent, EmptyTileComponent> _emptyTileFilter;
-
-        private readonly EcsFilter<GameStateComponent> _stateFilter = null;
-        private GameStateComponent _cachedState;
-
-        public void Init()
-        {
-            foreach (var i in _stateFilter)
-            {
-                _cachedState = _stateFilter.Get1(i);
-                break;
-            }
-        }
+        private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter;
 
         public void Run()
         {
+            if (_moveFilter.GetEntitiesCount() > 0)
+            {
+                return;
+            }
+
             foreach (var i in _uiClickEvents)
             {
                 ref var clickEvent = ref _uiClickEvents.Get1(i);
                 ProcessTileClick(clickEvent.Id);
+                return;
             }
         }
 
@@ -39,7 +34,7 @@ namespace Scripts.Systems
             {
                 ref var emptyTile = ref _emptyTileFilter.Get1(emptyTileEntity);
 
-                bool rightTurnDetect = false;
+                var validMove = false;
 
                 foreach (var tileEntity in _tileFilter)
                 {
@@ -62,15 +57,12 @@ namespace Scripts.Systems
                             Volume = 1f
                         });
 
-                        rightTurnDetect = true;
+                        validMove = true;
                         break;
-                    }
-                    else
-                    {
                     }
                 }
 
-                if (!rightTurnDetect)
+                if (!validMove)
                 {
                     var soundEntity = _world.NewEntity();
                     soundEntity.Replace(new PlaySoundEffectEvent()
@@ -79,6 +71,8 @@ namespace Scripts.Systems
                         Volume = 1f
                     });
                 }
+
+                return;
             }
         }
 

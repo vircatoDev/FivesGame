@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Fives.Domain;
 using UnityEngine;
 
 namespace Scripts.Helpers
@@ -7,12 +8,17 @@ namespace Scripts.Helpers
     {
         public static List<Vector2> GenerateStartField(out int emptyIndexResult)
         {
-            // Create virtual game field from [0, 0] to [2, 2]
-            List<Vector2> field = new List<Vector2>();
+            return GenerateStartField(3, out emptyIndexResult);
+        }
 
-            for (int y = 0; y < 3; y++)
+        public static List<Vector2> GenerateStartField(int boardSize, out int emptyIndexResult)
+        {
+            var cellCount = BoardMath.CellCount(boardSize);
+            var field = new List<Vector2>(cellCount);
+
+            for (int y = 0; y < boardSize; y++)
             {
-                for (int x = 0; x < 3; x++)
+                for (int x = 0; x < boardSize; x++)
                 {
                     field.Add(new Vector2(x, y));
                 }
@@ -25,11 +31,10 @@ namespace Scripts.Helpers
             HashSet<string> previousStates = new HashSet<string>();
             previousStates.Add(FieldToString(field));
 
-            // can control the difficulty by changing the number of shuffles
-            int shuffleCount = Random.Range(5, 10);
+            int shuffleCount = Random.Range(cellCount * 2, cellCount * 4 + 1);
             for (int i = 0; i < shuffleCount; i++)
             {
-                List<Vector2> neighbors = GetUniqueNeighbors(field, emptyCell, previousStates);
+                List<Vector2> neighbors = GetUniqueNeighbors(field, emptyCell, previousStates, boardSize);
 
                 if (neighbors.Count == 0)
                 {
@@ -51,7 +56,7 @@ namespace Scripts.Helpers
         }
 
         private static List<Vector2> GetUniqueNeighbors(List<Vector2> field, Vector2 emptyCell,
-            HashSet<string> previousStates)
+            HashSet<string> previousStates, int boardSize)
         {
             List<Vector2> neighbors = new List<Vector2>();
 
@@ -68,7 +73,7 @@ namespace Scripts.Helpers
             {
                 Vector2 neighbor = emptyCell + direction;
 
-                if (neighbor.x >= 0 && neighbor.x < 3 && neighbor.y >= 0 && neighbor.y < 3)
+                if (neighbor.x >= 0 && neighbor.x < boardSize && neighbor.y >= 0 && neighbor.y < boardSize)
                 {
                     //Check next state ,we need unique moves
                     var tempField = new List<Vector2>(field);

@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Helpers;
 using Scripts.Models;
-using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
@@ -11,7 +9,6 @@ namespace Scripts.Systems
     {
         private EcsFilter<SaveDataEvent> _saveEvents;
         private GameSaveData _gameSaveData;
-        private readonly IEnumerable<IStorable> _storables;
         private readonly PlayerDataSaveHelper _playerDataSaveHelper;
 
         public void Init()
@@ -28,6 +25,7 @@ namespace Scripts.Systems
                 storableObject.UpdatePlayerData(_gameSaveData);
 
                 _playerDataSaveHelper.SavePlayerData(_gameSaveData);
+                _saveEvents.GetEntity(i).Destroy();
             }
         }
     }

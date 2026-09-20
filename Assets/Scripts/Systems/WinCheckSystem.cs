@@ -1,5 +1,6 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
+using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
@@ -12,6 +13,7 @@ namespace Scripts.Systems
         private readonly EcsFilter<TileComponent> _tileFilter = null;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
         private readonly EcsWorld _world;
+        private readonly GameSession _gameSession;
 
         private bool _isWin;
 
@@ -38,7 +40,10 @@ namespace Scripts.Systems
             {
                 ref var tile = ref _tileFilter.Get1(i);
 
-                int expectedId = (int)(tile.Position.y + (tile.Position.y * 2) + tile.Position.x);
+                int expectedId = BoardMath.TileIdAt(
+                    (int)tile.Position.x,
+                    (int)tile.Position.y,
+                    _gameSession.SelectedGameMode.BoardSize);
 
                 if (tile.Id != expectedId)
                 {

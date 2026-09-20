@@ -19,17 +19,8 @@ namespace Scripts.Systems
         {
             if (_boardInitFilter.GetEntitiesCount() == 0) return;
 
-            var positions = new List<Vector2>();
-            for (int row = 0; row < _gameSession.SelectedGameMode.BoardSize; row++)
-            {
-                for (int col = 0; col < _gameSession.SelectedGameMode.BoardSize; col++)
-                {
-                    positions.Add(new Vector2Int(col, row));
-                }
-            }
-
-            List<Vector2> startField = PuzzleGenerator.GenerateStartField(out var emptyIndexResult);
-            positions = startField;
+            var boardSize = _gameSession.SelectedGameMode.BoardSize;
+            List<Vector2> positions = PuzzleGenerator.GenerateStartField(boardSize, out var emptyIndexResult);
 
             var emptyTile = _tileFilter.GetEntity(emptyIndexResult);
             emptyTile.Get<EmptyTileComponent>();

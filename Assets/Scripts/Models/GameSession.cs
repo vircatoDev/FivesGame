@@ -1,9 +1,11 @@
-﻿using Scripts.Configs;
+﻿using Fives.Domain;
+using Scripts.Configs;
 using UnityEngine;
 
 namespace Scripts.Models
 {
     public class GameSession {
+        private readonly RewardClaim _rewardClaim = new RewardClaim();
     
         public ThemeConfig SelectedTheme { get; private set; }
         public PuzzleData SelectedPuzzle { get; private set; }
@@ -15,6 +17,17 @@ namespace Scripts.Models
     
         public void SetSelectedImage(PuzzleData puzzle) {
             SelectedPuzzle = puzzle;
+        }
+
+        public void BeginRun()
+        {
+            _rewardClaim.Reset();
+            LastGameResult = new GameResult { StarCount = 10 };
+        }
+
+        public bool TryClaimReward(bool doubleReward, out int grantedAmount)
+        {
+            return _rewardClaim.TryClaim(10, doubleReward, out grantedAmount);
         }
     
         public void SetSelectedTheme(ThemeConfig theme) {
@@ -35,6 +48,8 @@ namespace Scripts.Models
         public void ResetSession() {
             SelectedPuzzle = null;
             SelectedGameMode = null;
+            LastGameResult = null;
+            _rewardClaim.Reset();
             IsTimedMode = false;
             RemainingTime = 0;
         }

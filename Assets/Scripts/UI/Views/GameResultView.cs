@@ -57,7 +57,6 @@ namespace Scripts.UI.Views
             if (gameSessionLastGameResult == null)
                 gameSessionLastGameResult = new GameResult();
 
-            gameSessionLastGameResult.StarCount += 10;
             puzzleIndex += 1;
         
             starsRewardText.text = $"+{gameSessionLastGameResult.StarCount} Stars";

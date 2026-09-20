@@ -81,7 +81,6 @@ namespace Scripts
                 .OneFrame<UpdateControlPanelStarsEvent>()
                 .OneFrame<UpdateControlPanelBtnLogicEvent>()
                 .OneFrame<ChangeStateEvent>()
-                .OneFrame<SaveDataEvent>()
                 .OneFrame<OpenScreenEvent>()
                 .OneFrame<CloseScreenEvent>()
                 .OneFrame<PlaySoundEffectEvent>()
@@ -101,11 +100,11 @@ namespace Scripts
                 .Add(new GamePlayManagementSystem(_mainSystems))
                 .Add(new GameStateSystem(_stateMachine))
                 .Add(new SoundSystem(_soundService))
-                .Add(new StorageSystem())
                 .Add(new EnergyRecoverySystem(_energyService))
                 .Add(new UISystem(_rootLayer, _popUpLayer))
                 .Add(new CommonUIHeaderPanelSystem(_headerPanelView))
-                .Add(new FadeSystem(_fadeScreen));
+                .Add(new FadeSystem(_fadeScreen))
+                .Add(new StorageSystem());
         }
 
         private EcsSystems AddGamePlaySystems()

@@ -15,7 +15,7 @@ The imported baseline contains a complete player loop:
 - player progress and local save data;
 - menus, settings, audio, transitions, and rewards.
 
-It was originally created as a two-week test assignment with Unity 2021.3.25f1, LeoECS, VContainer, UniTask, DOTween, uGUI, TextMesh Pro, and JSON persistence.
+It was originally created as a two-week test assignment and is now maintained with Unity 6.0 (6000.0.71f1), LeoECS, VContainer, UniTask, DOTween, uGUI, TextMesh Pro, and JSON persistence.
 
 ## Modernization direction
 
@@ -28,16 +28,17 @@ Development now focuses on a compact, verifiable architecture:
 - Addressables, RU/EN localization, and modern input;
 - EditMode/PlayMode tests, CI artifacts, and measured performance budgets.
 
-See the [audit summary](docs/AUDIT.md), [target architecture](docs/ARCHITECTURE.md), and [roadmap](docs/ROADMAP.md).
+See the [baseline report](docs/BASELINE.md), [audit summary](docs/AUDIT.md), [target architecture](docs/ARCHITECTURE.md), and [roadmap](docs/ROADMAP.md).
 
-## Open the baseline
+## Open and build
 
-1. Install Unity **2021.3.25f1** through Unity Hub.
+1. Install Unity **6000.0.71f1** with Android Build Support, SDK, NDK, and OpenJDK.
 2. Add this directory as a project.
 3. Let Unity Package Manager restore the locked dependencies.
 4. Open `Assets/Scenes/MainGame.unity`.
+5. Build an Android App Bundle from `FivesGame > Build > Android App Bundle`.
 
-Migration to Unity 6 will happen in a dedicated feature branch after the baseline compiles and its critical behavior is protected by tests.
+The project targets Android only. The automated entry point is `Fives.Editor.AndroidBuild.BuildRelease`; its default output is `Builds/Android/FivesGame.aab`.
 
 ## Git Flow
 
@@ -51,8 +52,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit and pull-request rules.
 
 ## Verification status
 
-Static analysis and isolated C# probes reproduced eight correctness problems in the imported baseline. Full Editor import, PlayMode, IL2CPP build, and device profiling are pending until Unity 2021.3.25f1 is installed. No performance values are claimed before profiling a documented build and device.
+The eight imported correctness problems now pass isolated regression probes, and the pure domain regressions compile as Unity EditMode tests. Unity 6 package resolution is reproducible. Full Test Runner execution, Android IL2CPP build, and device profiling remain pending because the current Codex sandbox blocks Unity's IL post-processor socket. No performance values are claimed before profiling a documented build and device.
 
 ## Licensing
 
-A project-wide license has not been selected yet. Third-party packages and imported media retain their own terms. Before the first public release, the repository will include a reviewed root license and third-party notices.
+A project-wide license has not been selected yet. Third-party packages and imported media retain their own terms. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); unresolved media provenance blocks a public store release.

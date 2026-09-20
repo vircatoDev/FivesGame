@@ -11,9 +11,6 @@ namespace Scripts.Systems
         private readonly EcsWorld _world;
         private readonly EnergyService _energyService;
 
-        private int _oldBalance;
-        private int _newBalance;
-
         private float _nextCheckTime = 0f;
 
         public EnergyRecoverySystem(EnergyService energyService)
@@ -27,15 +24,16 @@ namespace Scripts.Systems
 
             if (currentTime >= _nextCheckTime)
             {
-                _oldBalance = _energyService.GetBalance();
-                _energyService.GetBalance();
+                var recoveredAmount = _energyService.RecoverEnergy();
 
-                _newBalance = _energyService.GetBalance();
-
-                if (_oldBalance != _newBalance)
+                if (recoveredAmount > 0)
                 {
                     var updateEvent = _world.NewEntity();
-                    updateEvent.Get<UpdateControlPanelEnergyEvent>().EnergyAmount = _newBalance;
+                    updateEvent.Replace(new UpdateControlPanelEnergyEvent
+                    {
+                        EnergyAmount = _energyService.GetBalance(),
+                        EnergyChange = recoveredAmount
+                    });
 
                     var saveDataEvent = _world.NewEntity();
                     saveDataEvent.Replace(new SaveDataEvent
@@ -50,17 +48,8 @@ namespace Scripts.Systems
 
         private float GetNextCheckDelay()
         {
-            DateTime now = DateTime.Now;
-            TimeSpan elapsed = now - _energyService.GetLastRecoveryTime();
-            TimeSpan timeLeft = _energyService.GetRecoveryInterval() - elapsed;
-
-            // if energy full check more intensive
-            if (timeLeft <= TimeSpan.Zero)
-            {
-                return 60f;
-            }
-
-            return (float)timeLeft.TotalSeconds;
+            var timeLeft = _energyService.GetTimeUntilNextRecovery();
+            return Math.Max(1f, (float)timeLeft.TotalSeconds);
         }
     }
 }

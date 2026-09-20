@@ -1,4 +1,5 @@
 using System.Linq;
+using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Configs;
 using Scripts.Helpers;
@@ -27,6 +28,7 @@ namespace Scripts.Installers
             builder.RegisterInstance(globalConfig.StateConfigs.ToDictionary(cfg => cfg.StateName));
 
             builder.Register<PlayerDataSaveHelper>(Lifetime.Singleton);
+            builder.Register<IClock, SystemClock>(Lifetime.Singleton);
             builder.Register<IStorageService, StorageService>(Lifetime.Singleton);
             builder.Register<GameSession>(Lifetime.Singleton);
             builder.Register<SoundService>(Lifetime.Singleton);
