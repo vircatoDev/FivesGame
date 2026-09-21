@@ -33,6 +33,7 @@
 ExportedObj/
 .consulo/
 *.csproj
+!/tools/domain-tests/**/*.csproj
 *.unityproj
 *.sln
 *.suo
@@ -71,3 +72,8 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Standalone domain test builds (outside Unity's generated projects).
+/tools/domain-tests/**/bin/
+/tools/domain-tests/**/obj/
+/tools/domain-tests/TestResults/

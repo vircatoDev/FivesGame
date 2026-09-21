@@ -1,5 +1,13 @@
 # Target architecture
 
+## Current increment
+
+`Fives.Domain.BoardState` and its invariant tests are implemented independently of Unity.
+The current ECS gameplay has not yet been switched to that model. See
+[the board contract and integration sequence](BOARD_STATE.md) and
+[standalone test instructions](../tools/domain-tests/README.md).
+The sections below describe the direction; they are not a list of completed features.
+
 ## Direction
 
 The puzzle will use a small layered architecture:
@@ -10,27 +18,31 @@ Unity Presentation
 Application Use Cases
         ↓
 Pure C# Domain
-        ↓ ports
-Infrastructure
 
-Bootstrap composes the layers with VContainer scopes.
+Infrastructure implements ports defined by Application.
+Bootstrap composes the concrete dependencies with VContainer.
 ```
 
 The board is small and transactional. The target gameplay core will therefore be a deterministic C# model rather than another ECS migration. This makes atomic moves, Undo, Replay, solvers, and save migrations easy to verify without a scene.
 
 ## Assembly boundaries
 
-- `Fives.Domain`: board, sessions, economy rules, replay; no Unity references.
-- `Fives.Application`: use cases and infrastructure ports.
+- `Fives.Domain`: board and economy rules; no Unity references.
+- `Fives.Application`: session use cases, accepted move history, replay, and infrastructure ports.
 - `Fives.Presentation`: views, animation, input, and navigation.
 - `Fives.Infrastructure`: persistence, Addressables, telemetry, and platform adapters.
 - `Fives.Bootstrap`: VContainer composition and configuration.
 
 Editor and test assemblies remain separate. Dependencies point inward and do not form cycles.
+Only Domain is required for this increment. Further assembly splits need a concrete
+dependency boundary; the five responsibilities do not mandate five new assemblies at once.
 
 ## Board model
 
-One authoritative `BoardState` owns a flat tile array, dimensions, empty cell, and move count. `TryMove` validates and commits one move atomically, returning an immutable result for presentation. Every operation preserves one empty cell, unique tile IDs, valid bounds, and one terminal result per session.
+One authoritative `BoardState` owns a private flat tile array, size, hidden tile ID, and
+empty cell. `TryMove(cell)` validates and synchronously commits one legal swap, returning
+whether it was accepted. Every move preserves one empty cell, unique tile IDs and bounds.
+Move count, history, presentation results and terminal-session policy belong to Application.
 
 Shuffle starts from a solved board and applies legal moves using a supplied seed. Replay data stores the rules version, seed, board size, accepted moves, and final hash. The same replay must produce the same result on every platform.
 
@@ -38,7 +50,10 @@ Shuffle starts from a solved board and applies legal moves using a supplied seed
 
 UI calls typed operations such as `TryMove`, `PurchaseTheme`, `ClaimReward`, and `LoadProgressAsync`. A View cannot debit currency or grant progress. Purchase and reward operations use idempotency keys and typed failure results.
 
-VContainer remains the composition root with App, Menu, and GameSession scopes. Disposing a session cancels its asynchronous work and animations. Navigation serializes transitions so stale callbacks cannot reopen screens or destroy a later board.
+VContainer remains the composition root. Add narrower scopes only when a concrete owned
+resource needs them. Cancellation belongs to asynchronous operations that can outlive
+their owner, not to synchronous board rules. Navigation must prevent stale callbacks from
+reopening screens or destroying a later board.
 
 ## Data and content
 

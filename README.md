@@ -52,7 +52,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit and pull-request rules.
 
 ## Verification status
 
-The eight imported correctness problems now pass isolated regression probes, and the pure domain regressions compile as Unity EditMode tests. Unity 6 package resolution is reproducible. Full Test Runner execution, Android IL2CPP build, and device profiling remain pending because the current Codex sandbox blocks Unity's IL post-processor socket. No performance values are claimed before profiling a documented build and device.
+The pure-C# `BoardState` increment passes 56 standalone NUnit tests (51 board cases
+and the five existing domain regressions). It includes 8,000 attempted moves and
+exhaustive 2x2 state traversal. Gameplay still uses the existing ECS rules until the
+integration increment; seeded shuffle, Undo, and replay are not implemented yet.
+
+The same test sources compile against Unity 6000.0.71f1. The 34 legacy regression
+probes also pass. The latest CLI EditMode attempt was blocked by the already-open
+Editor; no Unity Test Runner, Android IL2CPP, or device profiling success is claimed.
+
+See [the board contract](docs/BOARD_STATE.md) and [test commands](tools/domain-tests/README.md).
+The new domain-only GitHub Actions workflow is configured for Linux and Windows;
+its first remote run will happen after these changes are committed and pushed.
 
 ## Licensing
 
