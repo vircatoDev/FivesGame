@@ -42,7 +42,7 @@ internal sealed class EmitSave : IEcsRunSystem
     public void Run() => _world.NewEntity().Replace(new SaveDataEvent { StorableObject = Target });
 }
 
-internal static class CorrectnessProbes
+internal static partial class CorrectnessProbes
 {
     private static int _passed;
 
@@ -55,7 +55,8 @@ internal static class CorrectnessProbes
         DefaultUnlockedThemes = new[] { "Dogs" },
         Themes = new List<ThemeConfig>
         {
-            new ThemeConfig { ThemeName = "Cities", UnlockCost = 60, Puzzles = Array.Empty<PuzzleData>() }
+            new ThemeConfig { ThemeName = "Cities", UnlockCost = 60, Puzzles = Array.Empty<PuzzleData>() },
+            new ThemeConfig { ThemeName = "Dogs", Puzzles = Array.Empty<PuzzleData>() }
         }
     };
 
@@ -78,7 +79,7 @@ internal static class CorrectnessProbes
         var world = new EcsWorld();
         var commands = new ECSCommandService(world);
 
-        var select = new SelectMenuPresenter(config, new GameSession(), energy, stars, progress, commands);
+        var select = new SelectMenuPresenter(config, new GameStartService(new GameSession(), energy, commands), stars, progress, commands);
         typeof(SelectMenuPresenter).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(select, new SelectMenuView());
         select.OnThemeBuy("Cities");
         Check("theme purchase debits once", stars.GetBalance() == 140, $"balance={stars.GetBalance()}");
@@ -142,6 +143,7 @@ internal static class CorrectnessProbes
         var generated = PuzzleGenerator.GenerateStartField(6, out var emptyIndex);
         Check("configured board size is honored", generated.Count == 36 && generated.Distinct().Count() == 36 && emptyIndex >= 0 && emptyIndex < 36, $"cells={generated.Count}, empty={emptyIndex}");
 
-        Console.WriteLine($"SUMMARY | {_passed}/8 correctness probes passed");
+        RunLifecycleProbes();
+        Console.WriteLine($"SUMMARY | {_passed} correctness probes passed");
     }
 }

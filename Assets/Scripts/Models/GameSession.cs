@@ -12,6 +12,8 @@ namespace Scripts.Models
         public PuzzleData SelectedPuzzle { get; private set; }
         public GameSettings SelectedGameMode { get; private set; }
         public GameResult LastGameResult { get; private set; }
+        public bool IsRunning { get; private set; }
+        public bool IsCompleted { get; private set; }
         public bool IsTimedMode { get; private set; }
         public float RemainingTime { get; private set; }
 
@@ -22,8 +24,20 @@ namespace Scripts.Models
 
         public void BeginRun()
         {
+            IsRunning = true;
+            IsCompleted = false;
             _rewardClaim.Reset();
             LastGameResult = new GameResult { StarCount = 10 };
+        }
+
+        public void CompleteRun()
+        {
+            IsCompleted = true;
+        }
+
+        public void EndRun()
+        {
+            IsRunning = false;
         }
 
         public bool TryClaimReward(bool doubleReward, out int grantedAmount)
@@ -52,6 +66,8 @@ namespace Scripts.Models
 
         public void ResetSession()
         {
+            IsRunning = false;
+            IsCompleted = false;
             SelectedPuzzle = null;
             SelectedGameMode = null;
             LastGameResult = null;

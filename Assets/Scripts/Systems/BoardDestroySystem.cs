@@ -1,5 +1,6 @@
 using Leopotam.Ecs;
 using Scripts.Components;
+using Scripts.Models;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -8,6 +9,7 @@ namespace Scripts.Systems
     class BoardDestroySystem : IEcsRunSystem
     {
         private readonly Transform _boardParent;
+        private readonly GameSession _session;
 
         private readonly EcsFilter<TileComponent> _tileFilter = null;
         private readonly EcsFilter<GameEndEvent> _gameEndEvent = null;
@@ -22,6 +24,7 @@ namespace Scripts.Systems
             if (_gameEndEvent.GetEntitiesCount() > 0)
             {
                 DestroyCurrentBoard();
+                _session.EndRun();
             }
         }
 

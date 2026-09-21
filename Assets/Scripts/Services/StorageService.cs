@@ -15,13 +15,24 @@ namespace Scripts.Services
 
         public T Load<T>(string key, T defaultValue = default)
         {
-            if (PlayerPrefs.HasKey(key))
+            if (!PlayerPrefs.HasKey(key))
+                return defaultValue;
+
+            var json = PlayerPrefs.GetString(key);
+            try
             {
-                string json = PlayerPrefs.GetString(key);
-                return JsonConvert.DeserializeObject<T>(json);
+                var data = JsonConvert.DeserializeObject<T>(json);
+                if (data != null)
+                    return data;
             }
+            catch (JsonException)
+            {
+                Debug.LogWarning($"Cannot read save '{key}'. A copy is stored in '{key}.corrupt'.");
+            }
+
+            PlayerPrefs.SetString(key + ".corrupt", json);
+            PlayerPrefs.Save();
             return defaultValue;
         }
-    
     }
 }

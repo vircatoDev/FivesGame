@@ -12,17 +12,15 @@ namespace Scripts.Helpers
     {
         private const string SAVE_KEY = "GameSaveData";
 
-        private IStorageService _storage;
+        private readonly IStorageService _storage;
         private GameSaveData _gameSaveData;
 
         public PlayerDataSaveHelper(IStorageService storage, GlobalConfig gameSettings)
         {
             _storage = storage;
-            _gameSaveData = _storage.Load<GameSaveData>(SAVE_KEY, new GameSaveData());
-            if (_gameSaveData.PlayerProgress == null)
-            {
-                InitPlayerData(gameSettings);
-            }
+            _gameSaveData = _storage.Load<GameSaveData>(SAVE_KEY)
+                ?? new GameSaveData { Stars = gameSettings.InitialStars };
+            NormalizePlayerData(gameSettings);
         }
 
         public GameSaveData GetPlayerData()
@@ -41,21 +39,26 @@ namespace Scripts.Helpers
             _storage.Save(SAVE_KEY, _gameSaveData);
         }
 
-        private void InitPlayerData(GlobalConfig gameSettings)
+        private void NormalizePlayerData(GlobalConfig gameSettings)
         {
-            _gameSaveData.Energy = new EnergyData
+            _gameSaveData.Energy ??= new EnergyData
             {
                 CurrentEnergy = gameSettings.InitialEnergy,
                 LastRecoveryTime = DateTime.UtcNow
             };
 
-            _gameSaveData.PlayerProgress = new PlayerProgressData
-            {
-                UnlockedThemes = gameSettings.DefaultUnlockedThemes.ToList(),
-                CompletedPuzzles = new List<string>()
-            };
+            if (_gameSaveData.Energy.LastRecoveryTime == default)
+                _gameSaveData.Energy.LastRecoveryTime = DateTime.UtcNow;
 
-            _gameSaveData.Stars = gameSettings.InitialStars;
+            _gameSaveData.Energy.CurrentEnergy = Math.Clamp(_gameSaveData.Energy.CurrentEnergy, 0, gameSettings.MaxEnergy);
+            _gameSaveData.Stars = Math.Max(0, _gameSaveData.Stars);
+            _gameSaveData.SoundSettings ??= new SoundSettingsData();
+            _gameSaveData.PlayerProgress ??= new PlayerProgressData();
+            var progress = _gameSaveData.PlayerProgress;
+            progress.UnlockedThemes = gameSettings.DefaultUnlockedThemes
+                .Concat(progress.UnlockedThemes ?? Enumerable.Empty<string>())
+                .Where(name => !string.IsNullOrEmpty(name)).Distinct().ToList();
+            progress.CompletedPuzzles ??= new List<string>();
         }
     }
 }

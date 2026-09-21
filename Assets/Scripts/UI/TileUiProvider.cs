@@ -14,6 +14,7 @@ namespace Scripts.UI
         [SerializeField] private int _id;
     
         private EcsWorld _world;
+        private Sprite _ownedSprite;
     
         float delayBetweenTiles = 0.1f; // Delay between tiles appearing
         float animationDuration = 0.3f; // Duration of each tile animation
@@ -22,8 +23,14 @@ namespace Scripts.UI
         {
             _world = world;
             _id = id;
+            _ownedSprite = tileSprite;
             _tileImage.sprite = tileSprite;
             _tileImage.color= Color.white;
+        }
+
+        private void OnDestroy()
+        {
+            Destroy(_ownedSprite);
         }
 
         public void OnPointerClick(PointerEventData eventData)

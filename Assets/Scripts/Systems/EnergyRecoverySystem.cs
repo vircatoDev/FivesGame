@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Scripts.Systems
 {
-    public class EnergyRecoverySystem : IEcsRunSystem
+    public class EnergyRecoverySystem : IEcsRunSystem, IEcsInitSystem
     {
         private readonly EcsWorld _world;
         private readonly EnergyService _energyService;
@@ -18,32 +18,31 @@ namespace Scripts.Systems
             _energyService = energyService;
         }
 
+        public void Init()
+        {
+            RecoverAndScheduleNextCheck();
+        }
+
         public void Run()
         {
-            float currentTime = Time.time;
+            if (Time.time >= _nextCheckTime)
+                RecoverAndScheduleNextCheck();
+        }
 
-            if (currentTime >= _nextCheckTime)
+        private void RecoverAndScheduleNextCheck()
+        {
+            var recoveredAmount = _energyService.RecoverEnergy();
+            if (recoveredAmount > 0)
             {
-                var recoveredAmount = _energyService.RecoverEnergy();
-
-                if (recoveredAmount > 0)
+                _world.NewEntity().Replace(new UpdateControlPanelEnergyEvent
                 {
-                    var updateEvent = _world.NewEntity();
-                    updateEvent.Replace(new UpdateControlPanelEnergyEvent
-                    {
-                        EnergyAmount = _energyService.GetBalance(),
-                        EnergyChange = recoveredAmount
-                    });
-
-                    var saveDataEvent = _world.NewEntity();
-                    saveDataEvent.Replace(new SaveDataEvent
-                    {
-                        StorableObject = _energyService
-                    });
-                }
-
-                _nextCheckTime = currentTime + GetNextCheckDelay();
+                    EnergyAmount = _energyService.GetBalance(),
+                    EnergyChange = recoveredAmount
+                });
+                _world.NewEntity().Replace(new SaveDataEvent { StorableObject = _energyService });
             }
+
+            _nextCheckTime = Time.time + GetNextCheckDelay();
         }
 
         private float GetNextCheckDelay()

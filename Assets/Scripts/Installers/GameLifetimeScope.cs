@@ -36,6 +36,7 @@ namespace Scripts.Installers
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);
             builder.Register<ECSCommandService>(Lifetime.Singleton);
+            builder.Register<GameStartService>(Lifetime.Singleton);
 
             builder.Register<PresenterFactory>(Lifetime.Singleton);
             builder.Register<GameStateFactory>(Lifetime.Singleton);

@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using Leopotam.Ecs;
 using Scripts.Commands;
 using Scripts.Configs;
 using Scripts.Models;
@@ -12,22 +11,18 @@ namespace Scripts.UI.Presenters
 {
     public class MainMenuPresenter : BasePresenter
     {
-        private readonly EcsWorld _world;
         private readonly GlobalConfig _themeConfig;
         private readonly PlayerProgressService _playerProgressService;
-        private readonly EnergyService _energyService;
-        private readonly GameSession _gameSession;
+        private readonly GameStartService _gameStartService;
         private readonly ECSCommandService _ecsCommandService;
         private MainMenuView _view;
 
-        public MainMenuPresenter(EcsWorld world, GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            EnergyService energyService, GameSession gameSession, ECSCommandService ecsCommandService)
+        public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
+            GameStartService gameStartService, ECSCommandService ecsCommandService)
         {
-            _world = world;
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
-            _energyService = energyService;
-            _gameSession = gameSession;
+            _gameStartService = gameStartService;
             _ecsCommandService = ecsCommandService;
         }
 
@@ -51,14 +46,10 @@ namespace Scripts.UI.Presenters
         {
             _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
 
-            if (!TrySpendEnergy())
-                return;
-
             var theme = GetLastActiveTheme();
             var nextPuzzle = FindNextUncompletedPuzzle(theme);
-            _gameSession.SetSelectedTheme(theme);
-            _gameSession.SetSelectedImage(nextPuzzle);
-            _gameSession.BeginRun();
+            if (!_gameStartService.TryStart(theme, nextPuzzle))
+                return;
             
             await _view.PlayHideAnimation();
             
@@ -79,24 +70,6 @@ namespace Scripts.UI.Presenters
             _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.SelectMenu).Execute();
         }
 
-        private bool TrySpendEnergy()
-        {
-            if (_energyService.GetBalance() <= 0)
-            {
-                _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.WrongClick, 1f).Execute();
-                _ecsCommandService.CreateCommand<HeaderNoEnergyAnimationCommand>().Execute();
-
-                return false;
-            }
-            else
-            {
-                _energyService.Spend(1);
-                _ecsCommandService.CreateCommand<UpdateEnergyBalanceCommand>(_energyService, -1).Execute();
-                _ecsCommandService.CreateCommand<SaveDataCommand>(_energyService).Execute();
-                return true;
-            }
-        }
-
         private List<string> GetCompletedPuzzleForThemeIntersect(ThemeConfig theme)
         {
             var completedPuzzles = _playerProgressService.GetProgressData().CompletedPuzzles;
@@ -105,7 +78,8 @@ namespace Scripts.UI.Presenters
 
         private ThemeConfig GetLastActiveTheme()
         {
-            var lastActiveTheme = _playerProgressService.GetProgressData().UnlockedThemes.Last();
+            var lastActiveTheme = _playerProgressService.GetProgressData().UnlockedThemes
+                .Last(name => _themeConfig.Themes.Any(theme => theme.ThemeName == name));
             var theme = _themeConfig.Themes.FirstOrDefault(x => x.ThemeName == lastActiveTheme);
             return theme;
         }

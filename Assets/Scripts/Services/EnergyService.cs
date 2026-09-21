@@ -25,7 +25,6 @@ namespace Scripts.Services
             var balance = savedEnergy?.CurrentEnergy ?? config.InitialEnergy;
             var lastRecovery = savedEnergy?.LastRecoveryTime ?? _clock.UtcNow;
             _wallet = new EnergyWallet(Math.Clamp(balance, 0, _maxEnergy), _maxEnergy, _recoveryInterval, lastRecovery);
-            _wallet.Recover(_clock.UtcNow);
         }
 
 

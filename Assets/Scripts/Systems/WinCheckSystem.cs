@@ -15,27 +15,35 @@ namespace Scripts.Systems
         private readonly EcsWorld _world;
         private readonly GameSession _gameSession;
 
-        private bool _winDetected;
+        private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter;
+        private readonly EcsFilter<GameEndEvent> _endEvents;
         private float _elapsedSinceWin;
 
         public void Run()
         {
             if (_stateFilter.Get1(0).CurrentState != GameStateType.Playing)
             {
-                ResetWinSequence();
+                _elapsedSinceWin = 0f;
                 return;
             }
 
-            if (!_winDetected)
+            // A manual exit takes precedence over the delayed result screen.
+            if (_endEvents.GetEntitiesCount() > 0)
+                return;
+
+            if (!_gameSession.IsCompleted)
             {
-                if (!IsBoardSolved())
+                if (_moveFilter.GetEntitiesCount() > 0 || !IsBoardSolved())
                 {
                     return;
                 }
 
-                _winDetected = true;
+                _gameSession.CompleteRun();
                 SendWinSound();
             }
+
+            if (_elapsedSinceWin >= ResultStateDelay)
+                return;
 
             _elapsedSinceWin += Time.unscaledDeltaTime;
 
@@ -51,14 +59,11 @@ namespace Scripts.Systems
             });
         }
 
-        private void ResetWinSequence()
-        {
-            _winDetected = false;
-            _elapsedSinceWin = 0f;
-        }
-
         private bool IsBoardSolved()
         {
+            if (_tileFilter.GetEntitiesCount() != BoardMath.CellCount(_gameSession.SelectedGameMode.BoardSize))
+                return false;
+
             foreach (var i in _tileFilter)
             {
                 ref var tile = ref _tileFilter.Get1(i);
@@ -74,7 +79,7 @@ namespace Scripts.Systems
                 }
             }
 
-            return _tileFilter.GetEntitiesCount() > 0;
+            return true;
         }
 
         private void SendWinSound()

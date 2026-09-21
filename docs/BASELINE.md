@@ -28,7 +28,7 @@ Android Build Support, SDK, NDK, and OpenJDK are installed with the editor. The 
 - Package Manager resolved the cleaned manifest and regenerated `Packages/packages-lock.json`.
 - `AndroidBuild.cs` compiles against the Unity 6 editor API.
 - The `Fives.Domain` assembly and its NUnit EditMode test assembly compile against Unity's managed profile.
-- `tools/logic-probes/run.py` compiles current production sources and passes all eight correctness probes.
+- `tools/logic-probes/run.py` compiles current production sources and passes all 34 correctness probes (including lifecycle and save recovery regressions).
 - Unity Roslyn compiles the complete `Assembly-CSharp` source set after the lifecycle fixes.
 
 ## Sandbox limitation
@@ -72,3 +72,10 @@ Build the Android App Bundle:
 ```
 
 Store signing is intentionally not committed. Configure a private upload keystore before publishing to Google Play.
+
+
+## Review-fix verification
+
+The isolated probes execute production services, presenters and ECS systems with small engine/UI substitutes. They cover repeated start, input during movement/win, manual exit, cold-start energy, corrupt/partial JSON, SFX volume and the tile sprite destruction callback. Newtonsoft.Json and LeoECS are real project dependencies; PlayerPrefs, rendering, audio playback and Unity object destruction are substitutes. These checks do not measure native memory or prove Android behaviour.
+
+The complete runtime source set also compiles with Unity 6000.0.71f1 Roslyn and the generated project references. On 2026-09-21, the Unity CLI EditMode run was blocked because this project was already open in Editor (PID 38148). No Unity Test Runner success or Android build is claimed for these changes.

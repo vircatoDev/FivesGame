@@ -1,6 +1,6 @@
 using Leopotam.Ecs;
 using Scripts.Components;
-using Scripts.Helpers;
+using Scripts.Services;
 using Scripts.UI.Views;
 
 namespace Scripts.Systems
@@ -8,20 +8,22 @@ namespace Scripts.Systems
     public class CommonUIHeaderPanelSystem : IEcsRunSystem,IEcsInitSystem
     {
         private readonly HeaderPanelView _headerPanelView;
-        private readonly PlayerDataSaveHelper _playerDataSaveHelper;
+        private readonly EnergyService _energy;
+        private readonly StarService _stars;
         private readonly EcsFilter<UpdateControlPanelEnergyEvent> _updateEnergyFilter;
         private readonly EcsFilter<UpdateControlPanelStarsEvent> _updateStarsFilter;
         private readonly EcsFilter<UpdateControlPanelBtnLogicEvent> _updateBtnLogicFilter;
 
 
-        public CommonUIHeaderPanelSystem(HeaderPanelView headerPanelView)
+        public CommonUIHeaderPanelSystem(HeaderPanelView headerPanelView, EnergyService energy, StarService stars)
         {
             _headerPanelView = headerPanelView;
+            _energy = energy;
+            _stars = stars;
         }
         public void Init()
         {
-            var gameSaveData = _playerDataSaveHelper.GetPlayerData();
-            _headerPanelView.UpdateViewContent(gameSaveData.Stars.ToString(), gameSaveData.Energy.CurrentEnergy.ToString());
+            _headerPanelView.UpdateViewContent(_stars.GetBalance().ToString(), _energy.GetBalance().ToString());
         }
         public void Run()
         {

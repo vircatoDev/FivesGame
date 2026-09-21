@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Leopotam.Ecs;
 using Scripts.Components;
@@ -49,8 +49,7 @@ namespace Scripts.Systems
                 moveEntity.Replace(new MoveComponent
                 {
                     InstaMove = true,
-                    Direction = Vector3.zero,
-                    Speed = 0f,
+                    Duration = 0f,
                     TargetPosition = tile.Position
                 });
             }

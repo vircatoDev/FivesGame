@@ -8,6 +8,7 @@ namespace Scripts.Systems
     public class TileClickSystem : IEcsRunSystem
     {
         private EcsWorld _world;
+        private readonly GameSession _session;
         private readonly EcsFilter<TileClickEvent> _uiClickEvents;
         private readonly EcsFilter<TileComponent> _tileFilter;
         private readonly EcsFilter<TileComponent, EmptyTileComponent> _emptyTileFilter;
@@ -15,7 +16,7 @@ namespace Scripts.Systems
 
         public void Run()
         {
-            if (_moveFilter.GetEntitiesCount() > 0)
+            if (_session.IsCompleted || _moveFilter.GetEntitiesCount() > 0)
             {
                 return;
             }
@@ -45,8 +46,7 @@ namespace Scripts.Systems
                         var moveEntity = _tileFilter.GetEntity(tileEntity);
                         moveEntity.Replace(new MoveComponent
                         {
-                            Direction = (emptyTile.Position - tile.Position).normalized,
-                            Speed = 0.35f,
+                            Duration = 0.35f,
                             TargetPosition = emptyTile.Position
                         });
 

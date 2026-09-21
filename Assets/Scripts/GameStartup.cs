@@ -29,6 +29,7 @@ namespace Scripts
         private GlobalConfig _config;
         private SoundService _soundService;
         private EnergyService _energyService;
+        private StarService _starService;
         private PlayerDataSaveHelper _playerDataSaveHelper;
         private GameStateMachine _stateMachine;
         private GameSession _gameSession;
@@ -39,6 +40,7 @@ namespace Scripts
             GlobalConfig config,
             SoundService soundService,
             EnergyService energyService,
+            StarService starService,
             GameStateMachine stateMachine, GameSession gameSession,
             PlayerDataSaveHelper playerDataSaveHelper)
         {
@@ -46,6 +48,7 @@ namespace Scripts
             _config = config;
             _soundService = soundService;
             _energyService = energyService;
+            _starService = starService;
             _stateMachine = stateMachine;
             _gameSession = gameSession;
             _playerDataSaveHelper = playerDataSaveHelper;
@@ -104,7 +107,7 @@ namespace Scripts
                 .Add(new SoundSystem(_soundService))
                 .Add(new EnergyRecoverySystem(_energyService))
                 .Add(new UISystem(_rootLayer, _popUpLayer))
-                .Add(new CommonUIHeaderPanelSystem(_headerPanelView))
+                .Add(new CommonUIHeaderPanelSystem(_headerPanelView, _energyService, _starService))
                 .Add(new FadeSystem(_fadeScreen))
                 .Add(new StorageSystem());
         }
