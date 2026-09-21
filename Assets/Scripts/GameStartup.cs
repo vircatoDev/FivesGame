@@ -98,6 +98,8 @@ namespace Scripts
 
             _mainSystems
                 .Add(new GamePlayManagementSystem(_mainSystems))
+                .Add(new WinCheckSystem())
+                .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new GameStateSystem(_stateMachine))
                 .Add(new SoundSystem(_soundService))
                 .Add(new EnergyRecoverySystem(_energyService))
@@ -111,11 +113,9 @@ namespace Scripts
         {
             var gamePlaySystems = new EcsSystems(_world, "gamePlay")
                 .Add(new BoardInitSystem(_gameLayer))
-                .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new TileClickSystem())
                 .Add(new TileMoveSystem())
-                .Add(new ShuffleSystem())
-                .Add(new WinCheckSystem());
+                .Add(new ShuffleSystem());
             return gamePlaySystems;
         }
 

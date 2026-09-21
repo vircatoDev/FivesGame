@@ -40,11 +40,13 @@ namespace Scripts.UI
             transform
                 .DOScale(Vector3.one, animationDuration)
                 .SetEase(Ease.OutBack)
-                .SetDelay(currentDelay);
+                .SetDelay(currentDelay)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
 
             _tileCanvas
                 .DOFade(1, animationDuration)
-                .SetDelay(currentDelay);
+                .SetDelay(currentDelay)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
     }
 }

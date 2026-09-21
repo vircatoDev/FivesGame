@@ -32,10 +32,10 @@ The correctness branch addresses all eight defects:
 
 `tools/logic-probes/run.py` compiles the current production sources with the locked LeoECS revision and reports `8/8 correctness probes passed`. Five additional NUnit EditMode tests protect the pure domain rules.
 
+State transitions now run through one small latest-request queue on Unity's main thread. The win presentation delay is an ordinary ECS update, and board cleanup runs immediately when it receives `GameEndEvent`; neither starts unowned async work. DOTween animations are linked to their owning GameObjects and stop when those objects are destroyed.
+
 ## Risks requiring Unity verification
 
-- state transitions can overlap because async work has no cancellation owner;
-- delayed win and board-destruction work can affect a later session;
 - runtime Texture2D/Sprite instances have no explicit ownership;
 - save JSON has no schema, migration, backup, or stable content identifiers;
 - SFX volume settings are stored but not applied to effect playback;

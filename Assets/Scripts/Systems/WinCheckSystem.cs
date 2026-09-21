@@ -1,5 +1,3 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
 using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Components;
@@ -8,94 +6,86 @@ using UnityEngine;
 
 namespace Scripts.Systems
 {
-    class WinCheckSystem : IEcsRunSystem, IEcsInitSystem
+    class WinCheckSystem : IEcsRunSystem
     {
+        private const float ResultStateDelay = 2f;
+
         private readonly EcsFilter<TileComponent> _tileFilter = null;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
         private readonly EcsWorld _world;
         private readonly GameSession _gameSession;
 
-        private bool _isWin;
-
-
-        public void Init()
-        {
-   
-        }
+        private bool _winDetected;
+        private float _elapsedSinceWin;
 
         public void Run()
         {
             if (_stateFilter.Get1(0).CurrentState != GameStateType.Playing)
             {
-                _isWin = false;
+                ResetWinSequence();
                 return;
             }
 
-            if (_isWin)
+            if (!_winDetected)
+            {
+                if (!IsBoardSolved())
+                {
+                    return;
+                }
+
+                _winDetected = true;
+                SendWinSound();
+            }
+
+            _elapsedSinceWin += Time.unscaledDeltaTime;
+
+            if (_elapsedSinceWin < ResultStateDelay)
+            {
                 return;
+            }
 
-            _isWin = true;
+            _world.NewEntity().Get<GameEndEvent>();
+            _world.NewEntity().Replace(new ChangeStateEvent
+            {
+                NewStateName = GameStateType.Finished
+            });
+        }
 
+        private void ResetWinSequence()
+        {
+            _winDetected = false;
+            _elapsedSinceWin = 0f;
+        }
+
+        private bool IsBoardSolved()
+        {
             foreach (var i in _tileFilter)
             {
                 ref var tile = ref _tileFilter.Get1(i);
 
-                int expectedId = BoardMath.TileIdAt(
+                var expectedId = BoardMath.TileIdAt(
                     (int)tile.Position.x,
                     (int)tile.Position.y,
                     _gameSession.SelectedGameMode.BoardSize);
 
                 if (tile.Id != expectedId)
                 {
-                    _isWin = false;
-                    break;
+                    return false;
                 }
             }
 
-            if (_isWin)
-            {
-                Debug.Log("Game completed!");
-            
-                var soundEntity = _world.NewEntity();
-                soundEntity.Replace(new PlaySoundEffectEvent()
-                {
-                    Key = AudioKeyCollection.Win,
-                    Volume = 1f
-                });
-            
-                SendWinGameEvents();
-            }
+            return _tileFilter.GetEntitiesCount() > 0;
         }
 
-        private async void SendWinGameEvents()
+        private void SendWinSound()
         {
-            await SendWinEvents();
-        }
+            Debug.Log("Game completed!");
 
-        private async UniTask SendWinEvents()
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(1f));
-
-            var gameEndEvent = _world.NewEntity();
-            gameEndEvent.Replace(new GameEndEvent()
+            _world.NewEntity().Replace(new PlaySoundEffectEvent
             {
-                Delay = 3f
+                Key = AudioKeyCollection.Win,
+                Volume = 1f
             });
-
-            await UniTask.Delay(TimeSpan.FromSeconds(1f));
-
-            var stateChangeEvent = _world.NewEntity();
-            stateChangeEvent.Replace(new ChangeStateEvent
-            {
-                NewStateName = GameStateType.Finished
-            });
-
-            await UniTask.Delay(TimeSpan.FromSeconds(1f));
-        }
-
-        private bool AllTilesInOrder()
-        {
-            return true;
         }
     }
 }

@@ -63,7 +63,10 @@ namespace Scripts.UI.Views
             levelProgressText.text = $"{puzzleIndex}/{puzzlesCount}";
             themeNameText.text = selectedTheme.ThemeName;
             var target = (float)puzzleIndex / (float)puzzlesCount;
-            themeSliderProgress.DOValue(target, 1f).SetDelay(0.7f);
+            themeSliderProgress
+                .DOValue(target, 1f)
+                .SetDelay(0.7f)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
     
         private void OnGetRewardClicked()

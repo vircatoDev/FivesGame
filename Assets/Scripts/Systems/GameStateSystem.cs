@@ -1,4 +1,3 @@
-﻿using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Helpers.StateMachine;
@@ -8,7 +7,6 @@ namespace Scripts.Systems
 {
     public class GameStateSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly EcsWorld _world = null;
         private readonly EcsFilter<ChangeStateEvent> _stateChangeFilter;
         private readonly EcsFilter<GameStateComponent> _gameStateFilter;
         private readonly GameStateMachine _stateMachine;
@@ -20,7 +18,7 @@ namespace Scripts.Systems
 
         public void Init()
         {
-            _stateMachine.ChangeState(GameStateType.MainMenu).Forget();
+            _stateMachine.ChangeState(GameStateType.MainMenu);
         }
 
         public void Run()
@@ -34,8 +32,8 @@ namespace Scripts.Systems
                     ref var gameState = ref _gameStateFilter.Get1(j);
                     gameState.CurrentState = stateChangeEvent.NewStateName;
                 }
-            
-                _stateMachine.ChangeState(stateChangeEvent.NewStateName).Forget();
+
+                _stateMachine.ChangeState(stateChangeEvent.NewStateName);
                 _stateChangeFilter.GetEntity(i).Destroy();
             }
         }

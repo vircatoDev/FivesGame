@@ -15,7 +15,7 @@ Exit: a clean clone opens in Unity 6000.0.71f1 and produces an Android App Bundl
 - Add regressions for purchase, reward, recovery, event ordering, and rapid tile input.
 - Make purchases and rewards atomic and idempotent.
 - Introduce a clock abstraction and correct recovery remainder handling.
-- Add cancellation and serialized navigation transitions.
+- Remove unowned delayed work and serialize navigation transitions.
 - Handle corrupt saves and make board generation and win checks honor the configured size.
 
 Exit: the eight reproduced defects have passing Unity tests.

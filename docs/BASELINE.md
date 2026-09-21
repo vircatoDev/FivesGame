@@ -29,6 +29,7 @@ Android Build Support, SDK, NDK, and OpenJDK are installed with the editor. The 
 - `AndroidBuild.cs` compiles against the Unity 6 editor API.
 - The `Fives.Domain` assembly and its NUnit EditMode test assembly compile against Unity's managed profile.
 - `tools/logic-probes/run.py` compiles current production sources and passes all eight correctness probes.
+- Unity Roslyn compiles the complete `Assembly-CSharp` source set after the lifecycle fixes.
 
 ## Sandbox limitation
 
