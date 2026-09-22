@@ -1,0 +1,8 @@
+{
+  "name": "Fives.UI.Editor.Tests",
+  "rootNamespace": "Fives.UI.Tests",
+  "references": ["UnityEngine.UI", "Unity.TextMeshPro"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}
