@@ -21,7 +21,7 @@ It was originally created as a two-week test assignment and is now maintained wi
 
 Development now focuses on a compact, verifiable architecture:
 
-- deterministic pure-C# puzzle domain;
+- ECS gameplay systems with deterministic pure-C# board rules;
 - atomic moves, Undo, Replay, and seeded daily challenges;
 - versioned saves with migrations and corruption recovery;
 - explicit async and resource ownership;
@@ -52,18 +52,22 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit and pull-request rules.
 
 ## Verification status
 
-The pure-C# `BoardState` increment passes 56 standalone NUnit tests (51 board cases
-and the five existing domain regressions). It includes 8,000 attempted moves and
-exhaustive 2x2 state traversal. Gameplay still uses the existing ECS rules until the
-integration increment; seeded shuffle, Undo, and replay are not implemented yet.
+Gameplay now uses a seeded board owned by an ECS entity. Systems handle input,
+Undo, replay, projection, animation and completion. The current unfinished attempt
+has touch controls for Undo and replay; persistence/share codes and daily challenges
+remain future work. No separate application-session layer was introduced.
 
-The same test sources compile against Unity 6000.0.71f1. The 34 legacy regression
-probes also pass. The latest CLI EditMode attempt was blocked by the already-open
-Editor; no Unity Test Runner, Android IL2CPP, or device profiling success is claimed.
+**74 standalone NUnit tests** and **50 local service/ECS probes** pass. Domain,
+tests and the full game assembly compile with Unity 6000.0.71f1 references.
+The open Editor blocks a separate CLI Test Runner run, and native UI automation
+is unavailable. PlayMode interaction, toolbar layout, Android builds and device
+profiling still require verification.
 
-See [the board contract](docs/BOARD_STATE.md) and [test commands](tools/domain-tests/README.md).
-The new domain-only GitHub Actions workflow is configured for Linux and Windows;
-its first remote run will happen after these changes are committed and pushed.
+See [the board contract and acceptance steps](docs/BOARD_STATE.md),
+[ECS architecture](docs/ARCHITECTURE.md) and [test commands](tools/domain-tests/README.md).
+The existing domain-only GitHub Actions workflow runs tests on Linux and Windows;
+new test cases are picked up automatically after commit/push. This uncommitted
+increment has no remote CI result yet.
 
 ## Licensing
 

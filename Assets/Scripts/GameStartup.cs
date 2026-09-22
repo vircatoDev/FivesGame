@@ -79,6 +79,8 @@ namespace Scripts
         private void AddOneFrames()
         {
             _mainSystems.OneFrame<TileClickEvent>()
+                .OneFrame<BoardControlEvent>()
+                .OneFrame<BoardRefreshEvent>()
                 .OneFrame<PlayFadeAnimationEvent>()
                 .OneFrame<UpdateControlPanelEnergyEvent>()
                 .OneFrame<UpdateControlPanelStarsEvent>()
@@ -115,10 +117,12 @@ namespace Scripts
         private EcsSystems AddGamePlaySystems()
         {
             var gamePlaySystems = new EcsSystems(_world, "gamePlay")
+                .Add(new BoardSetupSystem())
                 .Add(new BoardInitSystem(_gameLayer))
-                .Add(new TileClickSystem())
-                .Add(new TileMoveSystem())
-                .Add(new ShuffleSystem());
+                .Add(new BoardInputSystem())
+                .Add(new BoardReplaySystem())
+                .Add(new BoardProjectionSystem())
+                .Add(new TileMoveSystem());
             return gamePlaySystems;
         }
 

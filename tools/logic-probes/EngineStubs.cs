@@ -19,7 +19,13 @@ namespace UnityEngine
         public GameObject(string name = "") { }
         public T AddComponent<T>() where T : new() => new T();
     }
-    public class Transform : Object { public Vector3 position; }
+    public class Transform : Object
+    {
+        public Vector3 position;
+        public GameObject gameObject = new GameObject();
+        public int childCount;
+        public Transform GetChild(int index) => throw new InvalidOperationException("No visual hierarchy in logic probes.");
+    }
     public class MonoBehaviour : Object
     {
         public GameObject gameObject = new GameObject();
@@ -27,7 +33,7 @@ namespace UnityEngine
     }
     public class Texture2D : Object { }
     public class CanvasGroup : Object { }
-    public struct Color { public static Color white; }
+    public struct Color { public static Color white; public static Color clear; }
     public class AudioSource : Object
     {
         public static float LastVolume;
@@ -50,7 +56,7 @@ namespace UnityEngine
     }
     public class Sprite : Object { public Texture2D texture; }
     public class AudioClip { }
-    public class RectTransform { public Vector2 anchoredPosition; }
+    public class RectTransform { public Vector2 anchoredPosition; public bool IsChildOf(Transform parent) => false; public T[] GetComponentsInChildren<T>() => Array.Empty<T>(); }
     public static class Debug { public static void Log(object value) { } public static void LogError(object value) { } public static void LogWarning(object value) { } }
     public static class Time { public static float time; public static float unscaledDeltaTime = 0.1f; public static float deltaTime = 1; }
     public static class Mathf
@@ -158,7 +164,7 @@ namespace Scripts.UI.Views
 
 namespace UnityEngine.UI
 {
-    public class Image { public UnityEngine.Sprite sprite; public UnityEngine.Color color; }
+    public class Image { public bool raycastTarget; public UnityEngine.Sprite sprite; public UnityEngine.Color color; }
 }
 namespace UnityEngine.EventSystems
 {

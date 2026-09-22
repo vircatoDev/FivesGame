@@ -18,15 +18,23 @@ namespace Scripts.UI.Views
         [SerializeField] private TextMeshProUGUI mainText;
 
         private GamePlayPresenter _presenter;
+        private BoardControlsView _controls;
     
         private Vector2 _initialLeftBlockPosition;
         private Vector2 _initialRightBlockPosition;
 
         private void Awake()
         {
+            _controls = new BoardControlsView(previewRectTransform.parent, titleText.font,
+                control => _presenter?.RequestControl(control));
             _initialLeftBlockPosition = previewRectTransform.anchoredPosition;
             _initialRightBlockPosition = infoRectTransform.anchoredPosition;
         }
+
+        private void LateUpdate() => _presenter?.RefreshControls();
+
+        public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) =>
+            _controls.Refresh(status, canUndo, canReplay, replaying);
 
         public override void Initialize(BasePresenter initData)
         {

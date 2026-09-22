@@ -26,8 +26,17 @@ compiler and resolved packages.
 - Imported permutations are validated and copied, so callers cannot mutate the board.
 - Invalid moves, row boundaries, four-way adjacency, exact swaps, and reverse moves.
 - 8,000 reproducible attempted moves, checking permutation and move invariants after
-  each attempt. Test seeds drive input sampling only; seeded game shuffle is not implemented yet.
+  each attempt.
 - Exhaustive traversal of all 12 reachable 2x2 arrangements for each hidden tile ID.
+
+- Four fixed shuffle vectors protect algorithm stability, including zero and negative seeds.
+- 6,565 seed/size/hidden-ID combinations preserve permutation, determinism and a non-solved start.
+- Seeded 2x2 layouts are checked against the complete reachable state set.
+- Replay reconstructs each move; invalid/version-mismatched data is rejected and histories are copied.
+
+There are currently 74 standalone NUnit cases. The 50 local service/ECS probes
+also cover Undo, replay, interruption, cleanup/restart and animation/input ordering.
+Those probes use engine substitutes and are not in the GitHub-hosted domain workflow.
 
 The fixtures also remain available in Unity's EditMode Test Runner through the
 existing asmdef. Passing standalone tests does not imply they have run in Editor.

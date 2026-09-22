@@ -8,7 +8,6 @@ namespace Scripts.Systems
     class TileMoveSystem : IEcsRunSystem
     {
         private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter = null;
-        private readonly EcsFilter<TileComponent, EmptyTileComponent> _emptyTileFilter = null;
         private readonly GameSession _gameSettings;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
 
@@ -32,12 +31,6 @@ namespace Scripts.Systems
 
                 if (!move.Started)
                 {
-                    if (_emptyTileFilter.GetEntitiesCount() != 1)
-                        return;
-
-                    ref var empty = ref _emptyTileFilter.Get1(0);
-                    empty.Position = tile.Position;
-                    tile.Position = move.TargetPosition;
                     move.StartPosition = tile.Rect.anchoredPosition;
                     move.Started = true;
                 }

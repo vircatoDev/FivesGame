@@ -78,34 +78,27 @@ internal static partial class CorrectnessProbes
         var session = new GameSession();
         session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
         session.BeginRun();
-        var tiles = new EcsEntity[9];
-        for (int i = 0; i < tiles.Length; i++)
-        {
-            tiles[i] = world.NewEntity();
-            tiles[i].Replace(new TileComponent { Id = i, Position = new Vector3(i % 3, i / 3), Rect = new RectTransform() });
-        }
-        tiles[8].Get<EmptyTileComponent>();
-        // One legal move away from solved.
-        tiles[7].Get<TileComponent>().Position = new Vector3(2, 2);
-        tiles[8].Get<TileComponent>().Position = new Vector3(1, 2);
-        var systems = new EcsSystems(world)
-            .Add(new TileClickSystem()).Add(new TileMoveSystem()).Add(new WinCheckSystem())
-            .OneFrame<TileClickEvent>().Inject(session);
+        var boardEntity = CreateBoard(world, 3, 8, 1, 1);
+        var board = boardEntity.Get<BoardComponent>().State;
+        var solvingTile = board[8];
+        var destination = new Vector3(solvingTile % 3, solvingTile / 3);
+        var tiles = CreateTiles(world, board);
+        var systems = CreateBoardSystems(world, session);
         systems.Init();
-        world.NewEntity().Replace(new TileClickEvent { Id = 7 });
+        world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
         systems.Run();
-        Check("movement retains input lock across frames", tiles[7].Has<MoveComponent>() && !session.IsCompleted,
+        Check("movement retains input lock across frames", tiles[solvingTile].Has<MoveComponent>() && !session.IsCompleted,
             "last move is still animating");
-        world.NewEntity().Replace(new TileClickEvent { Id = 7 });
+        world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
         systems.Run();
-        Check("reverse click during movement is ignored", tiles[7].Get<TileComponent>().Position.Equals(new Vector3(1, 2)),
+        Check("reverse click during movement is ignored", tiles[solvingTile].Get<TileComponent>().Position.Equals(destination),
             "logical tile stays in destination");
         for (int i = 0; i < 3; i++) systems.Run();
-        Check("win starts after final movement completes", !tiles[7].Has<MoveComponent>() && session.IsCompleted,
+        Check("win starts after final movement completes", !tiles[solvingTile].Has<MoveComponent>() && session.IsCompleted,
             "animation completed and game locked");
-        world.NewEntity().Replace(new TileClickEvent { Id = 7 });
+        world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
         systems.Run();
-        Check("solved board rejects further moves", tiles[7].Get<TileComponent>().Position.Equals(new Vector3(1, 2)),
+        Check("solved board rejects further moves", tiles[solvingTile].Get<TileComponent>().Position.Equals(destination),
             "board remains solved during result delay");
         Check("result delay keeps solved board visible", world.GetFilter(typeof(EcsFilter<GameEndEvent>)).GetEntitiesCount() == 0,
             "no early cleanup");

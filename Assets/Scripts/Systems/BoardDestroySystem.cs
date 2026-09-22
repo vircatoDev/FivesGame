@@ -11,6 +11,7 @@ namespace Scripts.Systems
         private readonly Transform _boardParent;
         private readonly GameSession _session;
 
+        private readonly EcsFilter<BoardComponent> _boards;
         private readonly EcsFilter<TileComponent> _tileFilter = null;
         private readonly EcsFilter<GameEndEvent> _gameEndEvent = null;
 
@@ -23,6 +24,8 @@ namespace Scripts.Systems
         {
             if (_gameEndEvent.GetEntitiesCount() > 0)
             {
+                foreach (var i in _boards)
+                    _boards.GetEntity(i).Destroy();
                 DestroyCurrentBoard();
                 _session.EndRun();
             }

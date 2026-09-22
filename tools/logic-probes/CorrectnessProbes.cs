@@ -120,28 +120,12 @@ internal static partial class CorrectnessProbes
         saveSystems.Destroy();
         saveWorld.Destroy();
 
-        var moveWorld = new EcsWorld();
-        moveWorld.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
-        var blank = moveWorld.NewEntity();
-        blank.Replace(new TileComponent { Id = 4, Position = new Vector3(1, 1), Rect = new RectTransform() });
-        blank.Get<EmptyTileComponent>();
-        var left = moveWorld.NewEntity();
-        left.Replace(new TileComponent { Id = 3, Position = new Vector3(0, 1), Rect = new RectTransform() });
-        var below = moveWorld.NewEntity();
-        below.Replace(new TileComponent { Id = 1, Position = new Vector3(1, 0), Rect = new RectTransform() });
-        var moveSession = new GameSession();
-        moveSession.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
-        var moveSystems = new EcsSystems(moveWorld).Add(new TileClickSystem()).Add(new TileMoveSystem()).Inject(moveSession);
-        moveSystems.Init();
-        moveWorld.NewEntity().Replace(new TileClickEvent { Id = 3 });
-        moveWorld.NewEntity().Replace(new TileClickEvent { Id = 1 });
-        moveSystems.Run();
-        Check("rapid clicks serialize moves", !left.Get<TileComponent>().Position.Equals(below.Get<TileComponent>().Position), $"left={left.Get<TileComponent>().Position}, below={below.Get<TileComponent>().Position}");
-        moveSystems.Destroy();
-        moveWorld.Destroy();
-
-        var generated = PuzzleGenerator.GenerateStartField(6, out var emptyIndex);
-        Check("configured board size is honored", generated.Count == 36 && generated.Distinct().Count() == 36 && emptyIndex >= 0 && emptyIndex < 36, $"cells={generated.Count}, empty={emptyIndex}");
+        CheckRapidClicks();
+        var generated = SeededShuffle.Create(6, 35, 123, 144);
+        Check("configured board size is honored", generated.CellCount == 36
+            && Enumerable.Range(0, 36).Select(i => generated[i]).Distinct().Count() == 36,
+            $"cells={generated.CellCount}, empty={generated.EmptyTileId}");
+        RunBoardProbes();
 
         RunLifecycleProbes();
         Console.WriteLine($"SUMMARY | {_passed} correctness probes passed");

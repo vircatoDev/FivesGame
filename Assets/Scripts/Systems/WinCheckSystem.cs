@@ -1,4 +1,3 @@
-using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
@@ -10,7 +9,8 @@ namespace Scripts.Systems
     {
         private const float ResultStateDelay = 2f;
 
-        private readonly EcsFilter<TileComponent> _tileFilter = null;
+        private readonly EcsFilter<BoardComponent> _boards;
+        private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
         private readonly EcsWorld _world;
         private readonly GameSession _gameSession;
@@ -28,12 +28,12 @@ namespace Scripts.Systems
             }
 
             // A manual exit takes precedence over the delayed result screen.
-            if (_endEvents.GetEntitiesCount() > 0)
+            if (_endEvents.GetEntitiesCount() > 0 || !_gameSession.IsRunning || _replays.GetEntitiesCount() > 0)
                 return;
 
             if (!_gameSession.IsCompleted)
             {
-                if (_moveFilter.GetEntitiesCount() > 0 || !IsBoardSolved())
+                if (_moveFilter.GetEntitiesCount() > 0 || _boards.GetEntitiesCount() != 1 || !_boards.Get1(0).State.IsSolved)
                 {
                     return;
                 }
@@ -57,29 +57,6 @@ namespace Scripts.Systems
             {
                 NewStateName = GameStateType.Finished
             });
-        }
-
-        private bool IsBoardSolved()
-        {
-            if (_tileFilter.GetEntitiesCount() != BoardMath.CellCount(_gameSession.SelectedGameMode.BoardSize))
-                return false;
-
-            foreach (var i in _tileFilter)
-            {
-                ref var tile = ref _tileFilter.Get1(i);
-
-                var expectedId = BoardMath.TileIdAt(
-                    (int)tile.Position.x,
-                    (int)tile.Position.y,
-                    _gameSession.SelectedGameMode.BoardSize);
-
-                if (tile.Id != expectedId)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private void SendWinSound()

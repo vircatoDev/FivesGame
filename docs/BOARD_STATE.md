@@ -1,88 +1,120 @@
-# BoardState: first deterministic-core increment
+# Deterministic board inside ECS
 
-Status: domain model and tests implemented; gameplay integration, seeded shuffle,
-Undo, and replay remain subsequent reviewable increments.
+Branch: `feature/deterministic-board`. The prerequisite fixes at `c7900a8` are
+still on `feature/baseline-verification`; integrate that prerequisite before
+merging this feature into `develop`. No merge or history rewrite is part of this change.
 
-Branch: `feature/deterministic-board`, based on the reviewed fixes at `c7900a8`.
-Those prerequisite changes are still on `feature/baseline-verification`, awaiting
-integration into `develop`. Merge that prerequisite PR before targeting this feature
-at `develop`; no merge or history rewrite is part of this local increment.
+## Board contract
 
-## Contract
-
-`BoardState` owns a square grid as a flat, private array of tile IDs. Both cells
-and IDs are zero-based, in row-major order. A solved board has tile `N` in cell `N`.
-`EmptyTileId` identifies the hidden image fragment; `EmptyCell` is its current cell.
-They are deliberately different concepts. The existing game can hide any fragment,
-so the domain does not silently change the rules to always hide the final tile.
+`BoardState` contains a private flat tile array. Cells and tile IDs are zero-based,
+in row-major order. Solved means tile `N` occupies cell `N`. `EmptyTileId` identifies
+the hidden fragment; `EmptyCell` is its current location. Any fragment can be hidden.
 
 ```csharp
 var board = new BoardState(size: 3, emptyTileId: 4);
-bool moved = board.TryMove(cell: 1); // tile 1 slides into cell 4
-int tile = board[4];                // 1
-int empty = board.EmptyCell;        // 1
-bool solved = board.IsSolved;      // false
+board.TryMove(cell: 1); // tile 1 enters cell 4; empty cell becomes 1
 ```
 
-- The solved constructor and imported-state constructor require an explicit empty tile ID.
-- Imported data must contain each ID from 0 to `size * size - 1` exactly once.
-  Bad construction data throws an argument exception (or overflow for an overflowing size).
-- Input arrays/lists are copied. The public indexer has no setter and exposes no mutable array.
-- `CanMove` and `TryMove` take a **cell index**, not an ID. Invalid move requests return
-  `false`, leave the board unchanged, and do not allocate a result or throw.
-- Only orthogonal neighbors of the empty cell may move. A move exchanges exactly two
-  entries and updates the empty cell within a synchronous operation.
-- `IsSolved` scans the small grid; there is no cached solved flag to keep synchronized.
-- The model is mutable and intended for a single owning application session, not
-  concurrent access. Deterministic means equal initial states plus equal inputs yield
-  equal results; it does not mean thread-safe or immutable.
+Construction validates dimensions, hidden ID and an imported permutation, copying
+input data. Invalid move requests return false without mutation. Orthogonal legal
+moves preserve the permutation. Imported permutations are not checked for solvability.
+The board deliberately permits moves from the solved state; ECS decides when player
+input is locked. This is a synchronous model owned by one board entity, not a game
+session or a concurrency abstraction.
 
-## Why this boundary
+## Seeded shuffle version 1
 
-The class owns only arrangement and legal moves. It has no Unity/ECS types, clocks,
-random generator, tasks, events, rewards, persistence, move history, or animation state.
-No interface is needed for these fixed puzzle rules. The class is sealed because
-inheritance is not an extension point for maintaining its permutation invariant.
+`SeededShuffle.Create(size, emptyTileId, seed, steps)` starts from solved and makes
+legal moves, so every generated board is reachable. The recipe is:
 
-Validation is concentrated at construction/import. Legal moves preserve that invariant,
-so they do not rescan the permutation on every call. The constructor validates structure,
-**not solvability**: importing an arbitrary permutation does not prove it is reachable.
-The next shuffle increment must create reachable states through legal moves.
+- xorshift32 with shifts 13, 17, 5 and unsigned 32-bit state;
+- signed seeds are interpreted as their unsigned bit pattern;
+- seed zero maps to `0x6D2B79F5`;
+- neighbors are considered left, right, up, down; the immediately preceding empty
+  cell is excluded; selection is `random % candidateCount`;
+- `steps` must be positive. If the walk returns to solved, one additional legal
+  move uses the first remaining candidate.
 
-An imported board is copied for ownership, not designed as a serialization format.
-Move count, accepted history, Undo and terminal-session behavior belong in the application
-session. A solved board deliberately allows moves; freezing input after victory is a
-session policy, while shuffle needs to move away from the solved arrangement.
+This is reproducible shuffling, not cryptographic randomness or a uniform sample
+of every reachable permutation. Shuffle length is not a guarantee of puzzle difficulty.
+The runtime picks a seed once per run, uses `seed % cellCount` as the hidden ID and
+`cellCount * 4` shuffle steps, and retains that recipe in `BoardHistoryComponent`.
+The UI shows the seed. Domain code never uses Unity random state or `System.Random`.
 
-## Integration sequence
+## Moves, Undo and replay
 
-1. Review this core, its tests, and the standalone test/CI entry points.
-2. Add a specified seeded shuffle and application-session operations for moves, Undo and replay.
-   Replay will include the hidden tile ID and algorithm/version information, not only a seed.
-3. Connect the current ECS presentation to that session in one coherent change. Remove
-   duplicate adjacency, logical swaps and victory checks from presentation at that point.
-4. Verify rapid input, animations, victory/rewards, restart, and Android behavior in Unity.
+`BoardInputSystem` maps a tapped tile ID to its source cell, calls the board rule,
+and records only accepted cells. One command is accepted per tick. Input during
+movement, exit or the result delay cannot enqueue stale moves.
 
-Until step 3, the shipped gameplay continues to use its current ECS rules. The new model
-is not a second live authority and no claim is made that gameplay integration is complete.
+Undo moves the empty cell back to its preceding location, then removes the final
+history entry. The initial empty cell is kept for undoing the first move. A new
+move after Undo therefore starts a new path; abandoned moves are not replayed.
+Undo is available during an unfinished attempt after its last animation finishes.
+It does not refund energy or rewind wall-clock time.
 
-## Local verification (2026-09-21)
+`ReplayData` stores format version, size, hidden tile ID, seed, shuffle length and
+accepted cells. It copies the history and validates the entire sequence, rejecting
+illegal moves and moves after a solved board. Version 1 fixes both shuffle and
+move semantics; changing either requires version handling, not silently changing
+old replay results. This is an in-memory contract, not yet a save/share file format.
 
-- Standalone Release build: 56 NUnit tests passed, 0 failed, 0 skipped, on macOS ARM64
-  with .NET SDK 8.0.425. Of these, 51 are board cases and 5 are existing domain tests.
-- Both Domain and its test assembly compile using Unity 6000.0.71f1 Roslyn and the
-  project's generated reference lists, including Unity's NUnit assembly.
-- All 34 existing service/presenter/ECS regression probes passed.
-- Locked NuGet restore passed against a local feed of the official packages.
-  The SDK could not reach the NuGet index in this environment; packages were downloaded
-  over HTTPS from NuGet using curl. No alternate feed or machine-specific path is
-  stored in the project. The workflow uses the default NuGet source.
-- The CLI EditMode run was blocked by the existing Editor process (PID 38148).
-  Standalone test execution and Unity-compatible compilation are not an Editor test run.
-- GitHub-hosted Linux/Windows runs, PlayMode integration, Android builds, and native
-  profiling have not run for this increment.
+Replay starts from that recipe on a separate board in `BoardReplayComponent`.
+`BoardReplaySystem` advances one move after the previous animation. The live board
+and history remain unchanged. Stop interrupts even an in-progress animation;
+projection snaps back to the live attempt. Finishing playback returns automatically.
+Replay does not trigger completion, energy spending or reward flows.
 
-Final review on 2026-09-22: `actionlint` 1.7.12 accepted the workflow; the feature
-diff passes whitespace checks. Additional TMP/URP and graphics-settings changes
-appeared in the working tree during this task. They were not edited as part of this
-increment and must be reviewed separately before any commit includes them.
+This increment exposes playback of the **current unfinished attempt**. A persistent
+archive, post-result viewer, import/export buttons and a share code are future work.
+The board entity, history and replay are released on exit.
+
+## Display integration
+
+`BoardProjectionSystem` is the only bridge from board arrangement to tile destinations.
+`TileMoveSystem` only animates those destinations. `WinCheckSystem` uses the board's
+solved state rather than reconstructing it from floating-point visual coordinates.
+The old `PuzzleGenerator`, `ShuffleSystem`, `TileClickSystem`, empty-tile marker and
+unused `isEmpty` flag have been removed.
+
+The existing uGUI screen creates a small touch toolbar below its preview panel:
+**Отмена** and **Повтор / Стоп**, plus move count and seed. Buttons send ECS events;
+they cannot directly mutate the board. The layout uses the existing landscape
+Canvas and font; portrait/safe-area redesign is outside this increment.
+
+## Verification
+
+- **74 NUnit tests pass** in Release on macOS ARM64 with .NET SDK 8.0.425.
+  These include the previous 56 cases, four fixed shuffle vectors, 6,565
+  combinations of seed/size/hidden ID, exhaustive 2x2 reachability, replay sequence
+  reconstruction, copying and invalid input. Sizes 2, 3, 4 and 6 are covered.
+- **50 service/ECS probes pass** against the actual game systems and LeoECS source
+  with minimal engine substitutes. They cover rapid taps, Undo, branching history,
+  playback/interrupt, completion ordering, cleanup/restart and previous economy,
+  storage and lifecycle regressions. These do not simulate Unity rendering.
+- Domain, domain tests and the full runtime assembly compile with Unity
+  **6000.0.71f1** Roslyn and the project's actual assembly references. Existing
+  unrelated unawaited-call/unused-field warnings remain.
+- The existing Linux/Windows GitHub Actions workflow discovers the new domain tests
+  through the same source glob. It is unchanged. No remote run for this uncommitted
+  increment is claimed; ECS probes are still local, not part of that workflow.
+- Unity CLI EditMode execution is blocked because the project is already open in
+  Editor (PID 38148). Pipeline is not installed in that Editor. Native UI automation
+  is unavailable because Computer Use permission is not granted. No PlayMode,
+  visual-layout, Android build or device-performance success is claimed.
+
+### Manual acceptance in Unity
+
+1. Open `Assets/Scenes/MainGame.unity` with 6000.0.71f1 and enter Play Mode.
+2. Start a puzzle. Check the hidden tile, touch toolbar, count and seed.
+3. Make several moves; tap quickly during animation. Only accepted moves count.
+4. Undo all moves: the initial shuffled layout must return. Make a different move.
+5. Play replay, stop during a move, then let it finish. Both paths must restore
+   the live board and history without energy or rewards changing.
+6. Solve a puzzle: the final animation completes before the result delay; further
+   taps/Undo are blocked. Claim the reward and start another puzzle.
+7. Exit during movement/playback, then start again. Check for stale tiles or history.
+8. Repeat on an Android device, checking button size, margins, frame time and logs.
+
+TMP/URP assets and graphics settings already had unrelated changes in the working
+tree. They are not part of this feature's review patch.
