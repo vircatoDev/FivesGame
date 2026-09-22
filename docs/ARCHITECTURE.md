@@ -1,62 +1,79 @@
-# Target architecture
+# ECS gameplay architecture
 
-## Direction
+## Decision
 
-The puzzle will use a small layered architecture:
+Gameplay remains based on **LeoECS components and systems**. A separate application
+session or a five-layer assembly split is not the target of this increment.
+
+`BoardState` is a small pure C# model for a tile permutation and legal swaps. It is
+owned by an ECS board entity. It does not manage a game session, input, history,
+rewards, animations, or navigation. Pure rules remain independently testable while
+systems control the game loop.
 
 ```text
-Unity Presentation
-        ↓ intents / view state
-Application Use Cases
-        ↓
-Pure C# Domain
-        ↓ ports
-Infrastructure
+Touch UI → TileClickEvent / BoardControlEvent
+                       ↓
+              BoardInputSystem
+                       ↓
+    Board entity: BoardComponent + BoardHistoryComponent
+                       ↓
+    BoardProjectionSystem → MoveComponent → TileMoveSystem → uGUI
 
-Bootstrap composes the layers with VContainer scopes.
+Replay: optional BoardReplayComponent → BoardReplaySystem → same projection
+Victory: BoardComponent + completed animations → WinCheckSystem
+Exit: GameEndEvent → BoardDestroySystem
 ```
 
-The board is small and transactional. The target gameplay core will therefore be a deterministic C# model rather than another ECS migration. This makes atomic moves, Undo, Replay, solvers, and save migrations easy to verify without a scene.
+## Data ownership
 
-## Assembly boundaries
+- `BoardComponent.State` is the authoritative live board.
+- `BoardHistoryComponent` contains the seed, shuffle length, initial empty cell,
+  and the accepted source-cell history. Undo removes the final history entry.
+- `BoardReplayComponent` is temporary playback data on the same entity. Its board
+  is separate from the live attempt. Removing this component ends playback.
+- `TileComponent.Position` is a display destination. It cannot determine a legal
+  move or victory. `MoveComponent` tracks animation progress only.
+- The existing `GameSession` retains selected content, run lifecycle, and rewards.
+  It has no new board, move, Undo, or replay operations.
 
-- `Fives.Domain`: board, sessions, economy rules, replay; no Unity references.
-- `Fives.Application`: use cases and infrastructure ports.
-- `Fives.Presentation`: views, animation, input, and navigation.
-- `Fives.Infrastructure`: persistence, Addressables, telemetry, and platform adapters.
-- `Fives.Bootstrap`: VContainer composition and configuration.
+One board entity owns attempt data. Destroying it also discards its history and
+playback state. No cancellation tokens, delayed cleanup tasks, new locks, or run
+identifiers were added.
 
-Editor and test assemblies remain separate. Dependencies point inward and do not form cycles.
+## Systems and ordering
 
-## Board model
+The `gamePlay` group runs:
 
-One authoritative `BoardState` owns a flat tile array, dimensions, empty cell, and move count. `TryMove` validates and commits one move atomically, returning an immutable result for presentation. Every operation preserves one empty cell, unique tile IDs, valid bounds, and one terminal result per session.
+1. `BoardSetupSystem`: create one seeded board entity for an active run.
+2. `BoardInitSystem`: create the existing board/tile visuals.
+3. `BoardInputSystem`: accept at most one control or tile tap per tick. Controls
+   take precedence over taps; animation blocks edits. Stop can interrupt replay.
+4. `BoardReplaySystem`: advance playback only after the preceding animation ends.
+5. `BoardProjectionSystem`: synchronize tile destinations with the live/playback
+   board. Initial layout and replay start/stop snap instead of animating all tiles.
+6. `TileMoveSystem`: animate destinations without changing logical board state.
 
-Shuffle starts from a solved board and applies legal moves using a supplied seed. Replay data stores the rules version, seed, board size, accepted moves, and final hash. The same replay must produce the same result on every platform.
+`WinCheckSystem` runs after that group. It reads the live board, ignores replay,
+waits for movement to finish, freezes input, then retains the existing two-second
+result display. `BoardDestroySystem` handles exit and releases the board entity
+and visuals. The one-frame events are cleared after consumers run.
 
-## Application and lifecycle
+## Boundaries
 
-UI calls typed operations such as `TryMove`, `PurchaseTheme`, `ClaimReward`, and `LoadProgressAsync`. A View cannot debit currency or grant progress. Purchase and reward operations use idempotency keys and typed failure results.
+`Fives.Domain` has no Unity/ECS references. Current systems and presentation remain
+in `Assembly-CSharp`; VContainer remains the composition root. More assemblies
+will be added only when they enforce a useful dependency boundary. ECS is not
+being replaced with an object-oriented application-service layer.
 
-VContainer remains the composition root with App, Menu, and GameSession scopes. Disposing a session cancels its asynchronous work and animations. Navigation serializes transitions so stale callbacks cannot reopen screens or destroy a later board.
+See [the board, shuffle and replay contracts](BOARD_STATE.md) for invariants,
+format details, verification results and remaining manual checks.
 
-## Data and content
+## Future work, not implemented here
 
-Save data uses a versioned envelope, stable IDs, validation, sequential migrations, and backup recovery. Addressables replace string-based resource lookup; every handle has an owner and matching release. Tiles display regions of a shared texture instead of allocating copied textures for each cell.
+- Replay persistence and share/import UI; daily challenge and best results.
+- Versioned saves, stable content IDs and explicit migrations.
+- Addressables with clear ownership, RU/EN localization and Input System actions.
+- Unity PlayMode automation, Android build artifacts and device profiling.
 
-Localization uses RU/EN String Tables. Display names never identify progress. Input System maps touch, pointer, keyboard, and gamepad to the same domain commands.
-
-## Portfolio features
-
-- Undo and best-result tracking.
-- Deterministic replay and share code.
-- Daily challenge from UTC date plus rules version.
-- A* hints for 3×3 and a bounded strategy for larger boards.
-- Typed achievements over session results.
-- An Editor catalog validator for IDs, assets, and localization.
-
-Cloud services remain adapters and require a real use case, offline fallback, and documented data policy. Valuable rewards or leaderboard scores require server validation rather than trusting the client.
-
-## Quality evidence
-
-EditMode tests protect board invariants, economy, replay, and save migrations. PlayMode tests cover navigation, rapid input, cancellation, suspend/resume, and Addressables ownership. CI produces test and build artifacts. Performance reports name the device, scenario, baseline, budget, and measured result.
+These should use the same ECS command flow where they affect gameplay. Storage,
+platform APIs and content loading can remain services behind the relevant systems.

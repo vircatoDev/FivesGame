@@ -21,7 +21,7 @@ It was originally created as a two-week test assignment and is now maintained wi
 
 Development now focuses on a compact, verifiable architecture:
 
-- deterministic pure-C# puzzle domain;
+- ECS gameplay systems with deterministic pure-C# board rules;
 - atomic moves, Undo, Replay, and seeded daily challenges;
 - versioned saves with migrations and corruption recovery;
 - explicit async and resource ownership;
@@ -52,7 +52,24 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit and pull-request rules.
 
 ## Verification status
 
-The eight imported correctness problems now pass isolated regression probes, and the pure domain regressions compile as Unity EditMode tests. Unity 6 package resolution is reproducible. Full Test Runner execution, Android IL2CPP build, and device profiling remain pending because the current Codex sandbox blocks Unity's IL post-processor socket. No performance values are claimed before profiling a documented build and device.
+Gameplay now uses a seeded board owned by an ECS entity. Systems handle input,
+Undo, replay, projection, animation and completion. The current unfinished attempt
+has touch controls for Undo and replay; persistence/share codes and daily challenges
+remain future work. No separate application-session layer was introduced.
+
+During the review fixes, **74 standalone NUnit tests** and **59 local service/ECS
+probes** passed. For the final integration, verification was limited to compilation
+at the owner's request: Domain, domain tests, runtime and Editor assemblies compile
+with Unity 6000.0.71f1 references. PlayMode interaction, the final toolbar layout,
+Android builds and device profiling remain unverified.
+
+The Riverside Village visual redesign is preserved. Undo/replay controls are
+serialized in `GamePlayScreen.prefab`; the view no longer builds UI at runtime.
+
+See [the board contract and acceptance steps](docs/BOARD_STATE.md),
+[ECS architecture](docs/ARCHITECTURE.md) and [test commands](tools/domain-tests/README.md).
+The domain-only GitHub Actions workflow automatically runs on Linux and Windows
+for pushes and pull requests; it does not build Android or run the ECS probes.
 
 ## Licensing
 

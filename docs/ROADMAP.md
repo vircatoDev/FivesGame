@@ -20,15 +20,16 @@ Exit: a clean clone opens in Unity 6000.0.71f1 and produces an Android App Bundl
 
 Exit: the eight reproduced defects have passing Unity tests.
 
-## 2. Deterministic domain
+## 2. Deterministic board in ECS
 
 - Add assembly boundaries and pure `BoardState`.
 - Support tested 3×3 and 4×4 rules without hardcoded width.
-- Add Undo, replay format, seeded shuffle, and session results.
+- Store history and playback on the board entity; systems handle Undo, replay and completion.
 - Run property-style tests over many seeds and move sequences.
-- Record the ECS-to-domain decision in an ADR.
+- Keep ECS as the game architecture; document the boundary between pure board rules and systems.
 
-Exit: replay reconstructs the final board hash without MonoBehaviour.
+Implemented: seeded shuffle, Undo/current-attempt replay, ECS display integration, prefab controls and automated logic checks. Review fixes and the Riverside Village visual redesign are included in the develop integration. Final validation is compilation-only at the owner’s request; Unity interaction and Android acceptance remain pending.
+Exit: reproducible replay and verified Unity/Android interaction. A separate application-session layer is not planned.
 
 ## 3. Persistence and content
 
@@ -42,7 +43,7 @@ Exit: content is data-driven and repeated loading does not grow live resources.
 
 ## 4. Portfolio gameplay
 
-- Replay viewer and share code.
+- Persistent/post-result replay viewer and share code (current-attempt playback is implemented).
 - Daily challenge and streak.
 - A* hints for 3×3 and bounded hints for 4×4.
 - Move/time challenge rules and achievements.

@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Scripts.Models;
 using Scripts.UI.Presenters;
@@ -18,15 +18,22 @@ namespace Scripts.UI.Views
         [SerializeField] private TextMeshProUGUI mainText;
 
         private GamePlayPresenter _presenter;
+        [SerializeField] private BoardControlsView controls;
     
         private Vector2 _initialLeftBlockPosition;
         private Vector2 _initialRightBlockPosition;
 
         private void Awake()
         {
+            controls?.Initialize(control => _presenter?.RequestControl(control));
             _initialLeftBlockPosition = previewRectTransform.anchoredPosition;
             _initialRightBlockPosition = infoRectTransform.anchoredPosition;
         }
+
+        private void LateUpdate() => _presenter?.RefreshControls();
+
+        public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) =>
+            controls?.Refresh(status, canUndo, canReplay, replaying);
 
         public override void Initialize(BasePresenter initData)
         {
