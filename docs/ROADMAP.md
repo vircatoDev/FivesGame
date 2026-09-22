@@ -28,7 +28,7 @@ Exit: the eight reproduced defects have passing Unity tests.
 - Run property-style tests over many seeds and move sequences.
 - Keep ECS as the game architecture; document the boundary between pure board rules and systems.
 
-Implemented locally: seeded shuffle, Undo/current-attempt replay, ECS display integration and automated logic checks.
+Implemented: seeded shuffle, Undo/current-attempt replay, ECS display integration, prefab controls and automated logic checks. Review fixes and the Riverside Village visual redesign are included in the develop integration. Final validation is compilation-only at the owner’s request; Unity interaction and Android acceptance remain pending.
 Exit: reproducible replay and verified Unity/Android interaction. A separate application-session layer is not planned.
 
 ## 3. Persistence and content

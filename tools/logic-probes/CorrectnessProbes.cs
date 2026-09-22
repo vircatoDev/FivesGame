@@ -126,6 +126,7 @@ internal static partial class CorrectnessProbes
             && Enumerable.Range(0, 36).Select(i => generated[i]).Distinct().Count() == 36,
             $"cells={generated.CellCount}, empty={generated.EmptyTileId}");
         RunBoardProbes();
+        CheckPresenterAllocation();
 
         RunLifecycleProbes();
         Console.WriteLine($"SUMMARY | {_passed} correctness probes passed");

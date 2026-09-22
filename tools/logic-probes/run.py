@@ -18,7 +18,7 @@ if not ecs_candidates:
 runtime = unity / "NetCoreRuntime"
 dotnet = runtime / "dotnet"
 shared = runtime / "shared/Microsoft.NETCore.App/6.0.21"
-files = [probe / "EngineStubs.cs", probe / "CorrectnessProbes.cs", probe / "LifecycleProbes.cs", probe / "BoardProbes.cs"]
+files = [probe / "EngineStubs.cs", probe / "CorrectnessProbes.cs", probe / "LifecycleProbes.cs", probe / "BoardProbes.cs", probe / "PresenterProbes.cs"]
 files += list(domain.glob("*.cs"))
 files += list((ecs_candidates[-1] / "src").glob("*.cs"))
 for directory in ["Configs", "Models", "Components", "Commands", "Services/Interfaces"]:
@@ -28,7 +28,7 @@ for name in [
     "Services/EnergyService", "Services/StarService", "Services/PlayerProgressService",
     "Services/ECSCommandService", "Helpers/PlayerDataSaveHelper",
     "UI/Presenters/BasePresenter", "UI/Presenters/SelectMenuPresenter", "UI/Presenters/GameResultPresenter",
-    "UI/Presenters/MainMenuPresenter", "UI/TileUiProvider", "Systems/CommonUIHeaderPanelSystem",
+    "UI/Presenters/GamePlayPresenter", "UI/Presenters/MainMenuPresenter", "UI/TileUiProvider", "Systems/CommonUIHeaderPanelSystem",
     "Systems/WinCheckSystem", "Systems/EnergyRecoverySystem", "Systems/StorageSystem",
     "Systems/BoardInputSystem", "Systems/BoardReplaySystem", "Systems/BoardSetupSystem",
     "Systems/BoardProjectionSystem", "Systems/TileMoveSystem", "Systems/BoardDestroySystem"

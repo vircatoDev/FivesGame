@@ -34,7 +34,7 @@ compiler and resolved packages.
 - Seeded 2x2 layouts are checked against the complete reachable state set.
 - Replay reconstructs each move; invalid/version-mismatched data is rejected and histories are copied.
 
-There are currently 74 standalone NUnit cases. The 50 local service/ECS probes
+There are currently 74 standalone NUnit cases. The 59 local service/ECS probes
 also cover Undo, replay, interruption, cleanup/restart and animation/input ordering.
 Those probes use engine substitutes and are not in the GitHub-hosted domain workflow.
 

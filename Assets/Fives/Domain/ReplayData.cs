@@ -23,14 +23,9 @@ namespace Fives.Domain
             if (moves == null)
                 throw new ArgumentNullException(nameof(moves));
 
-            var board = SeededShuffle.Create(size, emptyTileId, seed, shuffleSteps);
             var copy = new int[moves.Count];
             for (var i = 0; i < moves.Count; i++)
-            {
-                if (board.IsSolved || !board.TryMove(moves[i]))
-                    throw new ArgumentException($"Invalid replay move at index {i}.", nameof(moves));
                 copy[i] = moves[i];
-            }
 
             Version = version;
             Size = size;
@@ -38,6 +33,19 @@ namespace Fives.Domain
             Seed = seed;
             ShuffleSteps = shuffleSteps;
             Moves = Array.AsReadOnly(copy);
+        }
+
+        /// <summary>Validates the complete path and returns its initial board, ready for playback.</summary>
+        public BoardState CreatePlaybackBoard()
+        {
+            var initial = SeededShuffle.Create(Size, EmptyTileId, Seed, ShuffleSteps);
+            var validation = initial.Copy();
+            for (var i = 0; i < Moves.Count; i++)
+            {
+                if (validation.IsSolved || !validation.TryMove(Moves[i]))
+                    throw new ArgumentException($"Invalid replay move at index {i}.", nameof(Moves));
+            }
+            return initial;
         }
     }
 }

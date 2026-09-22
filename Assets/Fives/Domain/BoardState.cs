@@ -17,6 +17,8 @@ namespace Fives.Domain
         public int EmptyCell { get; private set; }
         public int this[int cell] => _tiles[cell];
 
+        public BoardState Copy() => new BoardState(Size, EmptyTileId, _tiles);
+
         public bool IsSolved
         {
             get

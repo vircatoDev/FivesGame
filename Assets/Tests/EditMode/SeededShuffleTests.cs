@@ -82,7 +82,7 @@ namespace Fives.Domain.Tests
                 snapshots.Add(Tiles(board));
             }
             var data = new ReplayData(1, size, 0, -37, 40, moves);
-            var replay = SeededShuffle.Create(data.Size, data.EmptyTileId, data.Seed, data.ShuffleSteps);
+            var replay = data.CreatePlaybackBoard();
             for (var i = 0; i < data.Moves.Count; i++)
             {
                 Assert.That(replay.TryMove(data.Moves[i]), Is.True);
@@ -105,14 +105,14 @@ namespace Fives.Domain.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new ReplayData(2, 3, 8, 1, 1, Array.Empty<int>()));
             Assert.Throws<ArgumentNullException>(() => new ReplayData(1, 3, 8, 1, 1, null));
-            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { -1 }));
-            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { 0 }));
+            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { -1 }).CreatePlaybackBoard());
+            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { 0 }).CreatePlaybackBoard());
         }
 
         [Test]
         public void ReplayRejectsMovesAfterWinning()
         {
-            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { 8, 7 }));
+            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { 8, 7 }).CreatePlaybackBoard());
         }
 
         private static int[] Tiles(BoardState board) => Enumerable.Range(0, board.CellCount).Select(i => board[i]).ToArray();

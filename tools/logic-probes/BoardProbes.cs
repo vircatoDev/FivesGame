@@ -41,7 +41,7 @@ internal static partial class CorrectnessProbes
     private static EcsSystems CreateBoardSystems(EcsWorld world, GameSession session) => new EcsSystems(world)
         .Add(new BoardInputSystem()).Add(new BoardReplaySystem()).Add(new BoardProjectionSystem())
         .Add(new TileMoveSystem()).Add(new WinCheckSystem())
-        .OneFrame<TileClickEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardRefreshEvent>().Inject(session);
+        .OneFrame<TileClickEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardChangedEvent>().Inject(session);
 
     private static int[] Snapshot(BoardState board) => Enumerable.Range(0, board.CellCount).Select(i => board[i]).ToArray();
     private static void Settle(EcsSystems systems) { for (var tick = 0; tick < 5; tick++) systems.Run(); }
@@ -75,6 +75,7 @@ internal static partial class CorrectnessProbes
 
     private static void RunBoardProbes()
     {
+        CheckIdleProjection();
         CheckBoardSetup();
         CheckBoardCleanup();
         Time.deltaTime = 0.1f;
@@ -124,13 +125,33 @@ internal static partial class CorrectnessProbes
         systems.Run();
         Check("Replay ignores taps and preserves live history", history.Count == 2 && live.SequenceEqual(Snapshot(board)),
             "only the playback component advanced");
+        Check("Replay advances the board and schedules the visible tile", entity.Get<BoardReplayComponent>().Position == 1
+            && afterMoves[0].SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State))
+            && world.GetFilter(typeof(EcsFilter<TileComponent, MoveComponent>)).GetEntitiesCount() == 1,
+            "first recorded layout, with an active animation");
+        systems.Run();
+        Check("Replay waits for tile animation", entity.Get<BoardReplayComponent>().Position == 1
+            && afterMoves[0].SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State)), "no skipped frames");
         Control(world, systems, BoardControl.StopReplay);
         Check("Stop during replay animation restores live view", !entity.Has<BoardReplayComponent>()
             && live.SequenceEqual(Snapshot(board)) && Enumerable.Range(0, 9).All(cell =>
                 tiles[board[cell]].Get<TileComponent>().Rect.anchoredPosition.Equals(new Vector2(cell % 3, -(cell / 3)))),
             "no leftover moving tiles");
         Control(world, systems, BoardControl.Replay);
-        for (var tick = 0; tick < 30; tick++) systems.Run();
+        for (var step = 0; step < history.Count; step++)
+        {
+            systems.Run();
+            var replay = entity.Get<BoardReplayComponent>();
+            Check($"Replay reconstructs step {step + 1}", replay.Position == step + 1
+                && afterMoves[step].SequenceEqual(Snapshot(replay.State))
+                && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Position
+                    .Equals(new Vector3(cell % 3, cell / 3))), "logical state and projection match recorded move");
+            for (var frame = 0; frame < 3; frame++) systems.Run();
+            Check($"Replay completes visible step {step + 1}", replay.Position == entity.Get<BoardReplayComponent>().Position
+                && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Rect.anchoredPosition
+                    .Equals(new Vector2(cell % 3, -(cell / 3)))), "tile reached its expected screen position before the next step");
+        }
+        systems.Run();
         Check("completed replay returns to live game without win", !entity.Has<BoardReplayComponent>()
             && !session.IsCompleted && history.Count == 2 && live.SequenceEqual(Snapshot(board))
             && world.GetFilter(typeof(EcsFilter<GameEndEvent>)).GetEntitiesCount() == 0,
@@ -153,6 +174,30 @@ internal static partial class CorrectnessProbes
         Control(world, systems, BoardControl.Undo);
         Check("exit takes precedence over board commands", history.Count == 1 && beforeExit.SequenceEqual(Snapshot(board)),
             "no mutation during cleanup");
+        systems.Destroy(); world.Destroy();
+    }
+
+    private static void CheckIdleProjection()
+    {
+        var world = new EcsWorld();
+        var session = new GameSession();
+        session.BeginRun();
+        var entity = CreateBoard(world, 3, 8, 42, 36);
+        var board = entity.Get<BoardComponent>().State;
+        var tiles = CreateTiles(world, board);
+        var systems = new EcsSystems(world).Add(new BoardProjectionSystem())
+            .OneFrame<BoardChangedEvent>().Inject(session);
+        systems.Init();
+        // A sentinel proves an idle tick does not walk and rewrite tile positions.
+        tiles[0].Get<TileComponent>().Position = new Vector3(-1, -1);
+        systems.Run();
+        Check("idle projection leaves tiles untouched", tiles[0].Get<TileComponent>().Position.Equals(new Vector3(-1, -1))
+            && !tiles[0].Has<MoveComponent>(), "no board event, no projection work");
+        world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+        systems.Run();
+        Check("refresh projects every tile", Enumerable.Range(0, 9).All(cell =>
+            tiles[board[cell]].Get<TileComponent>().Position.Equals(new Vector3(cell % 3, cell / 3))
+            && tiles[board[cell]].Get<MoveComponent>().InstaMove), "explicit refresh restores the view");
         systems.Destroy(); world.Destroy();
     }
 

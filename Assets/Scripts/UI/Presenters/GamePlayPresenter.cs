@@ -16,6 +16,8 @@ namespace Scripts.UI.Presenters
         private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<TileComponent, MoveComponent> _moves;
         private GamePlayView _view;
+        private (int Seed, int Moves, bool Replaying, int Position)? _statusKey;
+        private string _status = "";
 
         public GamePlayPresenter(GameSession gameSession, ECSCommandService ecsCommandService, EcsWorld world)
         {
@@ -48,6 +50,7 @@ namespace Scripts.UI.Presenters
         {
             if (_boards.GetEntitiesCount() != 1)
             {
+                _statusKey = null;
                 _view.UpdateControls("", false, false, false);
                 return;
             }
@@ -56,10 +59,16 @@ namespace Scripts.UI.Presenters
             var replaying = _replays.GetEntitiesCount() > 0;
             var ready = _gameSession.IsRunning && !_gameSession.IsCompleted;
             var canEdit = ready && !replaying && _moves.GetEntitiesCount() == 0 && history.Moves.Count > 0;
-            var status = replaying
-                ? $"Повтор: {_replays.Get1(0).Position}/{history.Moves.Count}"
-                : $"Ходов: {history.Moves.Count}  ·  Seed: {history.Seed}";
-            _view.UpdateControls(status, canEdit, canEdit || (ready && replaying), replaying);
+            var position = replaying ? _replays.Get1(0).Position : 0;
+            var key = (history.Seed, history.Moves.Count, replaying, position);
+            if (_statusKey != key)
+            {
+                _statusKey = key;
+                _status = replaying
+                    ? $"Повтор: {position}/{history.Moves.Count}"
+                    : $"Ходов: {history.Moves.Count}  ·  Seed: {history.Seed}";
+            }
+            _view.UpdateControls(_status, canEdit, canEdit || (ready && replaying), replaying);
         }
 
         private void BackToMainMenu()

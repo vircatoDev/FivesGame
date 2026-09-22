@@ -80,7 +80,7 @@ namespace Scripts
         {
             _mainSystems.OneFrame<TileClickEvent>()
                 .OneFrame<BoardControlEvent>()
-                .OneFrame<BoardRefreshEvent>()
+                .OneFrame<BoardChangedEvent>()
                 .OneFrame<PlayFadeAnimationEvent>()
                 .OneFrame<UpdateControlPanelEnergyEvent>()
                 .OneFrame<UpdateControlPanelStarsEvent>()

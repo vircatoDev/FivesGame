@@ -54,7 +54,8 @@ Undo is available during an unfinished attempt after its last animation finishes
 It does not refund energy or rewind wall-clock time.
 
 `ReplayData` stores format version, size, hidden tile ID, seed, shuffle length and
-accepted cells. It copies the history and validates the entire sequence, rejecting
+accepted cells. Its constructor copies the history. `CreatePlaybackBoard()` explicitly
+creates one seeded board and validates the entire sequence on a copy, rejecting
 illegal moves and moves after a solved board. Version 1 fixes both shuffle and
 move semantics; changing either requires version handling, not silently changing
 old replay results. This is an in-memory contract, not yet a save/share file format.
@@ -72,12 +73,14 @@ The board entity, history and replay are released on exit.
 ## Display integration
 
 `BoardProjectionSystem` is the only bridge from board arrangement to tile destinations.
+It runs on initialization or `BoardChangedEvent`, skipping tile scans on idle frames.
+Normal moves animate; events with `Snap` restore the layout immediately.
 `TileMoveSystem` only animates those destinations. `WinCheckSystem` uses the board's
 solved state rather than reconstructing it from floating-point visual coordinates.
 The old `PuzzleGenerator`, `ShuffleSystem`, `TileClickSystem`, empty-tile marker and
 unused `isEmpty` flag have been removed.
 
-The existing uGUI screen creates a small touch toolbar below its preview panel:
+`GamePlayScreen.prefab` contains an Inspector-configured toolbar below its preview panel:
 **Отмена** and **Повтор / Стоп**, plus move count and seed. Buttons send ECS events;
 they cannot directly mutate the board. The layout uses the existing landscape
 Canvas and font; portrait/safe-area redesign is outside this increment.
@@ -88,20 +91,18 @@ Canvas and font; portrait/safe-area redesign is outside this increment.
   These include the previous 56 cases, four fixed shuffle vectors, 6,565
   combinations of seed/size/hidden ID, exhaustive 2x2 reachability, replay sequence
   reconstruction, copying and invalid input. Sizes 2, 3, 4 and 6 are covered.
-- **50 service/ECS probes pass** against the actual game systems and LeoECS source
+- **59 service/ECS probes passed during the review fixes** against the actual game systems and LeoECS source
   with minimal engine substitutes. They cover rapid taps, Undo, branching history,
-  playback/interrupt, completion ordering, cleanup/restart and previous economy,
+  each replay step and its tile destination, animation gating, playback/interrupt, idle projection, idle text allocation, completion ordering, cleanup/restart and previous economy,
   storage and lifecycle regressions. These do not simulate Unity rendering.
 - Domain, domain tests and the full runtime assembly compile with Unity
   **6000.0.71f1** Roslyn and the project's actual assembly references. Existing
   unrelated unawaited-call/unused-field warnings remain.
-- The existing Linux/Windows GitHub Actions workflow discovers the new domain tests
-  through the same source glob. It is unchanged. No remote run for this uncommitted
-  increment is claimed; ECS probes are still local, not part of that workflow.
-- Unity CLI EditMode execution is blocked because the project is already open in
-  Editor (PID 38148). Pipeline is not installed in that Editor. Native UI automation
-  is unavailable because Computer Use permission is not granted. No PlayMode,
-  visual-layout, Android build or device-performance success is claimed.
+- The Linux/Windows GitHub Actions workflow discovers domain tests through the same
+  source glob. ECS probes are local and use engine substitutes.
+- Final integration was limited to compilation at the owner's request. Runtime,
+  domain, domain tests and Editor code compile. No final PlayMode, visual-layout,
+  Android-build or device-performance success is claimed.
 
 ### Manual acceptance in Unity
 

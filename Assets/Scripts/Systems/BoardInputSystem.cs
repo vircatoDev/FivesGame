@@ -33,7 +33,7 @@ namespace Scripts.Systems
                 if (control == BoardControl.StopReplay && replaying)
                 {
                     entity.Del<BoardReplayComponent>();
-                    _world.NewEntity().Get<BoardRefreshEvent>();
+                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
                 }
                 else if (_moves.GetEntitiesCount() == 0 && !replaying)
                 {
@@ -71,6 +71,7 @@ namespace Scripts.Systems
                 if (!board.TryMove(cell))
                     return false;
                 _boards.Get2(0).Moves.Add(cell);
+                _world.NewEntity().Get<BoardChangedEvent>();
                 return true;
             }
             return false;
@@ -91,6 +92,7 @@ namespace Scripts.Systems
                     var previousEmptyCell = count == 1 ? history.InitialEmptyCell : history.Moves[count - 2];
                     board.TryMove(previousEmptyCell);
                     history.Moves.RemoveAt(count - 1);
+                    _world.NewEntity().Get<BoardChangedEvent>();
                     break;
                 case BoardControl.Replay:
                     var data = new ReplayData(ReplayData.CurrentVersion, board.Size, board.EmptyTileId,
@@ -98,9 +100,9 @@ namespace Scripts.Systems
                     _boards.GetEntity(0).Replace(new BoardReplayComponent
                     {
                         Data = data,
-                        State = SeededShuffle.Create(data.Size, data.EmptyTileId, data.Seed, data.ShuffleSteps)
+                        State = data.CreatePlaybackBoard()
                     });
-                    _world.NewEntity().Get<BoardRefreshEvent>();
+                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
                     break;
             }
         }

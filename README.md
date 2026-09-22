@@ -57,17 +57,19 @@ Undo, replay, projection, animation and completion. The current unfinished attem
 has touch controls for Undo and replay; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
-**74 standalone NUnit tests** and **50 local service/ECS probes** pass. Domain,
-tests and the full game assembly compile with Unity 6000.0.71f1 references.
-The open Editor blocks a separate CLI Test Runner run, and native UI automation
-is unavailable. PlayMode interaction, toolbar layout, Android builds and device
-profiling still require verification.
+During the review fixes, **74 standalone NUnit tests** and **59 local service/ECS
+probes** passed. For the final integration, verification was limited to compilation
+at the owner's request: Domain, domain tests, runtime and Editor assemblies compile
+with Unity 6000.0.71f1 references. PlayMode interaction, the final toolbar layout,
+Android builds and device profiling remain unverified.
+
+The Riverside Village visual redesign is preserved. Undo/replay controls are
+serialized in `GamePlayScreen.prefab`; the view no longer builds UI at runtime.
 
 See [the board contract and acceptance steps](docs/BOARD_STATE.md),
 [ECS architecture](docs/ARCHITECTURE.md) and [test commands](tools/domain-tests/README.md).
-The existing domain-only GitHub Actions workflow runs tests on Linux and Windows;
-new test cases are picked up automatically after commit/push. This uncommitted
-increment has no remote CI result yet.
+The domain-only GitHub Actions workflow automatically runs on Linux and Windows
+for pushes and pull requests; it does not build Android or run the ECS probes.
 
 ## Licensing
 

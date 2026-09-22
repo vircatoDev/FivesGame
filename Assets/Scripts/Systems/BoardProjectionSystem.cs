@@ -13,16 +13,21 @@ namespace Scripts.Systems
         private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<TileComponent> _tiles;
         private readonly EcsFilter<BoardInitializedEvent> _initialized;
-        private readonly EcsFilter<BoardRefreshEvent> _refresh;
+        private readonly EcsFilter<BoardChangedEvent> _changes;
 
         public void Run()
         {
             if (!_session.IsRunning || _boards.GetEntitiesCount() != 1)
                 return;
 
+            if (_initialized.GetEntitiesCount() == 0 && _changes.GetEntitiesCount() == 0)
+                return;
+
             var board = _replays.GetEntitiesCount() > 0 ? _replays.Get1(0).State : _boards.Get1(0).State;
             var initial = _initialized.GetEntitiesCount() > 0;
-            var snap = initial || _refresh.GetEntitiesCount() > 0;
+            var snap = initial;
+            foreach (var i in _changes)
+                snap |= _changes.Get1(i).Snap;
             foreach (var i in _tiles)
             {
                 ref var tile = ref _tiles.Get1(i);
