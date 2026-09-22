@@ -21,3 +21,13 @@ The isolated Editor attempt timed out after 60 seconds and produced no test repo
 a passing runtime result is not claimed. Further attempts were deferred to conserve
 usage at the owner's request. Next: run these tests in the regular Editor, then
 verify menu → puzzle → Undo/replay → victory → reward → restart and Android separately.
+
+## Fast CI format guard
+
+`python3 tools/check_unity_text.py` scans text prefabs and scenes under Assets.
+It rejects blank/whitespace-only lines, non-text files and an empty input directory.
+The separate `Unity prefab and scene format` Actions job runs without Unity.
+This catches the specific serialization regression that lost the BoardControlsView
+references. It does not parse all UnityYAML syntax, resolve references, or replace
+Editor/PlayMode tests. Unity documents this format limitation here:
+https://unity.com/blog/engine-platform/understanding-unitys-serialization-language-yaml

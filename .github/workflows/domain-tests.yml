@@ -1,4 +1,4 @@
-name: Domain tests
+name: Project checks
 
 on:
   push:
@@ -13,6 +13,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  unity-text:
+    name: Unity prefab and scene format
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Reject unsupported UnityYAML blank lines
+        run: python3 tools/check_unity_text.py
+
   test:
     name: Domain (${{ matrix.os }})
     strategy:
