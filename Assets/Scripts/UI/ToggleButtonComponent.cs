@@ -38,6 +38,7 @@ namespace Scripts.UI
         private void UpdateIcon()
         {
             iconImage.sprite = _isEnabled ? enabledSprite : disabledSprite;
+            iconImage.color = _isEnabled ? Color.white : new Color(1f, 1f, 1f, 0.35f);
         }
 
         private void OnDestroy()
