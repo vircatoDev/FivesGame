@@ -31,7 +31,7 @@ namespace Scripts.Services
             if (clip == null)
                 return;
 
-            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volume);
+            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volume * _soundSettings.SoundEffectsVolume);
         }
 
         public void PlayBackgroundMusic(string key)

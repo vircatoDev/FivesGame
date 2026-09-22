@@ -57,14 +57,16 @@ namespace Scripts.UI.Views
             if (gameSessionLastGameResult == null)
                 gameSessionLastGameResult = new GameResult();
 
-            gameSessionLastGameResult.StarCount += 10;
             puzzleIndex += 1;
         
             starsRewardText.text = $"+{gameSessionLastGameResult.StarCount} Stars";
             levelProgressText.text = $"{puzzleIndex}/{puzzlesCount}";
             themeNameText.text = selectedTheme.ThemeName;
             var target = (float)puzzleIndex / (float)puzzlesCount;
-            themeSliderProgress.DOValue(target, 1f).SetDelay(0.7f);
+            themeSliderProgress
+                .DOValue(target, 1f)
+                .SetDelay(0.7f)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
     
         private void OnGetRewardClicked()

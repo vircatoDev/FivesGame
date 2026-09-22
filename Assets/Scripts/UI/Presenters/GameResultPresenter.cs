@@ -49,14 +49,18 @@ namespace Scripts.UI.Presenters
 
         public void GetReward(bool doubleReward)
         {
-            GiveReward(doubleReward);
+            if (!_gameSession.TryClaimReward(doubleReward, out var rewardAmount))
+            {
+                return;
+            }
+
+            GiveReward(rewardAmount);
             SaveReward();
             BackToMainMenu();
         }
 
-        private void GiveReward(bool doubleReward)
+        private void GiveReward(int rewardAmount)
         {
-            int rewardAmount = doubleReward ? 20 : 10;
             _starService.Add(rewardAmount);
             _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService,rewardAmount).Execute();
         }

@@ -29,6 +29,7 @@ namespace Scripts
         private GlobalConfig _config;
         private SoundService _soundService;
         private EnergyService _energyService;
+        private StarService _starService;
         private PlayerDataSaveHelper _playerDataSaveHelper;
         private GameStateMachine _stateMachine;
         private GameSession _gameSession;
@@ -39,6 +40,7 @@ namespace Scripts
             GlobalConfig config,
             SoundService soundService,
             EnergyService energyService,
+            StarService starService,
             GameStateMachine stateMachine, GameSession gameSession,
             PlayerDataSaveHelper playerDataSaveHelper)
         {
@@ -46,6 +48,7 @@ namespace Scripts
             _config = config;
             _soundService = soundService;
             _energyService = energyService;
+            _starService = starService;
             _stateMachine = stateMachine;
             _gameSession = gameSession;
             _playerDataSaveHelper = playerDataSaveHelper;
@@ -81,7 +84,6 @@ namespace Scripts
                 .OneFrame<UpdateControlPanelStarsEvent>()
                 .OneFrame<UpdateControlPanelBtnLogicEvent>()
                 .OneFrame<ChangeStateEvent>()
-                .OneFrame<SaveDataEvent>()
                 .OneFrame<OpenScreenEvent>()
                 .OneFrame<CloseScreenEvent>()
                 .OneFrame<PlaySoundEffectEvent>()
@@ -99,24 +101,24 @@ namespace Scripts
 
             _mainSystems
                 .Add(new GamePlayManagementSystem(_mainSystems))
+                .Add(new WinCheckSystem())
+                .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new GameStateSystem(_stateMachine))
                 .Add(new SoundSystem(_soundService))
-                .Add(new StorageSystem())
                 .Add(new EnergyRecoverySystem(_energyService))
                 .Add(new UISystem(_rootLayer, _popUpLayer))
-                .Add(new CommonUIHeaderPanelSystem(_headerPanelView))
-                .Add(new FadeSystem(_fadeScreen));
+                .Add(new CommonUIHeaderPanelSystem(_headerPanelView, _energyService, _starService))
+                .Add(new FadeSystem(_fadeScreen))
+                .Add(new StorageSystem());
         }
 
         private EcsSystems AddGamePlaySystems()
         {
             var gamePlaySystems = new EcsSystems(_world, "gamePlay")
                 .Add(new BoardInitSystem(_gameLayer))
-                .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new TileClickSystem())
                 .Add(new TileMoveSystem())
-                .Add(new ShuffleSystem())
-                .Add(new WinCheckSystem());
+                .Add(new ShuffleSystem());
             return gamePlaySystems;
         }
 

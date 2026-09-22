@@ -1,7 +1,6 @@
-using System;
-using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
+using Scripts.Models;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -9,8 +8,8 @@ namespace Scripts.Systems
 {
     class BoardDestroySystem : IEcsRunSystem
     {
-        private EcsWorld _world;
         private readonly Transform _boardParent;
+        private readonly GameSession _session;
 
         private readonly EcsFilter<TileComponent> _tileFilter = null;
         private readonly EcsFilter<GameEndEvent> _gameEndEvent = null;
@@ -22,38 +21,32 @@ namespace Scripts.Systems
 
         public void Run()
         {
-            if (_gameEndEvent.GetEntitiesCount() <= 0) return;
-
-            DestroyBoardWithDelay(_gameEndEvent.Get1(0).Delay);
+            if (_gameEndEvent.GetEntitiesCount() > 0)
+            {
+                DestroyCurrentBoard();
+                _session.EndRun();
+            }
         }
 
-        private async void DestroyBoardWithDelay(float delay)
+        private void DestroyCurrentBoard()
         {
-            await DestroyBoard(delay);
-        }
+            if (_boardParent.childCount == 0)
+            {
+                return;
+            }
 
-        private async UniTask DestroyBoard(float delay)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(delay));
-            DestroyTiles();
-            DestroyGameObject();
-        }
+            var board = _boardParent.GetChild(_boardParent.childCount - 1);
 
-        private void DestroyGameObject()
-        {
-            Object.Destroy(_boardParent.GetChild(0).gameObject);
-        }
-
-        private void DestroyTiles()
-        {
             foreach (var i in _tileFilter)
             {
-                ref var tile = ref _tileFilter.Get1(i);
-
-                Object.Destroy(tile.Rect.gameObject);
-
-                _tileFilter.GetEntity(i).Destroy();
+                var tile = _tileFilter.Get1(i);
+                if (tile.Rect != null && tile.Rect.IsChildOf(board))
+                {
+                    _tileFilter.GetEntity(i).Destroy();
+                }
             }
+
+            Object.Destroy(board.gameObject);
         }
     }
 }

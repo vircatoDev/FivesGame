@@ -2,7 +2,6 @@ using DG.Tweening;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
-using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.UI;
 using UnityEngine;
@@ -10,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Scripts.Systems
 {
-    public class BoardInitSystem : IEcsInitSystem, IEcsRunSystem
+    public class BoardInitSystem : IEcsRunSystem
     {
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
 
@@ -21,7 +20,6 @@ namespace Scripts.Systems
 
         private bool _boardWasCreated;
         private GameSettings _roundSetting;
-        private GameStateComponent _cachedState;
         private GameObject _boardObject;
 
         public BoardInitSystem(Transform boardParent)
@@ -29,21 +27,9 @@ namespace Scripts.Systems
             _boardParent = boardParent;
         }
 
-        public void Init()
-        {
-            if (_stateFilter.GetEntitiesCount() > 0)
-            {
-                _cachedState = _stateFilter.Get1(0);
-            }
-
-            _roundSetting = _gameSession.SelectedGameMode;
-        }
-
         public void Run()
         {
-            _cachedState = _stateFilter.Get1(0);
-
-            if (_cachedState.CurrentState != GameStateType.Playing)
+            if (_stateFilter.Get1(0).CurrentState != GameStateType.Playing)
             {
                 _boardWasCreated = false;
                 return;
@@ -59,26 +45,27 @@ namespace Scripts.Systems
 
         private void CreateBoard()
         {
+            _roundSetting = _gameSession.SelectedGameMode;
             _boardObject = InstantiatePrefab(_settings.BoardPrefab, _boardParent);
             if (_boardObject == null) return;
 
-            _boardObject.GetComponent<Image>().DOFade(1, 1);
+            _boardObject.GetComponent<Image>().DOFade(1, 1).SetLink(_boardObject, LinkBehaviour.KillOnDestroy);
 
             int boardSize = _roundSetting.BoardSize;
             float tileSize = _roundSetting.TileSize;
             float spacing = _roundSetting.TileSpacing;
             Vector2 startPosition = GetTopLeftCorner(_boardParent);
 
-            var piecesImg = ImageSplitter.SplitImage(_gameSession.SelectedPuzzle.Image.texture, boardSize, boardSize);
+            var source = _gameSession.SelectedPuzzle.Image;
 
             for (int i = 0; i < boardSize * boardSize; i++)
             {
-                CreateTile(i, boardSize, tileSize, spacing, startPosition, piecesImg[i]);
+                CreateTile(i, boardSize, tileSize, spacing, startPosition, source);
             }
         }
 
         private void CreateTile(int id, int boardSize, float tileSize, float spacing, Vector2 startPosition,
-            Texture2D texture)
+            Sprite source)
         {
             var tileEntity = _world.NewEntity();
             ref var tileComponent = ref tileEntity.Get<TileComponent>();
@@ -96,7 +83,15 @@ namespace Scripts.Systems
             if (tileObject == null) return;
 
             SetTileProperties(ref tileComponent, tileObject, tileSize, position);
-            InitializeTileUI(ref tileComponent, texture, tileObject);
+            var sourceRect = source.rect;
+            var width = sourceRect.width / boardSize;
+            var height = sourceRect.height / boardSize;
+            var region = new Rect(sourceRect.x + column * width,
+                sourceRect.y + (boardSize - 1 - row) * height, width, height);
+            var sprite = Sprite.Create(source.texture, region, new Vector2(0, 0), source.pixelsPerUnit);
+            var tileUI = tileObject.GetComponent<TileUiProvider>();
+            tileUI.Init(_world, id, sprite);
+            tileUI.PlayTileShowAnimation();
         }
 
         private void SetTileProperties(ref TileComponent tileComponent, GameObject tileObject, float tileSize,
@@ -106,17 +101,6 @@ namespace Scripts.Systems
             rectTransform.sizeDelta = new Vector2(tileSize, tileSize);
             rectTransform.anchoredPosition = position;
             tileComponent.Rect = rectTransform;
-        }
-
-        private void InitializeTileUI(ref TileComponent tileComponent, Texture2D texture, GameObject tileObject)
-        {
-            int tileSize = texture.width;
-            Rect rec = new Rect(0, 0, tileSize, tileSize);
-            Sprite tileSprite = Sprite.Create(texture, rec, new Vector2(0, 0), .01f);
-
-            var tileUIProvider = tileObject.GetComponent<TileUiProvider>();
-            tileUIProvider.Init(_world, tileComponent.Id, tileSprite);
-            tileUIProvider.PlayTileShowAnimation();
         }
 
         private GameObject InstantiatePrefab(string prefabPath, Transform parent)

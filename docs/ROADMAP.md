@@ -1,22 +1,22 @@
 # Modernization roadmap
 
-## 0. Reproducible baseline
+## 0. Unity 6 Android baseline
 
-- Install Unity 2021.3.25f1 and restore locked packages.
+- Use Unity 6000.0.71f1 with Android Build Support and restore locked packages.
 - Exercise menu → puzzle → win → reward → restart.
-- Capture Editor/build logs and a Build Report.
+- Produce an IL2CPP/ARM64 Android App Bundle and capture its Build Report.
 - Verify asset redistribution rights and add LICENSE/THIRD_PARTY_NOTICES.
 - Pin Git dependencies explicitly in the manifest.
 
-Exit: a clean clone opens and builds, or the smallest compatibility fix is documented.
+Exit: a clean clone opens in Unity 6000.0.71f1 and produces an Android App Bundle, or every remaining external blocker is documented with a reproducible command.
 
 ## 1. Correctness
 
 - Add regressions for purchase, reward, recovery, event ordering, and rapid tile input.
 - Make purchases and rewards atomic and idempotent.
 - Introduce a clock abstraction and correct recovery remainder handling.
-- Add cancellation and serialized navigation transitions.
-- Handle corrupt saves and disable unsupported 6×6 until generic rules exist.
+- Remove unowned delayed work and serialize navigation transitions.
+- Handle corrupt saves and make board generation and win checks honor the configured size.
 
 Exit: the eight reproduced defects have passing Unity tests.
 
@@ -57,6 +57,6 @@ Exit: every feature has tests, a documented trade-off, and a short demonstration
 - Focus navigation, safe area, high contrast, and reduced motion.
 - Independent AudioMixer controls for music and SFX.
 - Suspend/resume and active-session recovery.
-- GitHub Actions/GameCI, WebGL and desktop artifacts, profiler report, and release video.
+- GitHub Actions/GameCI, Android artifacts, profiler report, and release video.
 
 Exit: the full flow is reproducible in CI and available as a playable build.

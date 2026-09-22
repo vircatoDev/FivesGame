@@ -17,18 +17,42 @@ Isolated C# probes using the original application code and the LeoECS revision f
 7. Two tile clicks in one ECS tick can place two tiles in the same cell.
 8. The generator always creates nine cells although a 6×6 configuration exists.
 
+## Resolution status
+
+The correctness branch addresses all eight defects:
+
+1. theme purchase spends once and persists both currency and progress;
+2. currency and energy reject non-positive spends;
+3. a per-run reward guard makes reward collection idempotent;
+4. recovery explicitly returns its amount and emits one UI update;
+5. recovery advances by whole intervals and preserves fractional elapsed time;
+6. save requests persist until `StorageSystem` consumes and destroys them;
+7. the input system accepts at most one tile click while a move is pending;
+8. generation and win checks use the configured board size.
+
+`tools/logic-probes/run.py` compiles the current production sources with the locked LeoECS revision and reports `34 correctness probes passed`. Five additional NUnit EditMode tests protect the pure domain rules.
+
+State transitions now run through one small latest-request queue on Unity's main thread. The win presentation delay is an ordinary ECS update, and board cleanup runs immediately when it receives `GameEndEvent`; neither starts unowned async work. DOTween animations are linked to their owning GameObjects and stop when those objects are destroyed.
+
+## Additional review fixes (2026-09-21)
+
+- Both menus use one `GameStartService`; repeat requests cannot debit energy before the first hide animation completes.
+- The session records completion once. Tile input stops during the result presentation, and a manual exit takes precedence over the delayed result request.
+- Movement is advanced in ECS updates; its component remains until the animation finishes. There are no background movement tasks.
+- Energy recovery runs during system initialization; the header reads the live services and the recovery emits its save request.
+- Invalid JSON falls back without losing the raw damaged string. Partial records are normalized and missing content is skipped when selecting the last active theme.
+- Tiles use regions of the shared texture and own their runtime Sprite, released in `OnDestroy`. SFX playback multiplies the per-effect volume by the saved preference.
+
 ## Risks requiring Unity verification
 
-- state transitions can overlap because async work has no cancellation owner;
-- delayed win and board-destruction work can affect a later session;
-- runtime Texture2D/Sprite instances have no explicit ownership;
-- save JSON has no schema, migration, backup, or stable content identifiers;
-- SFX volume settings are stored but not applied to effect playback;
+- save JSON still needs versioning, migrations, a known-good backup and stable content identifiers; invalid JSON now retains a separate `.corrupt` copy;
+- navigation still uses fixed delays and needs teardown/rapid-navigation PlayMode checks;
+- repeated-session native memory and sprite appearance need an Editor/device check;
 - timed mode and session results are incomplete;
 - reflection-created commands require a real IL2CPP/stripping check.
 
-## Limits
+## Unity 6 migration status
 
-The source targets Unity 2021.3.25f1. The audit machine currently has Unity 6000.0.71f1, so the imported baseline has not yet been opened or rewritten. Editor compilation, PlayMode, IL2CPP, FPS, GC allocations, and native memory remain unverified.
+The imported source targeted Unity 2021.3.25f1. The maintained baseline now targets Unity 6000.0.71f1 and Android. The first headless import resolved the Unity license and started package migration, but the Codex sandbox blocks Unity's IL post-processor Unix socket under `/tmp`. Editor compilation, PlayMode, Android IL2CPP, FPS, GC allocations, and native memory therefore still require an unsandboxed Unity run.
 
-The first milestone converts these findings into Unity Test Framework regressions and fixes correctness before adding new systems.
+The remaining verification step is to execute the committed EditMode suite and Android build from an unsandboxed Unity process.

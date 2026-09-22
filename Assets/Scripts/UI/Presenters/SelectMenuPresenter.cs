@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cysharp.Threading.Tasks;
 using Scripts.Commands;
 using Scripts.Configs;
 using Scripts.Models;
@@ -13,8 +12,7 @@ namespace Scripts.UI.Presenters
 {
     public class SelectMenuPresenter : BasePresenter
     {
-        private readonly GameSession _gameSession;
-        private readonly EnergyService _energyService;
+        private readonly GameStartService _gameStartService;
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
         private readonly List<ThemeConfig> _themeConfig;
@@ -25,15 +23,13 @@ namespace Scripts.UI.Presenters
 
         public SelectMenuPresenter(
             GlobalConfig gameConfig,
-            GameSession gameSession,
-            EnergyService energyService,
+            GameStartService gameStartService,
             StarService starService,
             PlayerProgressService playerProgressService,
             ECSCommandService ecsCommandService)
         {
             _themeConfig = gameConfig.Themes;
-            _gameSession = gameSession;
-            _energyService = energyService;
+            _gameStartService = gameStartService;
             _starService = starService;
             _playerProgressService = playerProgressService;
             _ecsCommandService = ecsCommandService;
@@ -61,17 +57,11 @@ namespace Scripts.UI.Presenters
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
-            if (!TrySpendEnergy())
-                return;
-
             var imageData = GetPuzzleData(selectedImg);
-            if (imageData == null)
-            {
+            if (!_gameStartService.TryStart(GetSelectedTheme(), imageData))
                 return;
-            }
 
-            SetSelectedGameSettings(imageData);
-            await HideCurrentView();
+            await _view.PlayHideAnimation();
             ChangeGameState(GameStateType.Playing);
         }
 
@@ -93,21 +83,6 @@ namespace Scripts.UI.Presenters
             }
         }
 
-        private bool TrySpendEnergy()
-        {
-            if (_energyService.GetBalance() <= 0)
-            {
-                PlaySoundEffect(AudioKeyCollection.WrongClick);
-                ShowNoEnergyAnimation();
-                return false;
-            }
-
-            _energyService.Spend(1);
-            UpdateEnergyBalance();
-            SaveEnergyData();
-            return true;
-        }
-
         private PuzzleData GetPuzzleData(string puzzleName)
         {
             var theme = GetSelectedTheme();
@@ -117,17 +92,6 @@ namespace Scripts.UI.Presenters
         private ThemeConfig GetSelectedTheme()
         {
             return _themeConfig.FirstOrDefault(t => t.ThemeName == _selectedTheme);
-        }
-
-        private void SetSelectedGameSettings(PuzzleData imageData)
-        {
-            _gameSession.SetSelectedImage(imageData);
-            _gameSession.SetSelectedTheme(GetSelectedTheme());
-        }
-
-        private async UniTask HideCurrentView()
-        {
-            await _view.PlayHideAnimation();
         }
 
         private void ChangeGameState(GameStateType newState)
@@ -209,7 +173,12 @@ namespace Scripts.UI.Presenters
                 return;
             }
 
-            if (!_starService.Spend(theme.UnlockCost))
+            if (IsThemeUnlocked(theme))
+            {
+                return;
+            }
+
+            if (theme.UnlockCost < 0 || (theme.UnlockCost > 0 && !_starService.Spend(theme.UnlockCost)))
             {
                 PlaySoundEffect(AudioKeyCollection.WrongClick);
                 ShowNoStarsAnimation();
@@ -226,11 +195,11 @@ namespace Scripts.UI.Presenters
 
         private void UnlockTheme(ThemeConfig theme)
         {
-            _starService.Spend(theme.UnlockCost);
             UpdateStarBalance(-theme.UnlockCost);
             SaveStarData();
 
             _playerProgressService.UnlockTheme(theme.ThemeName);
+            SaveProgressData();
             var updatedTile = new MenuItemData
             {
                 Id = theme.ThemeName,
@@ -264,19 +233,12 @@ namespace Scripts.UI.Presenters
         private void UpdateHeaderButton() => _ecsCommandService
             .CreateCommand<UpdateHeaderBtnLogicCommand>(OnExit, HeaderBtnType.Back).Execute();
 
-        private void ShowNoEnergyAnimation() =>
-            _ecsCommandService.CreateCommand<HeaderNoEnergyAnimationCommand>().Execute();
-
         private void ShowNoStarsAnimation() => _ecsCommandService.CreateCommand<HeaderNoStarsAnimationCommand>().Execute();
-
-        private void UpdateEnergyBalance() =>
-            _ecsCommandService.CreateCommand<UpdateEnergyBalanceCommand>(_energyService, -1).Execute();
-
-        private void SaveEnergyData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_energyService).Execute();
 
         private void UpdateStarBalance(int amount) =>
             _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService, amount).Execute();
 
         private void SaveStarData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_starService).Execute();
+        private void SaveProgressData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_playerProgressService).Execute();
     }
 }

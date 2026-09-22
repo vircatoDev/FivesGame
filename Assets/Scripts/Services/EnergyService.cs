@@ -1,4 +1,5 @@
 using System;
+using Fives.Domain;
 using Scripts.Configs;
 using Scripts.Helpers;
 using Scripts.Models;
@@ -9,47 +10,50 @@ namespace Scripts.Services
 {
     public class EnergyService : ICurrencyService, IStorable
     {
-        private int _currentEnergy;
         private readonly int _maxEnergy;
         private readonly TimeSpan _recoveryInterval;
-        private DateTime _lastRecoveryTime;
+        private readonly IClock _clock;
+        private EnergyWallet _wallet;
 
-        public EnergyService(GlobalConfig config, PlayerDataSaveHelper saveHelper)
+        public EnergyService(GlobalConfig config, PlayerDataSaveHelper saveHelper, IClock clock)
         {
-            _currentEnergy = config.InitialEnergy;
             _maxEnergy = config.MaxEnergy;
             _recoveryInterval = TimeSpan.FromHours(config.EnergyRecoveryIntervalHours);
-            _lastRecoveryTime = DateTime.Now;
+            _clock = clock;
 
-            SetDataFromSave(saveHelper.GetPlayerData().Energy);
+            var savedEnergy = saveHelper.GetPlayerData().Energy;
+            var balance = savedEnergy?.CurrentEnergy ?? config.InitialEnergy;
+            var lastRecovery = savedEnergy?.LastRecoveryTime ?? _clock.UtcNow;
+            _wallet = new EnergyWallet(Math.Clamp(balance, 0, _maxEnergy), _maxEnergy, _recoveryInterval, lastRecovery);
         }
 
 
         public int GetBalance()
         {
-            RecoverEnergy();
-            return _currentEnergy;
+            return _wallet.Balance;
         }
 
         public void Add(int amount)
         {
-            _currentEnergy = Math.Min(_currentEnergy + amount, _maxEnergy);
+            if (!_wallet.TryCredit(amount, _clock.UtcNow))
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount));
+            }
         }
 
         public bool Spend(int amount)
         {
-            if (_currentEnergy >= amount)
-            {
-                _currentEnergy -= amount;
-                return true;
-            }
-
-            return false;
+            return _wallet.TrySpend(amount);
         }
-    
+
+        public int RecoverEnergy()
+        {
+            return _wallet.Recover(_clock.UtcNow);
+        }
+
         public DateTime GetLastRecoveryTime()
         {
-            return _lastRecoveryTime;
+            return _wallet.LastRecoveryUtc;
         }
 
         public TimeSpan GetRecoveryInterval()
@@ -57,30 +61,28 @@ namespace Scripts.Services
             return _recoveryInterval;
         }
 
-        private void RecoverEnergy()
+        public TimeSpan GetTimeUntilNextRecovery()
         {
-            var now = DateTime.Now;
-            var elapsed = now - _lastRecoveryTime;
-
-            if (elapsed >= _recoveryInterval)
-            {
-                int recovered = (int)(elapsed.TotalHours / _recoveryInterval.TotalHours);
-                _currentEnergy = Math.Min(_currentEnergy + recovered, _maxEnergy);
-                _lastRecoveryTime = now;
-            }
+            return _wallet.TimeUntilNextRecovery(_clock.UtcNow);
         }
 
+        public bool IsFull()
+        {
+            return _wallet.IsFull;
+        }
 
         public void SetDataFromSave(EnergyData data)
         {
-            _currentEnergy = data.CurrentEnergy;
-            _lastRecoveryTime = data.LastRecoveryTime;
+            var balance = data?.CurrentEnergy ?? 0;
+            var lastRecovery = data?.LastRecoveryTime ?? _clock.UtcNow;
+            _wallet = new EnergyWallet(Math.Clamp(balance, 0, _maxEnergy), _maxEnergy, _recoveryInterval, lastRecovery);
         }
 
         public void UpdatePlayerData(GameSaveData playerData)
         {
-            playerData.Energy.CurrentEnergy = _currentEnergy;
-            playerData.Energy.LastRecoveryTime = _lastRecoveryTime;
+            playerData.Energy ??= new EnergyData();
+            playerData.Energy.CurrentEnergy = _wallet.Balance;
+            playerData.Energy.LastRecoveryTime = _wallet.LastRecoveryUtc;
         }
     
     }

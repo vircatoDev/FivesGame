@@ -1,4 +1,5 @@
 ﻿using Scripts.Commands;
+using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
@@ -34,7 +35,7 @@ namespace Scripts.UI.Presenters
         private void BackToMainMenu()
         {
             _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
-            _ecsCommandService.CreateCommand<EndGameCommand>(0).Execute();
+            _ecsCommandService.CreateSimpleEventCommand<GameEndEvent>().Execute();
             _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.MainMenu).Execute();
         }
     }

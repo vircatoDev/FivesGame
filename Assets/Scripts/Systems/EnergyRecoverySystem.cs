@@ -6,13 +6,10 @@ using UnityEngine;
 
 namespace Scripts.Systems
 {
-    public class EnergyRecoverySystem : IEcsRunSystem
+    public class EnergyRecoverySystem : IEcsRunSystem, IEcsInitSystem
     {
         private readonly EcsWorld _world;
         private readonly EnergyService _energyService;
-
-        private int _oldBalance;
-        private int _newBalance;
 
         private float _nextCheckTime = 0f;
 
@@ -21,46 +18,37 @@ namespace Scripts.Systems
             _energyService = energyService;
         }
 
+        public void Init()
+        {
+            RecoverAndScheduleNextCheck();
+        }
+
         public void Run()
         {
-            float currentTime = Time.time;
+            if (Time.time >= _nextCheckTime)
+                RecoverAndScheduleNextCheck();
+        }
 
-            if (currentTime >= _nextCheckTime)
+        private void RecoverAndScheduleNextCheck()
+        {
+            var recoveredAmount = _energyService.RecoverEnergy();
+            if (recoveredAmount > 0)
             {
-                _oldBalance = _energyService.GetBalance();
-                _energyService.GetBalance();
-
-                _newBalance = _energyService.GetBalance();
-
-                if (_oldBalance != _newBalance)
+                _world.NewEntity().Replace(new UpdateControlPanelEnergyEvent
                 {
-                    var updateEvent = _world.NewEntity();
-                    updateEvent.Get<UpdateControlPanelEnergyEvent>().EnergyAmount = _newBalance;
-
-                    var saveDataEvent = _world.NewEntity();
-                    saveDataEvent.Replace(new SaveDataEvent
-                    {
-                        StorableObject = _energyService
-                    });
-                }
-
-                _nextCheckTime = currentTime + GetNextCheckDelay();
+                    EnergyAmount = _energyService.GetBalance(),
+                    EnergyChange = recoveredAmount
+                });
+                _world.NewEntity().Replace(new SaveDataEvent { StorableObject = _energyService });
             }
+
+            _nextCheckTime = Time.time + GetNextCheckDelay();
         }
 
         private float GetNextCheckDelay()
         {
-            DateTime now = DateTime.Now;
-            TimeSpan elapsed = now - _energyService.GetLastRecoveryTime();
-            TimeSpan timeLeft = _energyService.GetRecoveryInterval() - elapsed;
-
-            // if energy full check more intensive
-            if (timeLeft <= TimeSpan.Zero)
-            {
-                return 60f;
-            }
-
-            return (float)timeLeft.TotalSeconds;
+            var timeLeft = _energyService.GetTimeUntilNextRecovery();
+            return Math.Max(1f, (float)timeLeft.TotalSeconds);
         }
     }
 }

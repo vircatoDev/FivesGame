@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Scripts.Helpers.Factory;
@@ -12,6 +12,8 @@ namespace Scripts.Helpers.StateMachine
     {
         private IGameState _currentState;
         private readonly Dictionary<GameStateType, IGameState> _states = new();
+        private bool _isTransitioning;
+        private GameStateType? _pendingState;
 
         public GameStateMachine(GameStateFactory factory)
         {
@@ -21,7 +23,40 @@ namespace Scripts.Helpers.StateMachine
             }
         }
 
-        public async UniTask ChangeState(GameStateType nextStateName)
+        public void ChangeState(GameStateType nextStateName)
+        {
+            _pendingState = nextStateName;
+
+            if (!_isTransitioning)
+            {
+                ProcessTransitions().Forget();
+            }
+        }
+
+        private async UniTask ProcessTransitions()
+        {
+            _isTransitioning = true;
+
+            try
+            {
+                while (_pendingState.HasValue)
+                {
+                    var nextState = _pendingState.Value;
+                    _pendingState = null;
+                    await TransitionTo(nextState);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+            finally
+            {
+                _isTransitioning = false;
+            }
+        }
+
+        private async UniTask TransitionTo(GameStateType nextStateName)
         {
             if (!_states.TryGetValue(nextStateName, out var nextState))
             {
@@ -33,11 +68,9 @@ namespace Scripts.Helpers.StateMachine
             {
                 await _currentState.Exit(nextState);
             }
-        
-            await nextState.Enter(_currentState);
-        
-            _currentState = nextState;
 
+            await nextState.Enter(_currentState);
+            _currentState = nextState;
         }
     }
 }
