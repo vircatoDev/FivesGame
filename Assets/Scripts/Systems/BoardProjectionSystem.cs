@@ -1,7 +1,6 @@
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
-using UnityEngine;
 
 namespace Scripts.Systems
 {
@@ -31,23 +30,13 @@ namespace Scripts.Systems
             foreach (var i in _tiles)
             {
                 ref var tile = ref _tiles.Get1(i);
-                var empty = tile.Id == board.EmptyTileId;
-                if (initial && empty)
-                {
-                    foreach (var graphic in tile.Rect.GetComponentsInChildren<UnityEngine.UI.Graphic>())
-                    {
-                        graphic.raycastTarget = false;
-                        graphic.color = Color.clear;
-                    }
-                }
-
                 var cell = board.CellOf(tile.Id);
                 if (snap || tile.Cell != cell)
                 {
                     tile.Cell = cell;
                     _tiles.GetEntity(i).Replace(new MoveComponent
                     {
-                        InstaMove = snap || empty,
+                        InstaMove = snap,
                         Duration = 0.35f,
                         TargetCell = cell
                     });

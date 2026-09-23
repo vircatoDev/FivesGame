@@ -22,19 +22,18 @@ compiler and resolved packages.
 
 ## Board coverage
 
-- Sizes 2, 3, 4, and 6; any image tile can be the hidden tile.
+- Sizes 2, 3, 4, and 6 on a fully filled swap board.
 - Imported permutations are validated and copied, so callers cannot mutate the board.
-- Invalid moves, row boundaries, four-way adjacency, exact swaps, and reverse moves.
-- 8,000 reproducible attempted moves, checking permutation and move invariants after
-  each attempt.
-- Exhaustive traversal of all 12 reachable 2x2 arrangements for each hidden tile ID.
+- Invalid swaps, row boundaries, four-way adjacency, exact exchanges, and self-inverse swaps.
+- 8,000 reproducible attempted swaps, checking permutation invariants after each attempt.
+- Exhaustive traversal reaching all 24 arrangements of a 2x2 board.
 
 - Four fixed shuffle vectors protect algorithm stability, including zero and negative seeds.
-- 6,565 seed/size/hidden-ID combinations preserve permutation, determinism and a non-solved start.
-- Seeded 2x2 layouts are checked against the complete reachable state set.
-- Replay reconstructs each move; invalid/version-mismatched data is rejected and histories are copied.
+- 4,004 seed/size combinations are deterministic permutations with no tile in its own cell.
+- Replay reconstructs each swap, accepts a full solving path, and rejects invalid,
+  post-win or version-mismatched data; histories are copied.
 
-There are currently 75 standalone NUnit cases. The 59 local service/ECS probes
+There are currently 65 standalone NUnit cases. The 66 local service/ECS probes
 also cover Undo, replay, interruption, cleanup/restart and animation/input ordering.
 Those probes use engine substitutes and are not in the GitHub-hosted domain workflow.
 

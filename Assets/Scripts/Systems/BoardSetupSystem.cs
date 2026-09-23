@@ -19,19 +19,13 @@ namespace Scripts.Systems
             if (!_session.IsRunning || _ends.GetEntitiesCount() > 0 || _boards.GetEntitiesCount() > 0)
                 return;
 
-            var size = _session.SelectedGameMode.BoardSize;
-            var count = BoardMath.CellCount(size);
             var seed = Random.Range(1, int.MaxValue);
-            var steps = count * 4;
-            var board = SeededShuffle.Create(size, seed % count, seed, steps);
             var entity = _world.NewEntity();
-            entity.Replace(new BoardComponent { State = board });
+            entity.Replace(new BoardComponent { State = SeededShuffle.Create(_session.SelectedGameMode.BoardSize, seed) });
             entity.Replace(new BoardHistoryComponent
             {
                 Seed = seed,
-                ShuffleSteps = steps,
-                InitialEmptyCell = board.EmptyCell,
-                Moves = new List<int>(),
+                Moves = new List<Swap>(),
                 StartTime = Time.realtimeSinceStartup
             });
         }

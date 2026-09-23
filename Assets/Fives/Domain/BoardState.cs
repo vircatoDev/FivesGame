@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace Fives.Domain
 {
     /// <summary>
-    /// A square sliding puzzle. Cells and tile IDs are zero-based, in row-major order.
-    /// The tile identified by EmptyTileId is hidden; a solved board has tile N in cell N.
+    /// A square swap puzzle with every cell filled. Cells and tile IDs are zero-based, in row-major order;
+    /// a solved board has tile N in cell N. A move exchanges two orthogonally adjacent cells.
     /// </summary>
     public sealed class BoardState
     {
@@ -14,14 +14,12 @@ namespace Fives.Domain
 
         public int Size { get; }
         public int CellCount => _tiles.Length;
-        public int EmptyTileId { get; }
-        public int EmptyCell { get; private set; }
         public int this[int cell] => _tiles[cell];
 
         /// <summary>Cell holding the tile, or -1 for an unknown tile ID.</summary>
         public int CellOf(int tileId) => tileId >= 0 && tileId < CellCount ? _cells[tileId] : -1;
 
-        public BoardState Copy() => new BoardState(Size, EmptyTileId, _tiles);
+        public BoardState Copy() => new BoardState(Size, _tiles);
 
         public bool IsSolved
         {
@@ -37,16 +35,11 @@ namespace Fives.Domain
             }
         }
 
-        /// <summary>Creates a solved board with the specified tile hidden.</summary>
-        public BoardState(int size, int emptyTileId)
+        /// <summary>Creates a solved board.</summary>
+        public BoardState(int size)
         {
             var cellCount = BoardMath.CellCount(size);
-            if (emptyTileId < 0 || emptyTileId >= cellCount)
-                throw new ArgumentOutOfRangeException(nameof(emptyTileId));
-
             Size = size;
-            EmptyTileId = emptyTileId;
-            EmptyCell = emptyTileId;
             _tiles = new int[cellCount];
             _cells = new int[cellCount];
 
@@ -57,11 +50,9 @@ namespace Fives.Domain
             }
         }
 
-        /// <summary>
-        /// Copies a permutation of tile IDs. Validates its structure, not its solvability.
-        /// </summary>
-        public BoardState(int size, int emptyTileId, IReadOnlyList<int> tiles)
-            : this(size, emptyTileId)
+        /// <summary>Copies a permutation of tile IDs.</summary>
+        public BoardState(int size, IReadOnlyList<int> tiles)
+            : this(size)
         {
             if (tiles == null)
                 throw new ArgumentNullException(nameof(tiles));
@@ -78,34 +69,32 @@ namespace Fives.Domain
                 seen[tile] = true;
                 _tiles[cell] = tile;
                 _cells[tile] = cell;
-                if (tile == EmptyTileId)
-                    EmptyCell = cell;
             }
         }
 
-        /// <summary>Checks a cell index, not a tile ID. Does not change the board.</summary>
-        public bool CanMove(int cell)
+        /// <summary>True for two cells on the board that share a side. Does not change the board.</summary>
+        public bool AreNeighbors(int a, int b)
         {
-            if (cell < 0 || cell >= CellCount)
+            if (a < 0 || a >= CellCount || b < 0 || b >= CellCount)
                 return false;
 
-            var rowDistance = Math.Abs(cell / Size - EmptyCell / Size);
-            var columnDistance = Math.Abs(cell % Size - EmptyCell % Size);
+            var rowDistance = Math.Abs(a / Size - b / Size);
+            var columnDistance = Math.Abs(a % Size - b % Size);
             return rowDistance + columnDistance == 1;
         }
 
-        /// <summary>Slides the tile at the given cell into the empty cell.</summary>
-        public bool TryMove(int cell)
+        /// <summary>Exchanges the tiles in two neighboring cells.</summary>
+        public bool TrySwap(Swap swap)
         {
-            if (!CanMove(cell))
+            if (!AreNeighbors(swap.First, swap.Second))
                 return false;
 
-            var tile = _tiles[cell];
-            _tiles[EmptyCell] = tile;
-            _cells[tile] = EmptyCell;
-            _tiles[cell] = EmptyTileId;
-            _cells[EmptyTileId] = cell;
-            EmptyCell = cell;
+            var first = _tiles[swap.First];
+            var second = _tiles[swap.Second];
+            _tiles[swap.First] = second;
+            _tiles[swap.Second] = first;
+            _cells[first] = swap.Second;
+            _cells[second] = swap.First;
             return true;
         }
     }

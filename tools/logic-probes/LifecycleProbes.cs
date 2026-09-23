@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
@@ -80,20 +81,21 @@ internal static partial class CorrectnessProbes
         var session = new GameSession(CreateConfig());
         session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
-        var boardEntity = CreateBoard(world, 3, 8, 1, 1);
+        // One swap from solved: tile 7 sits in cell 8.
+        var boardEntity = CreateBoard(world, new BoardState(3, new[] { 0, 1, 2, 3, 4, 5, 6, 8, 7 }));
         var board = boardEntity.Get<BoardComponent>().State;
-        var solvingTile = board[8];
+        var solvingTile = 7;
         var destination = solvingTile;
         var tiles = CreateTiles(world, board);
         var systems = CreateBoardSystems(world, session);
         systems.Init();
-        world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
+        world.NewEntity().Replace(new TileSwipeEvent { Id = solvingTile, Dx = -1 });
         systems.Run();
         Check("movement retains input lock across frames", tiles[solvingTile].Has<MoveComponent>() && !session.IsCompleted,
             "last move is still animating");
-        world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
+        world.NewEntity().Replace(new TileSwipeEvent { Id = solvingTile, Dx = -1 });
         systems.Run();
-        Check("reverse click during movement is ignored", tiles[solvingTile].Get<TileComponent>().Cell == destination,
+        Check("reverse swipe during movement is ignored", tiles[solvingTile].Get<TileComponent>().Cell == destination,
             "logical tile stays in destination");
         Time.realtimeSinceStartup = 83f;
         for (int i = 0; i < 3; i++) systems.Run();
@@ -103,7 +105,7 @@ internal static partial class CorrectnessProbes
             && session.LastGameResult.GameTime == TimeSpan.FromSeconds(83),
             $"moves={session.LastGameResult.TurnCount}, time={session.LastGameResult.GameTime}");
         Time.realtimeSinceStartup = 0f;
-        world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
+        world.NewEntity().Replace(new TileSwipeEvent { Id = solvingTile, Dx = -1 });
         systems.Run();
         Check("solved board rejects further moves", tiles[solvingTile].Get<TileComponent>().Cell == destination,
             "board remains solved during result delay");

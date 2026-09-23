@@ -7,59 +7,29 @@ namespace Fives.Domain.Tests
 {
     public class SeededShuffleTests
     {
-        [TestCase(3, 8, 12345, 32, new[] { 6, 0, 5, 7, 4, 3, 8, 2, 1 })]
-        [TestCase(3, 4, 0, 32, new[] { 4, 1, 5, 7, 8, 6, 3, 2, 0 })]
-        [TestCase(2, 3, 1, 12, new[] { 0, 3, 2, 1 })]
-        [TestCase(4, 7, int.MinValue, 64, new[] { 3, 4, 7, 1, 8, 0, 2, 10, 12, 5, 6, 15, 9, 11, 14, 13 })]
-        public void VersionOneHasStableReferenceLayouts(int size, int empty, int seed, int steps, int[] expected)
+        [TestCase(3, 12345, new[] { 1, 5, 6, 0, 3, 8, 7, 4, 2 })]
+        [TestCase(3, 0, new[] { 5, 2, 3, 6, 0, 8, 4, 1, 7 })]
+        [TestCase(2, 1, new[] { 2, 3, 1, 0 })]
+        [TestCase(4, int.MinValue, new[] { 12, 0, 11, 6, 3, 14, 9, 15, 10, 7, 2, 13, 4, 1, 8, 5 })]
+        public void VersionTwoHasStableReferenceLayouts(int size, int seed, int[] expected)
         {
-            CollectionAssert.AreEqual(expected, Tiles(SeededShuffle.Create(size, empty, seed, steps)));
+            CollectionAssert.AreEqual(expected, Tiles(SeededShuffle.Create(size, seed)));
         }
 
         [TestCase(2)]
         [TestCase(3)]
         [TestCase(4)]
         [TestCase(6)]
-        public void AllEmptyTileIdsAndManySeedsPreservePermutationAndAreUnsolved(int size)
+        public void ManySeedsGiveDeterministicPermutationsWithNoTileInPlace(int size)
         {
-            for (var empty = 0; empty < size * size; empty++)
-            for (var seed = -50; seed <= 50; seed++)
+            for (var seed = -500; seed <= 500; seed++)
             {
-                var board = SeededShuffle.Create(size, empty, seed, size * size * 4);
-                CollectionAssert.AreEquivalent(Enumerable.Range(0, board.CellCount), Tiles(board));
-                Assert.That(board.IsSolved, Is.False, $"size={size}, empty={empty}, seed={seed}");
-                Assert.That(board[board.EmptyCell], Is.EqualTo(empty));
-                CollectionAssert.AreEqual(Tiles(board), Tiles(SeededShuffle.Create(size, empty, seed, size * size * 4)));
-            }
-        }
-
-        [TestCase(0)]
-        [TestCase(-1)]
-        public void NonPositiveShuffleLengthIsRejected(int steps) =>
-            Assert.Throws<ArgumentOutOfRangeException>(() => SeededShuffle.Create(3, 8, 1, steps));
-
-        [Test]
-        public void EveryTwoByTwoShuffleIsReachableFromItsSolvedBoard()
-        {
-            for (var empty = 0; empty < 4; empty++)
-            {
-                var reachable = new HashSet<string>();
-                var queue = new Queue<BoardState>();
-                queue.Enqueue(new BoardState(2, empty));
-                while (queue.Count > 0)
-                {
-                    var board = queue.Dequeue();
-                    if (!reachable.Add(string.Join(",", Tiles(board)))) continue;
-                    for (var cell = 0; cell < 4; cell++)
-                    {
-                        var next = new BoardState(2, empty, Tiles(board));
-                        if (next.TryMove(cell)) queue.Enqueue(next);
-                    }
-                }
-                Assert.That(reachable.Count, Is.EqualTo(12));
-                for (var seed = 0; seed < 100; seed++)
-                for (var steps = 1; steps <= 24; steps++)
-                    Assert.That(reachable.Contains(string.Join(",", Tiles(SeededShuffle.Create(2, empty, seed, steps)))), Is.True);
+                var board = SeededShuffle.Create(size, seed);
+                var tiles = Tiles(board);
+                CollectionAssert.AreEquivalent(Enumerable.Range(0, board.CellCount), tiles);
+                Assert.That(Enumerable.Range(0, board.CellCount).All(cell => tiles[cell] != cell), $"size={size}, seed={seed}");
+                Assert.That(board.IsSolved, Is.False);
+                CollectionAssert.AreEqual(tiles, Tiles(SeededShuffle.Create(size, seed)));
             }
         }
 
@@ -67,52 +37,90 @@ namespace Fives.Domain.Tests
         [TestCase(3)]
         [TestCase(4)]
         [TestCase(6)]
-        public void ReplayReconstructsEachAcceptedMove(int size)
+        public void ReplayReconstructsEachAcceptedSwap(int size)
         {
-            var board = SeededShuffle.Create(size, 0, -37, 40);
-            var moves = new List<int>();
+            var board = SeededShuffle.Create(size, -37);
+            var random = new Random(size);
+            var moves = new List<Swap>();
             var snapshots = new List<int[]>();
-            var previousEmpty = -1;
-            for (var i = 0; i < 100 && !board.IsSolved; i++)
+            while (moves.Count < 100 && !board.IsSolved)
             {
-                var cell = Enumerable.Range(0, board.CellCount).First(c => c != previousEmpty && board.CanMove(c));
-                previousEmpty = board.EmptyCell;
-                board.TryMove(cell);
-                moves.Add(cell);
+                var cell = random.Next(board.CellCount);
+                var swap = cell % size < size - 1 ? new Swap(cell, cell + 1) : new Swap(cell, cell - 1);
+                Assert.That(board.TrySwap(swap), Is.True);
+                moves.Add(swap);
                 snapshots.Add(Tiles(board));
             }
-            var data = new ReplayData(1, size, 0, -37, 40, moves);
+
+            var data = new ReplayData(ReplayData.CurrentVersion, size, -37, moves);
             var replay = data.CreatePlaybackBoard();
             for (var i = 0; i < data.Moves.Count; i++)
             {
-                Assert.That(replay.TryMove(data.Moves[i]), Is.True);
+                Assert.That(replay.TrySwap(data.Moves[i]), Is.True);
                 CollectionAssert.AreEqual(snapshots[i], Tiles(replay));
             }
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 12345)]
+        [TestCase(4, -7)]
+        public void ReplayAcceptsASolvingPathAndRejectsMovesAfterWinning(int size, int seed)
+        {
+            var path = SolvingSwaps(SeededShuffle.Create(size, seed));
+            var replay = new ReplayData(ReplayData.CurrentVersion, size, seed, path).CreatePlaybackBoard();
+            foreach (var swap in path)
+                replay.TrySwap(swap);
+            Assert.That(replay.IsSolved, Is.True);
+
+            var extra = path.Append(new Swap(0, 1)).ToList();
+            Assert.Throws<ArgumentException>(() => new ReplayData(ReplayData.CurrentVersion, size, seed, extra).CreatePlaybackBoard());
         }
 
         [Test]
         public void ReplayCopiesMovesAndDoesNotExposeAMutableArray()
         {
-            var moves = new[] { 8 };
-            var data = new ReplayData(1, 3, 8, 1, 1, moves);
-            moves[0] = -1;
-            Assert.That(data.Moves[0], Is.EqualTo(8));
-            Assert.Throws<NotSupportedException>(() => ((IList<int>)data.Moves)[0] = -1);
+            var moves = new[] { new Swap(0, 1) };
+            var data = new ReplayData(ReplayData.CurrentVersion, 3, 1, moves);
+            moves[0] = new Swap(7, 8);
+            Assert.That(data.Moves[0], Is.EqualTo(new Swap(0, 1)));
+            Assert.Throws<NotSupportedException>(() => ((IList<Swap>)data.Moves)[0] = new Swap(7, 8));
         }
 
         [Test]
-        public void ReplayRejectsUnknownVersionNullAndInvalidMoves()
+        public void ReplayRejectsUnknownVersionNullAndInvalidSwaps()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReplayData(2, 3, 8, 1, 1, Array.Empty<int>()));
-            Assert.Throws<ArgumentNullException>(() => new ReplayData(1, 3, 8, 1, 1, null));
-            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { -1 }).CreatePlaybackBoard());
-            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { 0 }).CreatePlaybackBoard());
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ReplayData(1, 3, 1, Array.Empty<Swap>()));
+            Assert.Throws<ArgumentNullException>(() => new ReplayData(ReplayData.CurrentVersion, 3, 1, null));
+            Assert.Throws<ArgumentException>(() =>
+                new ReplayData(ReplayData.CurrentVersion, 3, 1, new[] { new Swap(-1, 0) }).CreatePlaybackBoard());
+            Assert.Throws<ArgumentException>(() =>
+                new ReplayData(ReplayData.CurrentVersion, 3, 1, new[] { new Swap(0, 4) }).CreatePlaybackBoard());
         }
 
-        [Test]
-        public void ReplayRejectsMovesAfterWinning()
+        // Places tiles in row-major order: along the tile's row to the target column, then up.
+        // Every cell on that path is still unplaced, so earlier tiles stay put.
+        private static List<Swap> SolvingSwaps(BoardState start)
         {
-            Assert.Throws<ArgumentException>(() => new ReplayData(1, 3, 8, 1, 1, new[] { 8, 7 }).CreatePlaybackBoard());
+            var board = start.Copy();
+            var size = board.Size;
+            var path = new List<Swap>();
+            for (var target = 0; target < board.CellCount; target++)
+            {
+                var cell = board.CellOf(target);
+                while (cell % size != target % size)
+                    cell = Step(cell, cell % size > target % size ? cell - 1 : cell + 1);
+                while (cell != target)
+                    cell = Step(cell, cell - size);
+            }
+            return path;
+
+            int Step(int from, int to)
+            {
+                var swap = new Swap(from, to);
+                Assert.That(board.TrySwap(swap), Is.True);
+                path.Add(swap);
+                return to;
+            }
         }
 
         private static int[] Tiles(BoardState board) => Enumerable.Range(0, board.CellCount).Select(i => board[i]).ToArray();

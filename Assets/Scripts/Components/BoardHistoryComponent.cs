@@ -1,13 +1,12 @@
 using System.Collections.Generic;
+using Fives.Domain;
 
 namespace Scripts.Components
 {
     public struct BoardHistoryComponent
     {
         public int Seed;
-        public int ShuffleSteps;
-        public int InitialEmptyCell;
-        public List<int> Moves;
+        public List<Swap> Moves;
         public float StartTime;
     }
 }

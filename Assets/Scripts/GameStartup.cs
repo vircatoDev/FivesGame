@@ -82,6 +82,7 @@ namespace Scripts
         private void AddOneFrames()
         {
             _mainSystems.OneFrame<TileClickEvent>()
+                .OneFrame<TileSwipeEvent>()
                 .OneFrame<BoardControlEvent>()
                 .OneFrame<BoardChangedEvent>()
                 .OneFrame<CurrencyChangedEvent>()
@@ -119,6 +120,7 @@ namespace Scripts
                 .Add(new BoardInputSystem())
                 .Add(new BoardReplaySystem())
                 .Add(new BoardProjectionSystem())
+                .Add(new TileHighlightSystem())
                 .Add(new TileMoveSystem())
                 .Add(new BoardHudSystem(_gamePlayPresenter));
             return gamePlaySystems;
