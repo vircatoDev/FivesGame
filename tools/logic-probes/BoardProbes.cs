@@ -10,15 +10,14 @@ using UnityEngine;
 
 internal static partial class CorrectnessProbes
 {
-    private static EcsEntity CreateBoard(EcsWorld world, int size, int empty, int seed, int steps)
+    private static EcsEntity CreateBoard(EcsWorld world, int size, int seed) =>
+        CreateBoard(world, SeededShuffle.Create(size, seed), seed);
+
+    private static EcsEntity CreateBoard(EcsWorld world, BoardState board, int seed = 1)
     {
-        var board = SeededShuffle.Create(size, empty, seed, steps);
         var entity = world.NewEntity();
         entity.Replace(new BoardComponent { State = board });
-        entity.Replace(new BoardHistoryComponent
-        {
-            Seed = seed, ShuffleSteps = steps, InitialEmptyCell = board.EmptyCell, Moves = new List<int>()
-        });
+        entity.Replace(new BoardHistoryComponent { Seed = seed, Moves = new List<Swap>() });
         return entity;
     }
 
@@ -41,10 +40,21 @@ internal static partial class CorrectnessProbes
     private static EcsSystems CreateBoardSystems(EcsWorld world, GameSession session) => new EcsSystems(world)
         .Add(new BoardInputSystem()).Add(new BoardReplaySystem()).Add(new BoardProjectionSystem())
         .Add(new TileMoveSystem()).Add(new WinCheckSystem())
-        .OneFrame<TileClickEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardChangedEvent>().Inject(session);
+        .OneFrame<TileClickEvent>().OneFrame<TileSwipeEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardChangedEvent>().Inject(session);
 
     private static int[] Snapshot(BoardState board) => Enumerable.Range(0, board.CellCount).Select(i => board[i]).ToArray();
     private static void Settle(EcsSystems systems) { for (var tick = 0; tick < 5; tick++) systems.Run(); }
+    private static void Tap(EcsWorld world, EcsSystems systems, int tileId)
+    {
+        world.NewEntity().Replace(new TileClickEvent { Id = tileId });
+        systems.Run();
+    }
+    private static void Swipe(EcsWorld world, EcsSystems systems, int tileId, int dx, int dy)
+    {
+        world.NewEntity().Replace(new TileSwipeEvent { Id = tileId, Dx = dx, Dy = dy });
+        systems.Run();
+    }
+    private static int MovingTiles(EcsWorld world) => world.GetFilter(typeof(EcsFilter<TileComponent, MoveComponent>)).GetEntitiesCount();
     private static void Control(EcsWorld world, EcsSystems systems, BoardControl control)
     {
         world.NewEntity().Replace(new BoardControlEvent { Control = control });
@@ -59,22 +69,23 @@ internal static partial class CorrectnessProbes
         var session = new GameSession(CreateConfig());
         session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
-        var entity = CreateBoard(world, 3, 8, 42, 36);
+        var entity = CreateBoard(world, 3, 42);
         var board = entity.Get<BoardComponent>().State;
         CreateTiles(world, board);
-        var cells = Enumerable.Range(0, 9).Where(board.CanMove).Take(2).ToArray();
+        var first = board[0];
         var systems = CreateBoardSystems(world, session);
         systems.Init();
-        foreach (var cell in cells)
-            world.NewEntity().Replace(new TileClickEvent { Id = board[cell] });
+        world.NewEntity().Replace(new TileSwipeEvent { Id = board[0], Dx = 1 });
+        world.NewEntity().Replace(new TileSwipeEvent { Id = board[4], Dx = 1 });
         systems.Run();
-        Check("rapid clicks accept exactly one move", entity.Get<BoardHistoryComponent>().Moves.Count == 1
-            && board.EmptyCell == cells[0], "one accepted command and one history entry");
+        Check("rapid swipes accept exactly one swap", entity.Get<BoardHistoryComponent>().Moves.Count == 1
+            && board[1] == first, "one accepted command and one history entry");
         systems.Destroy(); world.Destroy();
     }
 
     private static void RunBoardProbes()
     {
+        CheckTapSelection();
         CheckIdleProjection();
         CheckBoardSetup();
         CheckBoardCleanup();
@@ -85,7 +96,7 @@ internal static partial class CorrectnessProbes
         var session = new GameSession(CreateConfig());
         session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
-        var entity = CreateBoard(world, 3, 8, 42, 36);
+        var entity = CreateBoard(world, 3, 42);
         var board = entity.Get<BoardComponent>().State;
         var tiles = CreateTiles(world, board);
         var initial = Snapshot(board);
@@ -98,21 +109,16 @@ internal static partial class CorrectnessProbes
             && initial.SequenceEqual(Snapshot(board)), "no mutation");
 
         var afterMoves = new List<int[]>();
-        var previousEmpty = -1;
-        for (var move = 0; move < 3; move++)
+        foreach (var (cell, dx, dy) in new[] { (0, 1, 0), (4, 1, 0), (6, 0, -1) })
         {
-            var cell = Enumerable.Range(0, 9).First(c => c != previousEmpty && board.CanMove(c));
-            previousEmpty = board.EmptyCell;
-            world.NewEntity().Replace(new TileClickEvent { Id = board[cell] });
-            systems.Run(); Settle(systems);
+            Swipe(world, systems, board[cell], dx, dy); Settle(systems);
             afterMoves.Add(Snapshot(board));
         }
         Check("accepted ECS moves populate history", history.Count == 3, "three moves");
         Control(world, systems, BoardControl.Undo);
         Check("Undo animates and removes last move", history.Count == 2
             && afterMoves[1].SequenceEqual(Snapshot(board))
-            && world.GetFilter(typeof(EcsFilter<TileComponent, MoveComponent>)).GetEntitiesCount() == 1,
-            "previous board restored before animation");
+            && MovingTiles(world) == 2, "previous board restored, both tiles animating");
         Control(world, systems, BoardControl.Undo);
         Check("Undo during animation is ignored", history.Count == 2, "no overlapping inverse moves");
         Settle(systems);
@@ -127,8 +133,7 @@ internal static partial class CorrectnessProbes
             "only the playback component advanced");
         Check("Replay advances the board and schedules the visible tile", entity.Get<BoardReplayComponent>().Position == 1
             && afterMoves[0].SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State))
-            && world.GetFilter(typeof(EcsFilter<TileComponent, MoveComponent>)).GetEntitiesCount() == 1,
-            "first recorded layout, with an active animation");
+            && MovingTiles(world) == 2, "first recorded layout, with both tiles animating");
         systems.Run();
         Check("Replay waits for tile animation", entity.Get<BoardReplayComponent>().Position == 1
             && afterMoves[0].SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State)), "no skipped frames");
@@ -157,17 +162,16 @@ internal static partial class CorrectnessProbes
             "no result or reward flow from playback");
 
         while (history.Count > 0) { Control(world, systems, BoardControl.Undo); Settle(systems); }
-        Check("Undo all returns exactly to shuffled layout", initial.SequenceEqual(Snapshot(board)), "initial empty cell restored");
-        var branchCell = Enumerable.Range(0, 9).Last(board.CanMove);
-        world.NewEntity().Replace(new TileClickEvent { Id = board[branchCell] });
-        systems.Run(); Settle(systems);
+        Check("Undo all returns exactly to shuffled layout", initial.SequenceEqual(Snapshot(board)), "seeded layout restored");
+        Swipe(world, systems, board[8], 0, -1); Settle(systems);
         Control(world, systems, BoardControl.Replay);
         Check("new move after Undo replaces abandoned history", entity.Get<BoardReplayComponent>().Data.Moves.Count == 1
-            && entity.Get<BoardReplayComponent>().Data.Moves[0] == branchCell, "replay contains the current path only");
+            && entity.Get<BoardReplayComponent>().Data.Moves[0].Equals(new Swap(5, 8)), "replay contains the current path only");
         Control(world, systems, BoardControl.StopReplay);
-        world.NewEntity().Replace(new TileClickEvent { Id = -1 });
-        systems.Run();
-        Check("invalid tile ID leaves board and history intact", history.Count == 1, "no fabricated moves");
+        Tap(world, systems, -1);
+        Swipe(world, systems, -1, 1, 0);
+        Check("invalid tile ID leaves board and history intact", history.Count == 1
+            && !entity.Has<TileSelectionComponent>(), "no fabricated moves or selection");
         var beforeExit = Snapshot(board);
         world.NewEntity().Get<GameEndEvent>();
         Control(world, systems, BoardControl.Undo);
@@ -176,12 +180,49 @@ internal static partial class CorrectnessProbes
         systems.Destroy(); world.Destroy();
     }
 
-    private static void CheckIdleProjection()
+    private static void CheckTapSelection()
+    {
+        Time.deltaTime = 0.1f;
+        var world = new EcsWorld();
+        var session = new GameSession(CreateConfig());
+        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
+        session.BeginRun();
+        var entity = CreateBoard(world, 3, 42);
+        var board = entity.Get<BoardComponent>().State;
+        CreateTiles(world, board);
+        var history = entity.Get<BoardHistoryComponent>().Moves;
+        var systems = CreateBoardSystems(world, session);
+        systems.Init();
+        int Selected() => entity.Has<TileSelectionComponent>() ? entity.Get<TileSelectionComponent>().TileId : -1;
+
+        var corner = board[0];
+        Tap(world, systems, corner);
+        Check("tap selects a tile without moving it", Selected() == corner && history.Count == 0, $"selected={Selected()}");
+        var far = board[8];
+        Tap(world, systems, far);
+        Check("tap on a non-neighbor moves the selection", Selected() == far && history.Count == 0, $"selected={Selected()}");
+        Tap(world, systems, far);
+        Check("second tap on the selected tile clears it", Selected() == -1, "deselected");
+        var right = board[1];
+        Tap(world, systems, corner);
+        Tap(world, systems, right);
+        Check("tap on a neighbor swaps and clears the selection", history.Count == 1 && board[0] == right && board[1] == corner
+            && Selected() == -1 && MovingTiles(world) == 2, "both tiles animate");
+        Settle(systems);
+        Swipe(world, systems, board[2], 1, 0);
+        Swipe(world, systems, board[6], 0, 1);
+        Check("swipe off the board edge is rejected", history.Count == 1, "no swap outside the grid");
+        Swipe(world, systems, board[4], 0, 1);
+        Check("swipe down swaps with the tile below", history.Count == 2 && history[1].Equals(new Swap(4, 7)), history[1].ToString());
+        systems.Destroy(); world.Destroy();
+    }
+
+        private static void CheckIdleProjection()
     {
         var world = new EcsWorld();
         var session = new GameSession(CreateConfig());
         session.BeginRun();
-        var entity = CreateBoard(world, 3, 8, 42, 36);
+        var entity = CreateBoard(world, 3, 42);
         var board = entity.Get<BoardComponent>().State;
         var tiles = CreateTiles(world, board);
         var systems = new EcsSystems(world).Add(new BoardProjectionSystem())
@@ -240,8 +281,8 @@ internal static partial class CorrectnessProbes
         var board = boards.Get1(0).State;
         var history = boards.Get2(0);
         Check("setup creates one reproducible ECS board", boards.GetEntitiesCount() == 1 && board.CellCount == 36
-            && !board.IsSolved && Snapshot(board).SequenceEqual(Snapshot(SeededShuffle.Create(6, board.EmptyTileId, history.Seed, history.ShuffleSteps))),
-            "seed and shuffle recipe retained on the entity");
+            && !board.IsSolved && Snapshot(board).SequenceEqual(Snapshot(SeededShuffle.Create(6, history.Seed))),
+            "seed retained on the entity");
         systems.Destroy(); world.Destroy();
     }
 }

@@ -26,7 +26,7 @@ namespace Scripts.Systems
                     continue;
                 }
 
-                replay.State.TryMove(replay.Data.Moves[replay.Position]);
+                replay.State.TrySwap(replay.Data.Moves[replay.Position]);
                 replay.Position++;
                 _world.Send<BoardChangedEvent>();
             }

@@ -1,6 +1,6 @@
 # FivesGame
 
-A casual sliding-puzzle game and a modernization case study for production-oriented Unity development.
+A casual swap-puzzle game and a modernization case study for production-oriented Unity development.
 
 ![FivesGame menu](Content/FivesGame_Menu.gif)
 ![FivesGame gameplay](Content/FivesGame_GamePlay.gif)
@@ -9,7 +9,7 @@ A casual sliding-puzzle game and a modernization case study for production-orien
 
 The imported baseline contains a complete player loop:
 
-- sliding-puzzle gameplay;
+- swap-puzzle gameplay: exchange neighboring fragments to restore the picture;
 - themes and puzzle selection;
 - energy and star currencies;
 - player progress and local save data;

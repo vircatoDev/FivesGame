@@ -125,10 +125,11 @@ internal static partial class CorrectnessProbes
         saveWorld.Destroy();
 
         CheckRapidClicks();
-        var generated = SeededShuffle.Create(6, 35, 123, 144);
+        var generated = SeededShuffle.Create(6, 123);
         Check("configured board size is honored", generated.CellCount == 36
-            && Enumerable.Range(0, 36).Select(i => generated[i]).Distinct().Count() == 36,
-            $"cells={generated.CellCount}, empty={generated.EmptyTileId}");
+            && Enumerable.Range(0, 36).Select(i => generated[i]).Distinct().Count() == 36
+            && Enumerable.Range(0, 36).All(i => generated[i] != i),
+            $"cells={generated.CellCount}, every tile displaced");
         RunBoardProbes();
         CheckPresenterAllocation();
 

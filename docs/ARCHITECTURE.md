@@ -27,8 +27,8 @@ Exit: GameEndEvent → BoardDestroySystem
 ## Data ownership
 
 - `BoardComponent.State` is the authoritative live board.
-- `BoardHistoryComponent` contains the seed, shuffle length, initial empty cell,
-  and the accepted source-cell history. Undo removes the final history entry.
+- `BoardHistoryComponent` contains the seed, the accepted swaps and the start time.
+  Undo re-applies and removes the final swap. `TileSelectionComponent` marks a tapped tile.
 - `BoardReplayComponent` is temporary playback data on the same entity. Its board
   is separate from the live attempt. Removing this component ends playback.
 - `TileComponent.Cell` is a display destination; `GameSettings.CellToAnchored`

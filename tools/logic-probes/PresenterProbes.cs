@@ -15,8 +15,8 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         var session = new GameSession(CreateConfig()); session.BeginRun();
         var entity = world.NewEntity();
-        entity.Replace(new BoardComponent { State = SeededShuffle.Create(3, 8, 42, 36) });
-        entity.Replace(new BoardHistoryComponent { Seed = 42, Moves = new List<int>() });
+        entity.Replace(new BoardComponent { State = SeededShuffle.Create(3, 42) });
+        entity.Replace(new BoardHistoryComponent { Seed = 42, Moves = new List<Swap>() });
         var presenter = new GamePlayPresenter(session, world);
         var view = new GamePlayView();
         SetView(presenter, view);
@@ -28,7 +28,7 @@ internal static partial class CorrectnessProbes
         var bytes = GC.GetAllocatedBytesForCurrentThread() - before;
         Check("idle HUD does not touch the view or allocate", bytes == 0 && view.Updates == 1,
             $"{bytes} bytes, {view.Updates} view updates / 11000 frames");
-        entity.Get<BoardHistoryComponent>().Moves.Add(0);
+        entity.Get<BoardHistoryComponent>().Moves.Add(new Swap(0, 1));
         systems.Run();
         Check("HUD updates when history changes", view.Updates == 2 && view.Status.StartsWith("Ходов: 1"), view.Status);
         systems.Destroy(); world.Destroy();
