@@ -10,27 +10,22 @@ namespace Scripts.UI
     public class TileUiProvider : MonoBehaviour, IPointerClickHandler
     {  
         [SerializeField] private CanvasGroup _tileCanvas;
-        [SerializeField] private Image _tileImage;
+        [SerializeField] private RawImage _tileImage;
         [SerializeField] private int _id;
     
         private EcsWorld _world;
-        private Sprite _ownedSprite;
     
         float delayBetweenTiles = 0.1f; // Delay between tiles appearing
         float animationDuration = 0.3f; // Duration of each tile animation
 
-        public void Init(EcsWorld world, int id, Sprite tileSprite)
+        /// <summary>Shows the uvRect part of the shared puzzle texture; the tile owns no graphics resources.</summary>
+        public void Init(EcsWorld world, int id, Texture texture, Rect uvRect)
         {
             _world = world;
             _id = id;
-            _ownedSprite = tileSprite;
-            _tileImage.sprite = tileSprite;
-            _tileImage.color= Color.white;
-        }
-
-        private void OnDestroy()
-        {
-            Destroy(_ownedSprite);
+            _tileImage.texture = texture;
+            _tileImage.uvRect = uvRect;
+            _tileImage.color = Color.white;
         }
 
         public void OnPointerClick(PointerEventData eventData)

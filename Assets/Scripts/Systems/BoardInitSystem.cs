@@ -66,14 +66,16 @@ namespace Scripts.Systems
             if (tileObject == null) return;
 
             SetTileProperties(ref tileComponent, tileObject, layout.TileSize, layout.CellToAnchored(id));
-            var sourceRect = source.rect;
-            var width = sourceRect.width / boardSize;
-            var height = sourceRect.height / boardSize;
-            var region = new Rect(sourceRect.x + column * width,
-                sourceRect.y + (boardSize - 1 - row) * height, width, height);
-            var sprite = Sprite.Create(source.texture, region, new Vector2(0, 0), source.pixelsPerUnit);
+            // The sprite's texture rect, cut into cells; rows count from the top, UVs from the bottom.
+            var texture = source.texture;
+            var rect = source.textureRect;
+            var width = rect.width / boardSize;
+            var height = rect.height / boardSize;
+            var uvRect = new Rect((rect.x + column * width) / texture.width,
+                (rect.y + (boardSize - 1 - row) * height) / texture.height,
+                width / texture.width, height / texture.height);
             var tileUI = tileObject.GetComponent<TileUiProvider>();
-            tileUI.Init(_world, id, sprite);
+            tileUI.Init(_world, id, texture, uvRect);
             tileUI.PlayTileShowAnimation();
         }
 

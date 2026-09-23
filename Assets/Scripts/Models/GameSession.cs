@@ -1,3 +1,4 @@
+using System;
 using Fives.Domain;
 using Scripts.Configs;
 
@@ -33,9 +34,11 @@ namespace Scripts.Models
             LastGameResult = new GameResult { StarCount = _rewardStars };
         }
 
-        public void CompleteRun()
+        public void CompleteRun(int turnCount, TimeSpan gameTime)
         {
             IsCompleted = true;
+            LastGameResult.TurnCount = turnCount;
+            LastGameResult.GameTime = gameTime;
         }
 
         public void EndRun()

@@ -33,7 +33,6 @@ RectTransform:
   m_Children:
   - {fileID: 1026041012652676865}
   m_Father: {fileID: 7730156661660287988}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -111,7 +110,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1026041012652676865}
   - component: {fileID: 3398314543903655847}
-  - component: {fileID: 9180567659211022423}
+  - component: {fileID: 7612657886232297450}
   m_Layer: 5
   m_Name: ImageMain
   m_TagString: Untagged
@@ -132,7 +131,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7395765707522707767}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -147,7 +145,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2975843021723257546}
   m_CullTransparentMesh: 1
---- !u!114 &9180567659211022423
+--- !u!114 &7612657886232297450
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,7 +154,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2975843021723257546}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -167,16 +165,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e87be115a26bb294f82445b98f153229, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 1
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &7730156661660287991
 GameObject:
   m_ObjectHideFlags: 0
@@ -188,7 +183,6 @@ GameObject:
   - component: {fileID: 7730156661660287988}
   - component: {fileID: 7730156661660287978}
   - component: {fileID: 7730156661660287989}
-  - component: {fileID: 7730156661660287979}
   - component: {fileID: 1440813493514574326}
   - component: {fileID: 2436387349577410759}
   m_Layer: 5
@@ -212,7 +206,6 @@ RectTransform:
   m_Children:
   - {fileID: 7395765707522707767}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -257,23 +250,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 3.5
---- !u!114 &7730156661660287979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7730156661660287991}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_0
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!114 &1440813493514574326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,7 +263,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _tileCanvas: {fileID: 2436387349577410759}
-  _tileImage: {fileID: 9180567659211022423}
+  _tileImage: {fileID: 7612657886232297450}
   _id: 0
 --- !u!225 &2436387349577410759
 CanvasGroup:

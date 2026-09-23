@@ -1,3 +1,4 @@
+using System;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
@@ -9,7 +10,7 @@ namespace Scripts.Systems
     {
         private const float ResultStateDelay = 2f;
 
-        private readonly EcsFilter<BoardComponent> _boards;
+        private readonly EcsFilter<BoardComponent, BoardHistoryComponent> _boards;
         private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
         private readonly EcsWorld _world;
@@ -38,7 +39,9 @@ namespace Scripts.Systems
                     return;
                 }
 
-                _gameSession.CompleteRun();
+                ref var history = ref _boards.Get2(0);
+                _gameSession.CompleteRun(history.Moves.Count,
+                    TimeSpan.FromSeconds(Time.realtimeSinceStartup - history.StartTime));
                 _world.PlaySound(AudioKeyCollection.Win);
             }
 

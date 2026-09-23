@@ -17,6 +17,7 @@ namespace Scripts.UI.Views
         [SerializeField] private Button getRewardButton;
         [SerializeField] private Button doubleRewardButton;
         [SerializeField] private TextMeshProUGUI starsRewardText;
+        [SerializeField] private TextMeshProUGUI statsText;
         [SerializeField] private TextMeshProUGUI levelProgressText;
         [SerializeField] private TextMeshProUGUI themeNameText;
         [SerializeField] private Slider themeSliderProgress;
@@ -49,6 +50,7 @@ namespace Scripts.UI.Views
             puzzleIndex += 1;
         
             starsRewardText.text = $"+{gameSessionLastGameResult.StarCount} Stars";
+            statsText.text = $"Moves: {gameSessionLastGameResult.TurnCount}  ·  Time: {gameSessionLastGameResult.GameTime:mm\\:ss}";
             levelProgressText.text = $"{puzzleIndex}/{puzzlesCount}";
             themeNameText.text = selectedTheme.ThemeName;
             var target = (float)puzzleIndex / (float)puzzlesCount;

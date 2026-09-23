@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8262392940767761205}
   - component: {fileID: 8262392940767761207}
   - component: {fileID: 8262392940767761204}
-  - component: {fileID: 8262392940767761206}
   m_Layer: 5
   m_Name: TileFour
   m_TagString: Untagged
@@ -32,7 +31,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -77,23 +75,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392940767761206
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392940767761226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_3
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392940971373828
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,7 +86,6 @@ GameObject:
   - component: {fileID: 8262392940971373831}
   - component: {fileID: 8262392940971373825}
   - component: {fileID: 8262392940971373830}
-  - component: {fileID: 8262392940971373824}
   m_Layer: 5
   m_Name: TileFive
   m_TagString: Untagged
@@ -126,7 +106,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -171,23 +150,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392940971373824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392940971373828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_4
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392941602999663
 GameObject:
   m_ObjectHideFlags: 0
@@ -219,7 +181,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -297,7 +258,6 @@ RectTransform:
   m_Children:
   - {fileID: 8262392942508715990}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -365,7 +325,6 @@ GameObject:
   - component: {fileID: 8262392941691339344}
   - component: {fileID: 8262392941691339346}
   - component: {fileID: 8262392941691339347}
-  - component: {fileID: 8262392941691339357}
   m_Layer: 5
   m_Name: TileThree
   m_TagString: Untagged
@@ -386,7 +345,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -431,23 +389,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392941691339357
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392941691339345}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_2
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392942095091303
 GameObject:
   m_ObjectHideFlags: 0
@@ -459,7 +400,6 @@ GameObject:
   - component: {fileID: 8262392942095091302}
   - component: {fileID: 8262392942095091296}
   - component: {fileID: 8262392942095091297}
-  - component: {fileID: 8262392942095091299}
   m_Layer: 5
   m_Name: TileSeven
   m_TagString: Untagged
@@ -480,7 +420,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -525,23 +464,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392942095091299
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392942095091303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_6
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392942353938936
 GameObject:
   m_ObjectHideFlags: 0
@@ -553,7 +475,6 @@ GameObject:
   - component: {fileID: 8262392942353938939}
   - component: {fileID: 8262392942353938917}
   - component: {fileID: 8262392942353938938}
-  - component: {fileID: 8262392942353938916}
   m_Layer: 5
   m_Name: TileTwo
   m_TagString: Untagged
@@ -574,7 +495,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -619,23 +539,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392942353938916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392942353938936}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_1
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392942449645656
 GameObject:
   m_ObjectHideFlags: 0
@@ -647,7 +550,6 @@ GameObject:
   - component: {fileID: 8262392942449645659}
   - component: {fileID: 8262392942449645637}
   - component: {fileID: 8262392942449645658}
-  - component: {fileID: 8262392942449645636}
   m_Layer: 5
   m_Name: TileEight
   m_TagString: Untagged
@@ -668,7 +570,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -713,23 +614,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392942449645636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392942449645656}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_7
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392942501433014
 GameObject:
   m_ObjectHideFlags: 0
@@ -741,7 +625,6 @@ GameObject:
   - component: {fileID: 8262392942501433009}
   - component: {fileID: 8262392942501433011}
   - component: {fileID: 8262392942501433008}
-  - component: {fileID: 8262392942501433010}
   m_Layer: 5
   m_Name: TileSix
   m_TagString: Untagged
@@ -762,7 +645,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8262392942508715990}
-  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -807,23 +689,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8262392942501433010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8262392942501433014}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0c9fb09327b4c8193edaee9a0ce4ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WidgetName: Tile_5
-  Emitter: {fileID: 0}
-  _nameRegistrationType: 0
-  _selectable: {fileID: 0}
-  DragTreshold: 5
 --- !u!1 &8262392942508715991
 GameObject:
   m_ObjectHideFlags: 0
@@ -863,7 +728,6 @@ RectTransform:
   - {fileID: 8262392942449645659}
   - {fileID: 8262392941602999662}
   m_Father: {fileID: 8262392941684672177}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

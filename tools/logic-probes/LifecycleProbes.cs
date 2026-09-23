@@ -22,7 +22,6 @@ internal static partial class CorrectnessProbes
         CheckOfflineRecovery();
         CheckSaveRecovery();
         CheckSoundVolume();
-        CheckSpriteOwnership();
     }
 
     private static void SetField(object target, string name, object value) =>
@@ -96,9 +95,14 @@ internal static partial class CorrectnessProbes
         systems.Run();
         Check("reverse click during movement is ignored", tiles[solvingTile].Get<TileComponent>().Cell == destination,
             "logical tile stays in destination");
+        Time.realtimeSinceStartup = 83f;
         for (int i = 0; i < 3; i++) systems.Run();
         Check("win starts after final movement completes", !tiles[solvingTile].Has<MoveComponent>() && session.IsCompleted,
             "animation completed and game locked");
+        Check("win records moves and time for the result screen", session.LastGameResult.TurnCount == 1
+            && session.LastGameResult.GameTime == TimeSpan.FromSeconds(83),
+            $"moves={session.LastGameResult.TurnCount}, time={session.LastGameResult.GameTime}");
+        Time.realtimeSinceStartup = 0f;
         world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
         systems.Run();
         Check("solved board rejects further moves", tiles[solvingTile].Get<TileComponent>().Cell == destination,
@@ -199,24 +203,5 @@ internal static partial class CorrectnessProbes
         sound.SetSoundEffectVolume(0);
         sound.PlaySoundEffect("tap");
         Check("SFX mute reaches playback", AudioSource.LastVolume == 0, "volume=0");
-    }
-
-    private static void CheckSpriteOwnership()
-    {
-        var world = new EcsWorld();
-        var sharedTexture = new Texture2D();
-        var destroyed = 0;
-        for (int i = 0; i < 20; i++)
-        {
-            var sprite = new Sprite { texture = sharedTexture };
-            var tile = new TileUiProvider();
-            SetField(tile, "_tileImage", new UnityEngine.UI.Image());
-            tile.Init(world, i, sprite);
-            typeof(TileUiProvider).GetMethod("OnDestroy", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(tile, null);
-            if (sprite.Destroyed) destroyed++;
-        }
-        Check("tile cleanup destroys owned sprites but not shared texture", destroyed == 20 && !sharedTexture.Destroyed,
-            $"sprite Destroy calls={destroyed}, texture retained");
-        world.Destroy();
     }
 }
