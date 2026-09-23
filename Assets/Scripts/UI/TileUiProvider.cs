@@ -35,9 +35,7 @@ namespace Scripts.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            Debug.Log($"OnPointerClick:{_id}");
-            var clickEvent = new TileClickEvent() { Id = _id, Sender = gameObject };
-            _world.NewEntity().Replace(clickEvent);
+            _world.Send(new TileClickEvent { Id = _id });
         }
     
     

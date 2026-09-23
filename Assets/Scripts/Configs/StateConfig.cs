@@ -8,7 +8,6 @@ namespace Scripts.Configs
     {
         public GameStateType StateName;
         public string ScreenPrefab;
-        public bool  IsPopup;
-        public StateConfig[] AllowedTransitions;
+        public bool IsPopup;
     }
 }

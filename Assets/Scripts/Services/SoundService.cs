@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using Scripts.Configs;
 using Scripts.Helpers;
@@ -9,9 +8,9 @@ using UnityEngine;
 
 namespace Scripts.Services
 {
-    public class SoundService : ISoundService, IStorable
+    public class SoundService : IStorable
     {
-        private readonly List<GameSoundCollection> _audioClipsCollection;
+        private readonly Dictionary<string, AudioClip> _clips = new Dictionary<string, AudioClip>();
 
         private AudioSource _backgroundMusicGo;
         private SoundSettingsData _soundSettings;
@@ -19,16 +18,13 @@ namespace Scripts.Services
         public SoundService(GlobalConfig gameSettings, PlayerDataSaveHelper saveHelper)
         {
             _soundSettings = saveHelper.GetPlayerData().SoundSettings ?? new SoundSettingsData();
-            _audioClipsCollection = gameSettings.AudioClipsCollection;
-
-            SetMusicVolume(_soundSettings.MusicVolume);
-            SetSoundEffectVolume(_soundSettings.SoundEffectsVolume);
+            foreach (var sound in gameSettings.AudioClipsCollection)
+                _clips.TryAdd(sound.Key, sound.AudioClip);
         }
 
         public void PlaySoundEffect(string key, float volume = 1f)
         {
-            var clip = _audioClipsCollection.FirstOrDefault(x => x.Key == key)?.AudioClip;
-            if (clip == null)
+            if (!TryGetClip(key, out var clip))
                 return;
 
             AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volume * _soundSettings.SoundEffectsVolume);
@@ -36,8 +32,7 @@ namespace Scripts.Services
 
         public void PlayBackgroundMusic(string key)
         {
-            var clip = _audioClipsCollection.FirstOrDefault(x => x.Key == key)?.AudioClip;
-            if (clip == null)
+            if (!TryGetClip(key, out var clip))
                 return;
 
             // Create audio source if for the first time
@@ -59,26 +54,6 @@ namespace Scripts.Services
         }
 
 
-        public void TurnOnBackgroundMusic()
-        {
-            if (_backgroundMusicGo == null)
-                return;
-
-            _backgroundMusicGo.Play();
-            _backgroundMusicGo.DOFade(_soundSettings.MusicVolume, 0.5f);
-        }
-
-        public void TurnOffBackgrounMusic()
-        {
-            if (_backgroundMusicGo == null)
-                return;
-
-            _backgroundMusicGo
-                .DOFade(0f, 0.5f)
-                .OnComplete(() =>
-                    _backgroundMusicGo.Stop());
-        }
-
         public void SetMusicVolume(float volume)
         {
             _soundSettings.MusicVolume = volume;
@@ -86,7 +61,7 @@ namespace Scripts.Services
                 _backgroundMusicGo.volume = volume;
         }
 
-        public void SetDataFromSave(SoundSettingsData data) => _soundSettings = data;
+        private bool TryGetClip(string key, out AudioClip clip) => _clips.TryGetValue(key, out clip) && clip != null;
 
         public void UpdatePlayerData(GameSaveData playerData) => playerData.SoundSettings = _soundSettings;
 

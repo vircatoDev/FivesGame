@@ -31,7 +31,7 @@ internal static partial class CorrectnessProbes
             tiles[id] = world.NewEntity();
             tiles[id].Replace(new TileComponent
             {
-                Id = id, Position = new Vector3(cell % board.Size, cell / board.Size),
+                Id = id, Cell = cell,
                 Rect = new RectTransform { anchoredPosition = new Vector2(cell % board.Size, -(cell / board.Size)) }
             });
         }
@@ -56,8 +56,8 @@ internal static partial class CorrectnessProbes
         Time.deltaTime = 0.1f;
         var world = new EcsWorld();
         world.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
-        var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
+        var session = new GameSession(CreateConfig());
+        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
         var entity = CreateBoard(world, 3, 8, 42, 36);
         var board = entity.Get<BoardComponent>().State;
@@ -82,8 +82,8 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         var state = world.NewEntity();
         state.Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
-        var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
+        var session = new GameSession(CreateConfig());
+        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
         var entity = CreateBoard(world, 3, 8, 42, 36);
         var board = entity.Get<BoardComponent>().State;
@@ -144,8 +144,7 @@ internal static partial class CorrectnessProbes
             var replay = entity.Get<BoardReplayComponent>();
             Check($"Replay reconstructs step {step + 1}", replay.Position == step + 1
                 && afterMoves[step].SequenceEqual(Snapshot(replay.State))
-                && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Position
-                    .Equals(new Vector3(cell % 3, cell / 3))), "logical state and projection match recorded move");
+                && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Cell == cell), "logical state and projection match recorded move");
             for (var frame = 0; frame < 3; frame++) systems.Run();
             Check($"Replay completes visible step {step + 1}", replay.Position == entity.Get<BoardReplayComponent>().Position
                 && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Rect.anchoredPosition
@@ -180,7 +179,7 @@ internal static partial class CorrectnessProbes
     private static void CheckIdleProjection()
     {
         var world = new EcsWorld();
-        var session = new GameSession();
+        var session = new GameSession(CreateConfig());
         session.BeginRun();
         var entity = CreateBoard(world, 3, 8, 42, 36);
         var board = entity.Get<BoardComponent>().State;
@@ -189,14 +188,14 @@ internal static partial class CorrectnessProbes
             .OneFrame<BoardChangedEvent>().Inject(session);
         systems.Init();
         // A sentinel proves an idle tick does not walk and rewrite tile positions.
-        tiles[0].Get<TileComponent>().Position = new Vector3(-1, -1);
+        tiles[0].Get<TileComponent>().Cell = -1;
         systems.Run();
-        Check("idle projection leaves tiles untouched", tiles[0].Get<TileComponent>().Position.Equals(new Vector3(-1, -1))
+        Check("idle projection leaves tiles untouched", tiles[0].Get<TileComponent>().Cell == -1
             && !tiles[0].Has<MoveComponent>(), "no board event, no projection work");
         world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
         systems.Run();
         Check("refresh projects every tile", Enumerable.Range(0, 9).All(cell =>
-            tiles[board[cell]].Get<TileComponent>().Position.Equals(new Vector3(cell % 3, cell / 3))
+            tiles[board[cell]].Get<TileComponent>().Cell == cell
             && tiles[board[cell]].Get<MoveComponent>().InstaMove), "explicit refresh restores the view");
         systems.Destroy(); world.Destroy();
     }
@@ -205,8 +204,8 @@ internal static partial class CorrectnessProbes
     {
         var world = new EcsWorld();
         world.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
-        var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3 }, false);
+        var session = new GameSession(CreateConfig());
+        session.SetGameMode(new GameSettings { BoardSize = 3 });
         session.BeginRun();
         var systems = new EcsSystems(world).Add(new BoardSetupSystem()).Add(new BoardDestroySystem(new Transform()))
             .OneFrame<GameEndEvent>().Inject(session);
@@ -232,8 +231,8 @@ internal static partial class CorrectnessProbes
     {
         var world = new EcsWorld();
         world.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
-        var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 6 }, false);
+        var session = new GameSession(CreateConfig());
+        session.SetGameMode(new GameSettings { BoardSize = 6 });
         session.BeginRun();
         var systems = new EcsSystems(world).Add(new BoardSetupSystem()).Inject(session);
         systems.Init(); systems.Run(); systems.Run();

@@ -4,38 +4,21 @@ using Scripts.Models;
 
 namespace Scripts.Systems
 {
-    class GamePlayManagementSystem : IEcsRunSystem
+    /// <summary>Runs before the "gamePlay" group and enables it only while the game is in the Playing state.</summary>
+    class GamePlayManagementSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly EcsWorld _world = null;
-        private readonly EcsSystems _systems = null;
+        private readonly EcsSystems _systems;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
-    
-        private bool _boardWasCreated;
-        private readonly int _idx;
+        private int _idx;
 
         public GamePlayManagementSystem(EcsSystems systems)
         {
             _systems = systems;
-            _idx = systems.GetNamedRunSystem ("gamePlay");
         }
 
-        public void Run()
-        {
-            var _cachedState = _stateFilter.Get1(0);
+        public void Init() => _idx = _systems.GetNamedRunSystem("gamePlay");
 
-            if (_cachedState.CurrentState == GameStateType.Playing )
-            {
-                if (!_boardWasCreated)
-                {
-                    _systems.SetRunSystemState(_idx, true);
-                    _boardWasCreated = true;
-                }
-            }
-            else
-            {
-                _systems.SetRunSystemState (_idx, false);
-                _boardWasCreated = false;
-            }
-        }
+        public void Run() =>
+            _systems.SetRunSystemState(_idx, _stateFilter.Get1(0).CurrentState == GameStateType.Playing);
     }
 }

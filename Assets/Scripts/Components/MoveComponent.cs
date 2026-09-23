@@ -9,6 +9,6 @@ namespace Scripts.Components
         public Vector2 StartPosition;
         public float ElapsedTime;
         public float Duration;
-        public Vector3 TargetPosition;
+        public int TargetCell;
     }
 }

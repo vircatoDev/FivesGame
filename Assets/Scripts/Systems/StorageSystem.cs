@@ -25,7 +25,6 @@ namespace Scripts.Systems
                 storableObject.UpdatePlayerData(_gameSaveData);
 
                 _playerDataSaveHelper.SavePlayerData(_gameSaveData);
-                _saveEvents.GetEntity(i).Destroy();
             }
         }
     }

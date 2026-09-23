@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class SelectMenuView : BaseView
+    public class SelectMenuView : View<SelectMenuPresenter>
     {
         [Header("UI Elements")] [SerializeField]
         private RectTransform scrollView;
@@ -29,23 +29,8 @@ namespace Scripts.UI.Views
         private Vector2 textOffScreenPosition; 
 
         private List<MenuItemView> _activeMenuItemViews = new List<MenuItemView>();
-        private SelectMenuPresenter _presenter;
 
-        public override void Initialize(BasePresenter initData)
-        {
-            if (initData is not SelectMenuPresenter presenter)
-            {
-                Debug.LogError("SelectMenuView: wrong initData");
-                return;
-            }
-
-            SetupView();
-
-            _presenter = presenter;
-            _presenter.Initialize(this);
-        }
-
-        private void SetupView()
+        protected override void OnInitialized()
         {
             exitButton.onClick.AddListener(OnExitClicked);
             initialScrollViewPosition = scrollView.anchoredPosition;
@@ -94,7 +79,7 @@ namespace Scripts.UI.Views
         public void UnlockThemeItemByName(MenuItemData itemData, Action<string> onTileClick)
         {
             var menuItem = _activeMenuItemViews.FirstOrDefault(x => x.GetId() == itemData.Id);
-            menuItem?.Initialize(itemData, onTileClick, _presenter.OnThemeBuy);
+            menuItem?.Initialize(itemData, onTileClick, Presenter.OnThemeBuy);
         }
 
         private Sequence CreateShowSequence()
@@ -149,14 +134,14 @@ namespace Scripts.UI.Views
             {
                 scrollSnap.Add(puzzleItemPrefab, _activeMenuItemViews.Count);
                 var menuItem = scrollSnap.Panels[_activeMenuItemViews.Count].GetComponent<MenuItemView>();
-                menuItem.Initialize(tile, onClick, _presenter.OnThemeBuy);
+                menuItem.Initialize(tile, onClick, Presenter.OnThemeBuy);
                 _activeMenuItemViews.Add(menuItem);
             }
         }
 
         private void OnExitClicked()
         {
-            _presenter.OnExit();
+            Presenter.OnExit();
         }
     }
 }

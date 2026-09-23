@@ -1,41 +1,29 @@
-using Scripts.Commands;
+using Cysharp.Threading.Tasks;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
-using UnityEngine;
 
 namespace Scripts.UI.Presenters
 {
-    public class GameResultPresenter : BasePresenter
+    public class GameResultPresenter : Presenter<GameResultView>
     {
         private readonly GameSession _gameSession;
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
-        private readonly ECSCommandService _ecsCommandService;
-        private GameResultView _view;
+        private readonly EcsWorld _world;
 
         public GameResultPresenter(
             GameSession gameSession,
             StarService starService,
             PlayerProgressService playerProgressService,
-            ECSCommandService ecsCommandService)
+            EcsWorld world)
         {
             _gameSession = gameSession;
             _starService = starService;
             _playerProgressService = playerProgressService;
-            _ecsCommandService = ecsCommandService;
-        }
-
-        public override void Initialize(BaseView initData)
-        {
-            _view = initData as GameResultView;
-            if (_view == null)
-            {
-                Debug.LogError("GameResultPresenter: wrong initData.");
-                return;
-            }
-
-            OnActivateView();
+            _world = world;
         }
 
         public override void OnActivateView()
@@ -43,8 +31,8 @@ namespace Scripts.UI.Presenters
             PlayOpenPopUpAudioEffects();
             UpdateProgress();
             SavePlayerProgress();
-            _view.UpdateViewContent(_gameSession.LastGameResult, _gameSession.SelectedTheme, _gameSession.SelectedPuzzle);
-            _view.PlayShowAnimation();
+            View.UpdateViewContent(_gameSession.LastGameResult, _gameSession.SelectedTheme, _gameSession.SelectedPuzzle);
+            View.PlayShowAnimation().Forget();
         }
 
         public void GetReward(bool doubleReward)
@@ -62,14 +50,14 @@ namespace Scripts.UI.Presenters
         private void GiveReward(int rewardAmount)
         {
             _starService.Add(rewardAmount);
-            _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService,rewardAmount).Execute();
+            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _starService.GetBalance(), rewardAmount));
         }
 
   
         private void UpdateProgress() => _playerProgressService.MarkPuzzleCompleted(_gameSession.SelectedPuzzle.Name);
-        private void SavePlayerProgress() => _ecsCommandService.CreateCommand<SaveDataCommand>(_playerProgressService).Execute();
-        private void SaveReward() => _ecsCommandService.CreateCommand<SaveDataCommand>(_starService).Execute();
-        private void PlayOpenPopUpAudioEffects() => _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.OpenPopUp,1f).Execute();
-        private void BackToMainMenu() => _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.MainMenu).Execute();
+        private void SavePlayerProgress() => _world.Send(new SaveDataEvent { StorableObject = _playerProgressService });
+        private void SaveReward() => _world.Send(new SaveDataEvent { StorableObject = _starService });
+        private void PlayOpenPopUpAudioEffects() => _world.PlaySound(AudioKeyCollection.OpenPopUp);
+        private void BackToMainMenu() => _world.ChangeState(GameStateType.MainMenu);
     }
 }

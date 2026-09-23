@@ -15,12 +15,10 @@ namespace Scripts.Systems
         private readonly EcsFilter<TileComponent, MoveComponent> _moves;
         private readonly EcsFilter<GameEndEvent> _ends;
         private readonly EcsFilter<BoardInitializedEvent> _initialized;
-        private readonly EcsFilter<GameStateComponent> _states;
 
         public void Run()
         {
             if (!_session.IsRunning || _session.IsCompleted || _boards.GetEntitiesCount() != 1
-                || _states.Get1(0).CurrentState != GameStateType.Playing
                 || _ends.GetEntitiesCount() > 0 || _initialized.GetEntitiesCount() > 0)
                 return;
 
@@ -33,7 +31,7 @@ namespace Scripts.Systems
                 if (control == BoardControl.StopReplay && replaying)
                 {
                     entity.Del<BoardReplayComponent>();
-                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+                    _world.Send(new BoardChangedEvent { Snap = true });
                 }
                 else if (_moves.GetEntitiesCount() == 0 && !replaying)
                 {
@@ -49,11 +47,7 @@ namespace Scripts.Systems
             {
                 var accepted = TryMoveTile(_clicks.Get1(i).Id);
 
-                _world.NewEntity().Replace(new PlaySoundEffectEvent
-                {
-                    Key = accepted ? AudioKeyCollection.RightTap : AudioKeyCollection.WrongClick,
-                    Volume = 1f
-                });
+                _world.PlaySound(accepted ? AudioKeyCollection.RightTap : AudioKeyCollection.WrongClick);
                 return;
             }
         }
@@ -64,17 +58,13 @@ namespace Scripts.Systems
             if (board.IsSolved)
                 return false;
 
-            for (var cell = 0; cell < board.CellCount; cell++)
-            {
-                if (board[cell] != tileId)
-                    continue;
-                if (!board.TryMove(cell))
-                    return false;
-                _boards.Get2(0).Moves.Add(cell);
-                _world.NewEntity().Get<BoardChangedEvent>();
-                return true;
-            }
-            return false;
+            var cell = board.CellOf(tileId);
+            if (!board.TryMove(cell))
+                return false;
+
+            _boards.Get2(0).Moves.Add(cell);
+            _world.Send<BoardChangedEvent>();
+            return true;
         }
 
         private void ApplyControl(BoardControl control)
@@ -92,7 +82,7 @@ namespace Scripts.Systems
                     var previousEmptyCell = count == 1 ? history.InitialEmptyCell : history.Moves[count - 2];
                     board.TryMove(previousEmptyCell);
                     history.Moves.RemoveAt(count - 1);
-                    _world.NewEntity().Get<BoardChangedEvent>();
+                    _world.Send<BoardChangedEvent>();
                     break;
                 case BoardControl.Replay:
                     var data = new ReplayData(ReplayData.CurrentVersion, board.Size, board.EmptyTileId,
@@ -102,7 +92,7 @@ namespace Scripts.Systems
                         Data = data,
                         State = data.CreatePlaybackBoard()
                     });
-                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+                    _world.Send(new BoardChangedEvent { Snap = true });
                     break;
             }
         }

@@ -1,12 +1,12 @@
 using Fives.Domain;
 using Scripts.Configs;
-using UnityEngine;
 
 namespace Scripts.Models
 {
     public class GameSession
     {
         private readonly RewardClaim _rewardClaim = new RewardClaim();
+        private readonly int _rewardStars;
 
         public ThemeConfig SelectedTheme { get; private set; }
         public PuzzleData SelectedPuzzle { get; private set; }
@@ -14,8 +14,11 @@ namespace Scripts.Models
         public GameResult LastGameResult { get; private set; }
         public bool IsRunning { get; private set; }
         public bool IsCompleted { get; private set; }
-        public bool IsTimedMode { get; private set; }
-        public float RemainingTime { get; private set; }
+
+        public GameSession(GlobalConfig config)
+        {
+            _rewardStars = config.RewardStars;
+        }
 
         public void SetSelectedImage(PuzzleData puzzle)
         {
@@ -27,7 +30,7 @@ namespace Scripts.Models
             IsRunning = true;
             IsCompleted = false;
             _rewardClaim.Reset();
-            LastGameResult = new GameResult { StarCount = 10 };
+            LastGameResult = new GameResult { StarCount = _rewardStars };
         }
 
         public void CompleteRun()
@@ -42,7 +45,7 @@ namespace Scripts.Models
 
         public bool TryClaimReward(bool doubleReward, out int grantedAmount)
         {
-            return _rewardClaim.TryClaim(10, doubleReward, out grantedAmount);
+            return _rewardClaim.TryClaim(_rewardStars, doubleReward, out grantedAmount);
         }
 
         public void SetSelectedTheme(ThemeConfig theme)
@@ -50,30 +53,9 @@ namespace Scripts.Models
             SelectedTheme = theme;
         }
 
-        public void SetGameMode(GameSettings gameMode, bool isTimed)
+        public void SetGameMode(GameSettings gameMode)
         {
             SelectedGameMode = gameMode;
-            IsTimedMode = isTimed;
-        }
-
-        public void UpdateRemainingTime(float deltaTime)
-        {
-            if (IsTimedMode)
-            {
-                RemainingTime = Mathf.Max(0, RemainingTime - deltaTime);
-            }
-        }
-
-        public void ResetSession()
-        {
-            IsRunning = false;
-            IsCompleted = false;
-            SelectedPuzzle = null;
-            SelectedGameMode = null;
-            LastGameResult = null;
-            _rewardClaim.Reset();
-            IsTimedMode = false;
-            RemainingTime = 0;
         }
     }
 }

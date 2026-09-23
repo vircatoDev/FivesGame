@@ -41,28 +41,18 @@ namespace Scripts.Systems
                     }
                 }
 
-                for (var cell = 0; cell < board.CellCount; cell++)
+                var cell = board.CellOf(tile.Id);
+                if (snap || tile.Cell != cell)
                 {
-                    if (board[cell] != tile.Id)
-                        continue;
-
-                    var position = new Vector3(cell % board.Size, cell / board.Size);
-                    if (snap || !tile.Position.Equals(position))
+                    tile.Cell = cell;
+                    _tiles.GetEntity(i).Replace(new MoveComponent
                     {
-                        tile.Position = position;
-                        _tiles.GetEntity(i).Replace(new MoveComponent
-                        {
-                            InstaMove = snap || empty,
-                            Duration = 0.35f,
-                            TargetPosition = position
-                        });
-                    }
-                    break;
+                        InstaMove = snap || empty,
+                        Duration = 0.35f,
+                        TargetCell = cell
+                    });
                 }
             }
-
-            foreach (var i in _initialized)
-                _initialized.GetEntity(i).Destroy();
         }
     }
 }

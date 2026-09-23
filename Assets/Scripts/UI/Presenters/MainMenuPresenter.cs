@@ -1,79 +1,65 @@
-using System.Collections.Generic;
 using System.Linq;
-using Scripts.Commands;
+using Cysharp.Threading.Tasks;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
-using UnityEngine;
 
 namespace Scripts.UI.Presenters
 {
-    public class MainMenuPresenter : BasePresenter
+    public class MainMenuPresenter : Presenter<MainMenuView>
     {
         private readonly GlobalConfig _themeConfig;
         private readonly PlayerProgressService _playerProgressService;
         private readonly GameStartService _gameStartService;
-        private readonly ECSCommandService _ecsCommandService;
-        private MainMenuView _view;
+        private readonly EcsWorld _world;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, ECSCommandService ecsCommandService)
+            GameStartService gameStartService, EcsWorld world)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
             _gameStartService = gameStartService;
-            _ecsCommandService = ecsCommandService;
-        }
-
-        public override void Initialize(BaseView initData)
-        {
-            _view = initData as MainMenuView;
-            OnActivateView();
+            _world = world;
         }
 
         public override void OnActivateView()
         {
             var theme = GetLastActiveTheme();
 
-            _view.PlayShowAnimation();
-            _view.UpdateViewContent(GetThemeProgress(theme), theme.ThemeName, theme.ThemeLogo);
+            View.PlayShowAnimation().Forget();
+            View.UpdateViewContent(_playerProgressService.GetThemeProgress(theme).ToString(), theme.ThemeName, theme.ThemeLogo);
 
-            _ecsCommandService.CreateCommand<UpdateHeaderBtnLogicCommand>(OnSettings, HeaderBtnType.Settings).Execute();
+            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnSettings, BtnType = HeaderBtnType.Settings });
         }
 
         public async void OnStartGame()
         {
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
 
             var theme = GetLastActiveTheme();
             var nextPuzzle = FindNextUncompletedPuzzle(theme);
             if (!_gameStartService.TryStart(theme, nextPuzzle))
                 return;
             
-            await _view.PlayHideAnimation();
+            await View.PlayHideAnimation();
             
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.Playing).Execute();
+            _world.ChangeState(GameStateType.Playing);
         }
 
         public void OnSettings()
         {
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.Settings).Execute();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
+            _world.ChangeState(GameStateType.Settings);
         }
 
         public async void OnSelectMenu()
         {
-            Debug.Log("MainMenuPresenter: Start Game clicked");
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
-            await _view.PlayHideAnimation();
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.SelectMenu).Execute();
-        }
-
-        private List<string> GetCompletedPuzzleForThemeIntersect(ThemeConfig theme)
-        {
-            var completedPuzzles = _playerProgressService.GetProgressData().CompletedPuzzles;
-            return completedPuzzles.Intersect(theme.Puzzles.Select(p => p.Name)).ToList();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
+            await View.PlayHideAnimation();
+            _world.ChangeState(GameStateType.SelectMenu);
         }
 
         private ThemeConfig GetLastActiveTheme()
@@ -98,8 +84,5 @@ namespace Scripts.UI.Presenters
 
             return lastUnlockedTheme.Puzzles.Last();
         }
-
-        private string GetThemeProgress(ThemeConfig theme) =>
-            GetCompletedPuzzleForThemeIntersect(theme).Count() + "/" + theme.Puzzles.Length;
     }
 }

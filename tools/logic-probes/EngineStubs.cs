@@ -144,8 +144,10 @@ namespace Scripts.UI.Views
     {
         public string EnergyText;
         public void UpdateViewContent(string stars, string energy) { EnergyText = energy; }
-        public void UpdateEnergy(Scripts.Components.UpdateControlPanelEnergyEvent e) { EnergyText = e.EnergyAmount.ToString(); }
-        public void UpdateStars(Scripts.Components.UpdateControlPanelStarsEvent e) { }
+        public void UpdateCurrency(in Scripts.Components.CurrencyChangedEvent e)
+        {
+            if (e.Currency == Scripts.Models.Currency.Energy) EnergyText = e.Balance.ToString();
+        }
         public void UpdateButtonLogic(Scripts.Components.UpdateControlPanelBtnLogicEvent e) { }
     }
     public class SelectMenuView : BaseView

@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
+using Fives.Domain;
+using Scripts.Configs;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services.Interfaces;
@@ -36,12 +39,10 @@ namespace Scripts.Services
             }
         }
 
-        public PlayerProgressData GetProgressData()
-        {
-            return _progressData;
-        }
+        public ThemeProgress GetThemeProgress(ThemeConfig theme) =>
+            new ThemeProgress(theme.Puzzles.Select(p => p.Name).ToArray(), _progressData.CompletedPuzzles);
 
-        public PlayerProgressData GetDataForSave()
+        public PlayerProgressData GetProgressData()
         {
             return _progressData;
         }

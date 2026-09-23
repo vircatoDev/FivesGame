@@ -37,59 +37,29 @@ namespace Scripts.Systems
                 _isFading = true;
                 _fadeOverlay.blocksRaycasts = true;
 
-                switch (fadeEvent.FadeMode)
+                var duration = fadeEvent.Duration;
+                var tween = fadeEvent.FadeMode switch
                 {
-                    case FadeMode.FadeIn:
-                        PlayFadeIn(fadeEvent.Duration, fadeEvent.OnComplete);
-                        break;
-
-                    case FadeMode.FadeOut:
-                        PlayFadeOut(fadeEvent.Duration, fadeEvent.OnComplete);
-                        break;
-
-                    case FadeMode.FadeInOut:
-                        PlayFadeInOut(fadeEvent.Duration, fadeEvent.OnComplete);
-                        break;
-                }
-
-                _fadeEventFilter.GetEntity(i).Destroy();
-            }
-        }
-
-        private void PlayFadeIn(float duration, System.Action onComplete)
-        {
-            _fadeOverlay.alpha = 0;
-            _fadeOverlay.DOFade(1, duration).OnComplete(() =>
-            {
-                _fadeOverlay.blocksRaycasts = false;
-                _isFading = false;
-                onComplete?.Invoke();
-            });
-        }
-
-        private void PlayFadeOut(float duration, System.Action onComplete)
-        {
-            _fadeOverlay.alpha = 1;
-            _fadeOverlay.DOFade(0, duration).OnComplete(() =>
-            {
-                _fadeOverlay.blocksRaycasts = false;
-                _isFading = false;
-                onComplete?.Invoke();
-            });
-        }
-
-        private void PlayFadeInOut(float duration, System.Action onComplete)
-        {
-            _fadeOverlay.alpha = 0;
-            _fadeOverlay.DOFade(1, duration / 2).SetEase(Ease.OutExpo).OnComplete(() =>
-            {
-                _fadeOverlay.DOFade(0, duration / 2).SetEase(Ease.InExpo).OnComplete(() =>
+                    FadeMode.FadeIn => Fade(0, 1, duration),
+                    FadeMode.FadeOut => Fade(1, 0, duration),
+                    _ => DOTween.Sequence()
+                        .Append(Fade(0, 1, duration / 2).SetEase(Ease.OutExpo))
+                        .Append(_fadeOverlay.DOFade(0, duration / 2).SetEase(Ease.InExpo))
+                };
+                var onComplete = fadeEvent.OnComplete;
+                tween.OnComplete(() =>
                 {
                     _fadeOverlay.blocksRaycasts = false;
                     _isFading = false;
                     onComplete?.Invoke();
                 });
-            });
+            }
+        }
+
+        private Tween Fade(float from, float to, float duration)
+        {
+            _fadeOverlay.alpha = from;
+            return _fadeOverlay.DOFade(to, duration);
         }
     }
 }

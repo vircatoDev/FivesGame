@@ -5,6 +5,7 @@ using Fives.Domain;
 using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
+using Scripts.Systems;
 using Scripts.UI.Presenters;
 using Scripts.UI.Views;
 internal static partial class CorrectnessProbes
@@ -12,18 +13,25 @@ internal static partial class CorrectnessProbes
     private static void CheckPresenterAllocation()
     {
         var world = new EcsWorld();
-        var session = new GameSession(); session.BeginRun();
+        var session = new GameSession(CreateConfig()); session.BeginRun();
         var entity = world.NewEntity();
         entity.Replace(new BoardComponent { State = SeededShuffle.Create(3, 8, 42, 36) });
         entity.Replace(new BoardHistoryComponent { Seed = 42, Moves = new List<int>() });
-        var presenter = new GamePlayPresenter(session, new ECSCommandService(world), world);
-        SetField(presenter, "_view", new GamePlayView());
-        for (var i = 0; i < 1000; i++) presenter.RefreshControls();
+        var presenter = new GamePlayPresenter(session, world);
+        var view = new GamePlayView();
+        SetView(presenter, view);
+        var systems = new EcsSystems(world).Add(new BoardHudSystem(presenter)).Inject(session);
+        systems.Init();
+        for (var i = 0; i < 1000; i++) systems.Run();
         var before = GC.GetAllocatedBytesForCurrentThread();
-        for (var i = 0; i < 10000; i++) presenter.RefreshControls();
+        for (var i = 0; i < 10000; i++) systems.Run();
         var bytes = GC.GetAllocatedBytesForCurrentThread() - before;
-        Check("idle presenter does not allocate status strings", bytes == 0, $"{bytes} bytes / 10000 calls (stub view)");
-        world.Destroy();
+        Check("idle HUD does not touch the view or allocate", bytes == 0 && view.Updates == 1,
+            $"{bytes} bytes, {view.Updates} view updates / 11000 frames");
+        entity.Get<BoardHistoryComponent>().Moves.Add(0);
+        systems.Run();
+        Check("HUD updates when history changes", view.Updates == 2 && view.Status.StartsWith("Ходов: 1"), view.Status);
+        systems.Destroy(); world.Destroy();
     }
 }
 namespace Scripts.UI.Views
@@ -32,6 +40,8 @@ namespace Scripts.UI.Views
     {
         public void UpdateViewContent(PuzzleData puzzle) { }
         public Cysharp.Threading.Tasks.UniTask PlayShowAnimation() => default;
-        public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) { }
+        public int Updates;
+        public string Status = "";
+        public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) { Updates++; Status = status; }
     }
 }

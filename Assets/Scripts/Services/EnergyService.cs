@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Scripts.Services
 {
-    public class EnergyService : ICurrencyService, IStorable
+    public class EnergyService : IStorable
     {
         private readonly int _maxEnergy;
         private readonly TimeSpan _recoveryInterval;
@@ -20,13 +20,8 @@ namespace Scripts.Services
             _maxEnergy = config.MaxEnergy;
             _recoveryInterval = TimeSpan.FromHours(config.EnergyRecoveryIntervalHours);
             _clock = clock;
-
-            var savedEnergy = saveHelper.GetPlayerData().Energy;
-            var balance = savedEnergy?.CurrentEnergy ?? config.InitialEnergy;
-            var lastRecovery = savedEnergy?.LastRecoveryTime ?? _clock.UtcNow;
-            _wallet = new EnergyWallet(Math.Clamp(balance, 0, _maxEnergy), _maxEnergy, _recoveryInterval, lastRecovery);
+            SetDataFromSave(saveHelper.GetPlayerData().Energy);
         }
-
 
         public int GetBalance()
         {
@@ -56,27 +51,14 @@ namespace Scripts.Services
             return _wallet.LastRecoveryUtc;
         }
 
-        public TimeSpan GetRecoveryInterval()
-        {
-            return _recoveryInterval;
-        }
-
         public TimeSpan GetTimeUntilNextRecovery()
         {
             return _wallet.TimeUntilNextRecovery(_clock.UtcNow);
         }
 
-        public bool IsFull()
-        {
-            return _wallet.IsFull;
-        }
-
-        public void SetDataFromSave(EnergyData data)
-        {
-            var balance = data?.CurrentEnergy ?? 0;
-            var lastRecovery = data?.LastRecoveryTime ?? _clock.UtcNow;
-            _wallet = new EnergyWallet(Math.Clamp(balance, 0, _maxEnergy), _maxEnergy, _recoveryInterval, lastRecovery);
-        }
+        /// <summary>Expects data normalized by <see cref="PlayerDataSaveHelper"/>.</summary>
+        public void SetDataFromSave(EnergyData data) =>
+            _wallet = new EnergyWallet(data.CurrentEnergy, _maxEnergy, _recoveryInterval, data.LastRecoveryTime);
 
         public void UpdatePlayerData(GameSaveData playerData)
         {
@@ -84,7 +66,6 @@ namespace Scripts.Services
             playerData.Energy.CurrentEnergy = _wallet.Balance;
             playerData.Energy.LastRecoveryTime = _wallet.LastRecoveryUtc;
         }
-    
     }
 
     [System.Serializable]

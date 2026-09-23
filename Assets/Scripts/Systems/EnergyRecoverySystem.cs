@@ -1,6 +1,7 @@
 using System;
 using Leopotam.Ecs;
 using Scripts.Components;
+using Scripts.Models;
 using Scripts.Services;
 using UnityEngine;
 
@@ -34,12 +35,8 @@ namespace Scripts.Systems
             var recoveredAmount = _energyService.RecoverEnergy();
             if (recoveredAmount > 0)
             {
-                _world.NewEntity().Replace(new UpdateControlPanelEnergyEvent
-                {
-                    EnergyAmount = _energyService.GetBalance(),
-                    EnergyChange = recoveredAmount
-                });
-                _world.NewEntity().Replace(new SaveDataEvent { StorableObject = _energyService });
+                _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energyService.GetBalance(), recoveredAmount));
+                _world.Send(new SaveDataEvent { StorableObject = _energyService });
             }
 
             _nextCheckTime = Time.time + GetNextCheckDelay();

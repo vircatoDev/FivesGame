@@ -1,24 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Scripts.Commands;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
-using UnityEngine;
 
 namespace Scripts.UI.Presenters
 {
-    public class SelectMenuPresenter : BasePresenter
+    public class SelectMenuPresenter : Presenter<SelectMenuView>
     {
         private readonly GameStartService _gameStartService;
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
         private readonly List<ThemeConfig> _themeConfig;
-        private readonly ECSCommandService _ecsCommandService;
+        private readonly EcsWorld _world;
 
-        private SelectMenuView _view;
         private string _selectedTheme;
 
         public SelectMenuPresenter(
@@ -26,25 +25,13 @@ namespace Scripts.UI.Presenters
             GameStartService gameStartService,
             StarService starService,
             PlayerProgressService playerProgressService,
-            ECSCommandService ecsCommandService)
+            EcsWorld world)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
             _starService = starService;
             _playerProgressService = playerProgressService;
-            _ecsCommandService = ecsCommandService;
-        }
-
-        public override void Initialize(BaseView initData)
-        {
-            if (initData is not SelectMenuView view)
-            {
-                Debug.LogError("SelectMenuPresenter: wrong initData.");
-                return;
-            }
-
-            _view = view;
-            OnActivateView();
+            _world = world;
         }
 
         public override void OnActivateView()
@@ -61,12 +48,8 @@ namespace Scripts.UI.Presenters
             if (!_gameStartService.TryStart(GetSelectedTheme(), imageData))
                 return;
 
-            await _view.PlayHideAnimation();
+            await View.PlayHideAnimation();
             ChangeGameState(GameStateType.Playing);
-        }
-
-        public void OnSettings()
-        {
         }
 
         public void OnExit()
@@ -94,39 +77,37 @@ namespace Scripts.UI.Presenters
             return _themeConfig.FirstOrDefault(t => t.ThemeName == _selectedTheme);
         }
 
-        private void ChangeGameState(GameStateType newState)
-        {
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(newState).Execute();
-        }
+        private void ChangeGameState(GameStateType newState) => _world.ChangeState(newState);
 
         private void UpdateThemeSelectionView(bool playAnimation)
         {
             var tiles = GetThemeItemData();
-            _view.UpdateViewContent(tiles, "SELECT THEME", OnThemeSelected, playAnimation);
+            View.UpdateViewContent(tiles, "SELECT THEME", OnThemeSelected, playAnimation);
             ClearSelectedTheme();
         }
 
         private MenuItemData[] GetThemeItemData()
         {
-            return _themeConfig.Select(theme => new MenuItemData
+            return _themeConfig.Select(ToMenuItem).ToArray();
+        }
+
+        private MenuItemData ToMenuItem(ThemeConfig theme)
+        {
+            var unlocked = IsThemeUnlocked(theme);
+            return new MenuItemData
             {
                 Id = theme.ThemeName,
                 Image = theme.ThemeLogo,
                 TitleText = theme.ThemeName,
-                BottomText = CreateTextForThemeTile(theme),
-                Offer = !IsThemeUnlocked(theme)
-            }).ToArray();
+                BottomText = unlocked ? GetProgressText(theme) : $"Open {theme.UnlockCost}",
+                Offer = !unlocked
+            };
         }
 
-        private string CreateTextForThemeTile(ThemeConfig theme)
+        private string GetProgressText(ThemeConfig theme)
         {
-            if (IsThemeUnlocked(theme))
-            {
-                var progress = GetThemeProgress(theme);
-                return progress == theme.Puzzles.Length.ToString() ? "COMPLETED" : $"{progress}/{theme.Puzzles.Length}";
-            }
-
-            return $"Open {theme.UnlockCost}";
+            var progress = _playerProgressService.GetThemeProgress(theme);
+            return progress.IsComplete ? "COMPLETED" : progress.ToString();
         }
 
         private bool IsThemeUnlocked(ThemeConfig theme)
@@ -137,12 +118,6 @@ namespace Scripts.UI.Presenters
         private bool IsPuzzleUnlocked(string puzzleName)
         {
             return _playerProgressService.GetProgressData().CompletedPuzzles.Contains(puzzleName);
-        }
-
-        private string GetThemeProgress(ThemeConfig theme)
-        {
-            var completedPuzzles = _playerProgressService.GetProgressData().CompletedPuzzles;
-            return completedPuzzles.Intersect(theme.Puzzles.Select(p => p.Name)).Count().ToString();
         }
 
         private void OnThemeSelected(string themeName)
@@ -159,7 +134,7 @@ namespace Scripts.UI.Presenters
                 BottomText = IsPuzzleUnlocked(data.Name) ? "COMPLETED" : string.Empty
             }).ToArray();
 
-            _view.UpdateViewContent(tiles, "SELECT PUZZLE", OnStartGame, true);
+            View.UpdateViewContent(tiles, "SELECT PUZZLE", OnStartGame, true);
         }
 
         public void OnThemeBuy(string themeName)
@@ -200,16 +175,7 @@ namespace Scripts.UI.Presenters
 
             _playerProgressService.UnlockTheme(theme.ThemeName);
             SaveProgressData();
-            var updatedTile = new MenuItemData
-            {
-                Id = theme.ThemeName,
-                Image = theme.ThemeLogo,
-                TitleText = theme.ThemeName,
-                BottomText = CreateTextForThemeTile(theme),
-                Offer = false
-            };
-
-            _view.UnlockThemeItemByName(updatedTile, OnThemeSelected);
+            View.UnlockThemeItemByName(ToMenuItem(theme), OnThemeSelected);
         }
 
         private PuzzleData[] GetAllImagesByThemeName(string themeName)
@@ -227,18 +193,17 @@ namespace Scripts.UI.Presenters
 
         private void ClearSelectedTheme() => _selectedTheme = string.Empty;
 
-        private void PlaySoundEffect(string key) =>
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(key, 1f).Execute();
+        private void PlaySoundEffect(string key) => _world.PlaySound(key);
 
-        private void UpdateHeaderButton() => _ecsCommandService
-            .CreateCommand<UpdateHeaderBtnLogicCommand>(OnExit, HeaderBtnType.Back).Execute();
+        private void UpdateHeaderButton() =>
+            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnExit, BtnType = HeaderBtnType.Back });
 
-        private void ShowNoStarsAnimation() => _ecsCommandService.CreateCommand<HeaderNoStarsAnimationCommand>().Execute();
+        private void ShowNoStarsAnimation() => _world.Send(CurrencyChangedEvent.NotEnough(Currency.Stars));
 
         private void UpdateStarBalance(int amount) =>
-            _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService, amount).Execute();
+            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _starService.GetBalance(), amount));
 
-        private void SaveStarData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_starService).Execute();
-        private void SaveProgressData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_playerProgressService).Execute();
+        private void SaveStarData() => _world.Send(new SaveDataEvent { StorableObject = _starService });
+        private void SaveProgressData() => _world.Send(new SaveDataEvent { StorableObject = _playerProgressService });
     }
 }

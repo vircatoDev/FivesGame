@@ -6,7 +6,7 @@ using Scripts.Services.Interfaces;
 
 namespace Scripts.Services
 {
-    public class StarService : ICurrencyService, IStorable
+    public class StarService : IStorable
     {
         private readonly CurrencyWallet _wallet;
 

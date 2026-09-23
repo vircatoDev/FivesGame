@@ -1,10 +1,11 @@
-﻿using Scripts.UI.Presenters;
+﻿using Scripts.Configs;
+using Scripts.UI.Presenters;
 
 namespace Scripts.Components
 {
-    public struct OpenScreenEvent {
-        public string PrefabName;
-        public bool IsPopup;
-        public BasePresenter InitData;
+    public struct OpenScreenEvent
+    {
+        public StateConfig Config;
+        public BasePresenter Presenter;
     }
 }

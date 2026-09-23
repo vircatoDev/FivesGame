@@ -35,7 +35,6 @@ namespace Scripts.Installers
             builder.Register<EnergyService>(Lifetime.Singleton);
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);
-            builder.Register<ECSCommandService>(Lifetime.Singleton);
             builder.Register<GameStartService>(Lifetime.Singleton);
 
             builder.Register<PresenterFactory>(Lifetime.Singleton);
@@ -43,7 +42,7 @@ namespace Scripts.Installers
         
             builder.Register<MainMenuPresenter>(Lifetime.Transient);
             builder.Register<SelectMenuPresenter>(Lifetime.Transient);
-            builder.Register<GamePlayPresenter>(Lifetime.Transient);
+            builder.Register<GamePlayPresenter>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Transient);
             builder.Register<SettingsPresenter>(Lifetime.Transient);
 

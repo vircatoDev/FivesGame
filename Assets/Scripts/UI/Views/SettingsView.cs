@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class SettingsView : BaseView
+    public class SettingsView : View<SettingsPresenter>
     {
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private Button closeButton;
@@ -15,33 +15,21 @@ namespace Scripts.UI.Views
         [SerializeField] private ToggleButtonComponent musicToggle;
         [SerializeField] private ToggleButtonComponent soundEffectToggle;
 
-        private SettingsPresenter _presenter;
-
-        public override void Initialize(BasePresenter initData)
+        protected override void OnInitialized()
         {
-            if (initData is SettingsPresenter presenter)
-            {
-                _presenter = presenter;
-                _presenter.Initialize(this);
+            closeButton.onClick.AddListener(Presenter.OnClose);
 
-                closeButton.onClick.AddListener(_presenter.OnClose);
-            
-                musicVolumeSlider.onValueChanged.AddListener(_presenter.OnChangeMusicVolume);
-                soundEffectVolumeSlider.onValueChanged.AddListener(_presenter.OnChangeSFXVolume);
-            
-                musicToggle.Initialize(_presenter.GetMusicState(), _presenter.OnToggleMusic);
-                soundEffectToggle.Initialize(_presenter.GetSoundEffectState(), _presenter.OnToggleSFX);
-            }
-            else
-            {
-                Debug.LogError("SettingsView: wrong initData");
-            }
+            musicVolumeSlider.onValueChanged.AddListener(Presenter.OnChangeMusicVolume);
+            soundEffectVolumeSlider.onValueChanged.AddListener(Presenter.OnChangeSFXVolume);
+
+            musicToggle.Initialize(Presenter.GetMusicState(), Presenter.OnToggleMusic);
+            soundEffectToggle.Initialize(Presenter.GetSoundEffectState(), Presenter.OnToggleSFX);
         }
 
         public void UpdateUI(float musicVolume, float sfxVolume)
         {
-            musicVolumeSlider.value = musicVolume;
-            soundEffectVolumeSlider.value = sfxVolume;
+            musicVolumeSlider.SetValueWithoutNotify(musicVolume);
+            soundEffectVolumeSlider.SetValueWithoutNotify(sfxVolume);
         }
     
         public void SetMusicVolumeSlider(float value) {
