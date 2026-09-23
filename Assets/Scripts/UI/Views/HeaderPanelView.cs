@@ -41,31 +41,19 @@ namespace Scripts.UI.Views
             }
         }
 
-        public void UpdateEnergy(UpdateControlPanelEnergyEvent updateControlPanelEventEvent)
+        public void UpdateCurrency(in CurrencyChangedEvent evt)
         {
-            if (updateControlPanelEventEvent.EnergyChange != 0)
+            var text = evt.Currency == Currency.Stars ? starsAmountText : energyAmountText;
+
+            if (evt.Delta != 0)
             {
-                energyAmountText.text = updateControlPanelEventEvent.EnergyAmount.ToString();
-                PlayChangeCurrencyAnimation(energyAmountText, updateControlPanelEventEvent.EnergyChange);
+                text.text = evt.Balance.ToString();
+                PlayChangeCurrencyAnimation(text, evt.Delta);
             }
 
-            if (updateControlPanelEventEvent.EnergyNotEnough)
+            if (evt.Insufficient)
             {
-                PlayNotEnoughCurrencyAnimation(energyAmountText);
-            }
-        }
-
-        public void UpdateStars(UpdateControlPanelStarsEvent updateControlPanelEventEvent)
-        {
-            if (updateControlPanelEventEvent.StarsChange != 0)
-            {
-                starsAmountText.text = updateControlPanelEventEvent.StarsAmount.ToString();
-                PlayChangeCurrencyAnimation(starsAmountText, updateControlPanelEventEvent.StarsChange);
-            }
-
-            if (updateControlPanelEventEvent.StarsNotEnough)
-            {
-                PlayNotEnoughCurrencyAnimation(starsAmountText);
+                PlayNotEnoughCurrencyAnimation(text);
             }
         }
 
@@ -75,11 +63,11 @@ namespace Scripts.UI.Views
             textMeshProUGUI.DOColor(Color.red, 0.5f).OnComplete(() => { textMeshProUGUI.DOColor(Color.white, 0.5f); });
         }
 
-        private void PlayChangeCurrencyAnimation(TextMeshProUGUI textMeshProUGUI, int starsChange)
+        private void PlayChangeCurrencyAnimation(TextMeshProUGUI textMeshProUGUI, int delta)
         {
             textMeshProUGUI.transform.DOPunchScale(Vector3.one, 0.3f);
             var animationPrefab = Instantiate(currencyAnimationComponentPrefab, textMeshProUGUI.transform);
-            animationPrefab.PlayAnimation(starsChange);
+            animationPrefab.PlayAnimation(delta);
         }
     }
 

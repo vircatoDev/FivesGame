@@ -5,14 +5,13 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class GamePlayPresenter : BasePresenter
+    public class GamePlayPresenter : Presenter<GamePlayView>
     {
         private readonly GameSession _gameSession;
         private readonly EcsWorld _world;
         private readonly EcsFilter<BoardComponent, BoardHistoryComponent> _boards;
         private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<TileComponent, MoveComponent> _moves;
-        private GamePlayView _view;
         private (int Seed, int Moves, bool Replaying, int Position)? _statusKey;
         private string _status = "";
 
@@ -25,16 +24,10 @@ namespace Scripts.UI.Presenters
             _gameSession = gameSession;
         }
 
-        public override void Initialize(BaseView initData)
-        {
-            _view = initData as GamePlayView;
-            OnActivateView();
-        }
-
         public override void OnActivateView()
         {
-            _view.UpdateViewContent(_gameSession.SelectedPuzzle);
-            _view.PlayShowAnimation();
+            View.UpdateViewContent(_gameSession.SelectedPuzzle);
+            View.PlayShowAnimation();
 
             _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = BackToMainMenu, BtnType = HeaderBtnType.Back });
         }
@@ -47,7 +40,7 @@ namespace Scripts.UI.Presenters
             if (_boards.GetEntitiesCount() != 1)
             {
                 _statusKey = null;
-                _view.UpdateControls("", false, false, false);
+                View.UpdateControls("", false, false, false);
                 return;
             }
 
@@ -64,7 +57,7 @@ namespace Scripts.UI.Presenters
                     ? $"Повтор: {position}/{history.Moves.Count}"
                     : $"Ходов: {history.Moves.Count}  ·  Seed: {history.Seed}";
             }
-            _view.UpdateControls(_status, canEdit, canEdit || (ready && replaying), replaying);
+            View.UpdateControls(_status, canEdit, canEdit || (ready && replaying), replaying);
         }
 
         private void BackToMainMenu()

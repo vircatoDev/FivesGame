@@ -30,9 +30,13 @@ internal sealed class FakeClock : IClock
 
 internal sealed class EnergyObserver : IEcsRunSystem
 {
-    private readonly EcsFilter<UpdateControlPanelEnergyEvent> _events = null;
+    private readonly EcsFilter<CurrencyChangedEvent> _events = null;
     public int Count;
-    public void Run() => Count += _events.GetEntitiesCount();
+    public void Run()
+    {
+        foreach (var i in _events)
+            if (_events.Get1(i).Currency == Currency.Energy) Count++;
+    }
 }
 
 internal sealed class EmitSave : IEcsRunSystem
@@ -78,15 +82,15 @@ internal static partial class CorrectnessProbes
         var progress = new PlayerProgressService(save);
         var world = new EcsWorld();
 
-        var select = new SelectMenuPresenter(config, new GameStartService(new GameSession(), energy, world), stars, progress, world);
-        typeof(SelectMenuPresenter).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(select, new SelectMenuView());
+        var select = new SelectMenuPresenter(config, new GameStartService(new GameSession(CreateConfig()), energy, world), stars, progress, world);
+        SetView(select, new SelectMenuView());
         select.OnThemeBuy("Cities");
         Check("theme purchase debits once", stars.GetBalance() == 140, $"balance={stars.GetBalance()}");
 
         var beforeNegativeSpend = stars.GetBalance();
         Check("negative spend rejected", !stars.Spend(-10) && stars.GetBalance() == beforeNegativeSpend, $"balance={stars.GetBalance()}");
 
-        var session = new GameSession();
+        var session = new GameSession(CreateConfig());
         session.BeginRun();
         var resultPresenter = new GameResultPresenter(session, stars, progress, world);
         var beforeReward = stars.GetBalance();

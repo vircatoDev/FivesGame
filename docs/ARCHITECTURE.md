@@ -31,8 +31,9 @@ Exit: GameEndEvent → BoardDestroySystem
   and the accepted source-cell history. Undo removes the final history entry.
 - `BoardReplayComponent` is temporary playback data on the same entity. Its board
   is separate from the live attempt. Removing this component ends playback.
-- `TileComponent.Position` is a display destination. It cannot determine a legal
-  move or victory. `MoveComponent` tracks animation progress only.
+- `TileComponent.Cell` is a display destination; `GameSettings.CellToAnchored`
+  converts it to a UI position. It cannot determine a legal move or victory.
+  `MoveComponent` tracks animation progress only.
 - The existing `GameSession` retains selected content, run lifecycle, and rewards.
   It has no new board, move, Undo, or replay operations.
 

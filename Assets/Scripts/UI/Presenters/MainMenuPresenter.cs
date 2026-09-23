@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Leopotam.Ecs;
 using Scripts.Components;
@@ -9,13 +8,12 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class MainMenuPresenter : BasePresenter
+    public class MainMenuPresenter : Presenter<MainMenuView>
     {
         private readonly GlobalConfig _themeConfig;
         private readonly PlayerProgressService _playerProgressService;
         private readonly GameStartService _gameStartService;
         private readonly EcsWorld _world;
-        private MainMenuView _view;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
             GameStartService gameStartService, EcsWorld world)
@@ -26,18 +24,12 @@ namespace Scripts.UI.Presenters
             _world = world;
         }
 
-        public override void Initialize(BaseView initData)
-        {
-            _view = initData as MainMenuView;
-            OnActivateView();
-        }
-
         public override void OnActivateView()
         {
             var theme = GetLastActiveTheme();
 
-            _view.PlayShowAnimation();
-            _view.UpdateViewContent(GetThemeProgress(theme), theme.ThemeName, theme.ThemeLogo);
+            View.PlayShowAnimation();
+            View.UpdateViewContent(_playerProgressService.GetThemeProgress(theme).ToString(), theme.ThemeName, theme.ThemeLogo);
 
             _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnSettings, BtnType = HeaderBtnType.Settings });
         }
@@ -51,7 +43,7 @@ namespace Scripts.UI.Presenters
             if (!_gameStartService.TryStart(theme, nextPuzzle))
                 return;
             
-            await _view.PlayHideAnimation();
+            await View.PlayHideAnimation();
             
             _world.ChangeState(GameStateType.Playing);
         }
@@ -65,14 +57,8 @@ namespace Scripts.UI.Presenters
         public async void OnSelectMenu()
         {
             _world.PlaySound(AudioKeyCollection.MenuClick);
-            await _view.PlayHideAnimation();
+            await View.PlayHideAnimation();
             _world.ChangeState(GameStateType.SelectMenu);
-        }
-
-        private List<string> GetCompletedPuzzleForThemeIntersect(ThemeConfig theme)
-        {
-            var completedPuzzles = _playerProgressService.GetProgressData().CompletedPuzzles;
-            return completedPuzzles.Intersect(theme.Puzzles.Select(p => p.Name)).ToList();
         }
 
         private ThemeConfig GetLastActiveTheme()
@@ -97,8 +83,5 @@ namespace Scripts.UI.Presenters
 
             return lastUnlockedTheme.Puzzles.Last();
         }
-
-        private string GetThemeProgress(ThemeConfig theme) =>
-            GetCompletedPuzzleForThemeIntersect(theme).Count() + "/" + theme.Puzzles.Length;
     }
 }

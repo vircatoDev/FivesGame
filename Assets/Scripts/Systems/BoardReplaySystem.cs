@@ -1,6 +1,5 @@
 using Leopotam.Ecs;
 using Scripts.Components;
-using Scripts.Models;
 
 namespace Scripts.Systems
 {
@@ -11,12 +10,10 @@ namespace Scripts.Systems
         private readonly EcsFilter<TileComponent, MoveComponent> _moves;
         private readonly EcsFilter<BoardChangedEvent> _changes;
         private readonly EcsFilter<GameEndEvent> _ends;
-        private readonly EcsFilter<GameStateComponent> _states;
 
         public void Run()
         {
-            if (_states.Get1(0).CurrentState != GameStateType.Playing || _ends.GetEntitiesCount() > 0
-                || _moves.GetEntitiesCount() > 0 || _changes.GetEntitiesCount() > 0)
+            if (_ends.GetEntitiesCount() > 0 || _moves.GetEntitiesCount() > 0 || _changes.GetEntitiesCount() > 0)
                 return;
 
             foreach (var i in _replays)

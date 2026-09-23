@@ -9,18 +9,14 @@ namespace Scripts.Systems
     {
         private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter = null;
         private readonly GameSession _gameSettings;
-        private readonly EcsFilter<GameStateComponent> _stateFilter = null;
 
         public void Run()
         {
-            if (_stateFilter.Get1(0).CurrentState != GameStateType.Playing)
-                return;
-
             foreach (var i in _moveFilter)
             {
                 ref var tile = ref _moveFilter.Get1(i);
                 ref var move = ref _moveFilter.Get2(i);
-                var target = CalculateUIPosition(move.TargetPosition);
+                var target = _gameSettings.SelectedGameMode.CellToAnchored(move.TargetCell);
 
                 if (move.InstaMove)
                 {
@@ -42,12 +38,6 @@ namespace Scripts.Systems
                 if (progress >= 1f)
                     _moveFilter.GetEntity(i).Del<MoveComponent>();
             }
-        }
-
-        private Vector2 CalculateUIPosition(Vector2 position)
-        {
-            var spacing = _gameSettings.SelectedGameMode.TileSize + _gameSettings.SelectedGameMode.TileSpacing;
-            return new Vector2(position.x * spacing, -position.y * spacing);
         }
     }
 }

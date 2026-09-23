@@ -3,17 +3,15 @@ using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
-using UnityEngine;
 
 namespace Scripts.UI.Presenters
 {
-    public class GameResultPresenter : BasePresenter
+    public class GameResultPresenter : Presenter<GameResultView>
     {
         private readonly GameSession _gameSession;
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
         private readonly EcsWorld _world;
-        private GameResultView _view;
 
         public GameResultPresenter(
             GameSession gameSession,
@@ -27,25 +25,13 @@ namespace Scripts.UI.Presenters
             _world = world;
         }
 
-        public override void Initialize(BaseView initData)
-        {
-            _view = initData as GameResultView;
-            if (_view == null)
-            {
-                Debug.LogError("GameResultPresenter: wrong initData.");
-                return;
-            }
-
-            OnActivateView();
-        }
-
         public override void OnActivateView()
         {
             PlayOpenPopUpAudioEffects();
             UpdateProgress();
             SavePlayerProgress();
-            _view.UpdateViewContent(_gameSession.LastGameResult, _gameSession.SelectedTheme, _gameSession.SelectedPuzzle);
-            _view.PlayShowAnimation();
+            View.UpdateViewContent(_gameSession.LastGameResult, _gameSession.SelectedTheme, _gameSession.SelectedPuzzle);
+            View.PlayShowAnimation();
         }
 
         public void GetReward(bool doubleReward)
@@ -63,7 +49,7 @@ namespace Scripts.UI.Presenters
         private void GiveReward(int rewardAmount)
         {
             _starService.Add(rewardAmount);
-            _world.Send(new UpdateControlPanelStarsEvent { StarsAmount = _starService.GetBalance(), StarsChange = rewardAmount });
+            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _starService.GetBalance(), rewardAmount));
         }
 
   

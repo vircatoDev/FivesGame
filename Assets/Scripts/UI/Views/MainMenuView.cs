@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class MainMenuView : BaseView
+    public class MainMenuView : View<MainMenuPresenter>
     {
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private Button startGameButton;
@@ -18,7 +18,6 @@ namespace Scripts.UI.Views
         [SerializeField] private Image previewThemeImage;
 
 
-        private MainMenuPresenter _presenter;
         private Vector2 _initialPosition;
         private RectTransform _menuContainer;
 
@@ -33,21 +32,12 @@ namespace Scripts.UI.Views
             ResetPosition();
         }
 
-        public override void Initialize(BasePresenter initData)
+        protected override void OnInitialized()
         {
-            if (initData is MainMenuPresenter presenter)
-            {
-                _presenter = presenter;
-                _presenter.Initialize(this);
-
-                startGameButton.onClick.AddListener(_presenter.OnStartGame);
-                levelButton.onClick.AddListener(_presenter.OnSelectMenu);
-            }
-            else
-            {
-                Debug.LogError("MainMenuView: wrong InitData");
-            }
+            startGameButton.onClick.AddListener(Presenter.OnStartGame);
+            levelButton.onClick.AddListener(Presenter.OnSelectMenu);
         }
+
         public void UpdateViewContent(string themeProgress, string themeName, Sprite themePreview)
         {
             previewThemeProgress.text = themeProgress;

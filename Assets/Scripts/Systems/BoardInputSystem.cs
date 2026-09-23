@@ -15,12 +15,10 @@ namespace Scripts.Systems
         private readonly EcsFilter<TileComponent, MoveComponent> _moves;
         private readonly EcsFilter<GameEndEvent> _ends;
         private readonly EcsFilter<BoardInitializedEvent> _initialized;
-        private readonly EcsFilter<GameStateComponent> _states;
 
         public void Run()
         {
             if (!_session.IsRunning || _session.IsCompleted || _boards.GetEntitiesCount() != 1
-                || _states.Get1(0).CurrentState != GameStateType.Playing
                 || _ends.GetEntitiesCount() > 0 || _initialized.GetEntitiesCount() > 0)
                 return;
 
@@ -60,17 +58,13 @@ namespace Scripts.Systems
             if (board.IsSolved)
                 return false;
 
-            for (var cell = 0; cell < board.CellCount; cell++)
-            {
-                if (board[cell] != tileId)
-                    continue;
-                if (!board.TryMove(cell))
-                    return false;
-                _boards.Get2(0).Moves.Add(cell);
-                _world.Send<BoardChangedEvent>();
-                return true;
-            }
-            return false;
+            var cell = board.CellOf(tileId);
+            if (!board.TryMove(cell))
+                return false;
+
+            _boards.Get2(0).Moves.Add(cell);
+            _world.Send<BoardChangedEvent>();
+            return true;
         }
 
         private void ApplyControl(BoardControl control)

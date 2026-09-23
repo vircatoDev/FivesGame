@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class GameResultView : BaseView
+    public class GameResultView : View<GameResultPresenter>
     {
         [SerializeField] private Transform contentContainer;
         [SerializeField] private Image backgroundImage;
@@ -21,21 +21,10 @@ namespace Scripts.UI.Views
         [SerializeField] private TextMeshProUGUI themeNameText;
         [SerializeField] private Slider themeSliderProgress;
 
-        private GameResultPresenter _presenter;
-
-        public override void Initialize(BasePresenter initData)
+        protected override void OnInitialized()
         {
-            if (initData is GameResultPresenter presenter)
-            {
-                _presenter = presenter;
-                _presenter.Initialize(this);
-                getRewardButton.onClick.AddListener(OnGetRewardClicked);
-                doubleRewardButton.onClick.AddListener(OnGetDoubleRewardClicked);
-            }
-            else
-            {
-                Debug.LogError("GameResultView: wrong initData");
-            }
+            getRewardButton.onClick.AddListener(OnGetRewardClicked);
+            doubleRewardButton.onClick.AddListener(OnGetDoubleRewardClicked);
         }
 
         public override async UniTask PlayShowAnimation()
@@ -71,12 +60,12 @@ namespace Scripts.UI.Views
     
         private void OnGetRewardClicked()
         {
-            _presenter.GetReward(false);
+            Presenter.GetReward(false);
         }
 
         private void OnGetDoubleRewardClicked()
         {
-            _presenter.GetReward(true);
+            Presenter.GetReward(true);
         }
     }
 }

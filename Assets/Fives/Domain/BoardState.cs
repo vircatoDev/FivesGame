@@ -10,12 +10,16 @@ namespace Fives.Domain
     public sealed class BoardState
     {
         private readonly int[] _tiles;
+        private readonly int[] _cells;
 
         public int Size { get; }
         public int CellCount => _tiles.Length;
         public int EmptyTileId { get; }
         public int EmptyCell { get; private set; }
         public int this[int cell] => _tiles[cell];
+
+        /// <summary>Cell holding the tile, or -1 for an unknown tile ID.</summary>
+        public int CellOf(int tileId) => tileId >= 0 && tileId < CellCount ? _cells[tileId] : -1;
 
         public BoardState Copy() => new BoardState(Size, EmptyTileId, _tiles);
 
@@ -44,9 +48,13 @@ namespace Fives.Domain
             EmptyTileId = emptyTileId;
             EmptyCell = emptyTileId;
             _tiles = new int[cellCount];
+            _cells = new int[cellCount];
 
             for (var cell = 0; cell < cellCount; cell++)
+            {
                 _tiles[cell] = cell;
+                _cells[cell] = cell;
+            }
         }
 
         /// <summary>
@@ -69,6 +77,7 @@ namespace Fives.Domain
 
                 seen[tile] = true;
                 _tiles[cell] = tile;
+                _cells[tile] = cell;
                 if (tile == EmptyTileId)
                     EmptyCell = cell;
             }
@@ -91,8 +100,11 @@ namespace Fives.Domain
             if (!CanMove(cell))
                 return false;
 
-            _tiles[EmptyCell] = _tiles[cell];
+            var tile = _tiles[cell];
+            _tiles[EmptyCell] = tile;
+            _cells[tile] = EmptyCell;
             _tiles[cell] = EmptyTileId;
+            _cells[EmptyTileId] = cell;
             EmptyCell = cell;
             return true;
         }

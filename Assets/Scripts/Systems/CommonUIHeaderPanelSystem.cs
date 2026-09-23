@@ -10,8 +10,7 @@ namespace Scripts.Systems
         private readonly HeaderPanelView _headerPanelView;
         private readonly EnergyService _energy;
         private readonly StarService _stars;
-        private readonly EcsFilter<UpdateControlPanelEnergyEvent> _updateEnergyFilter;
-        private readonly EcsFilter<UpdateControlPanelStarsEvent> _updateStarsFilter;
+        private readonly EcsFilter<CurrencyChangedEvent> _currencyFilter;
         private readonly EcsFilter<UpdateControlPanelBtnLogicEvent> _updateBtnLogicFilter;
 
 
@@ -27,17 +26,8 @@ namespace Scripts.Systems
         }
         public void Run()
         {
-            foreach (var i in _updateEnergyFilter)
-            {
-                ref var updateControlPanelEventEvent = ref _updateEnergyFilter.Get1(i);
-                _headerPanelView.UpdateEnergy(updateControlPanelEventEvent);
-            }
-
-            foreach (var i in _updateStarsFilter)
-            {
-                ref var updateControlPanelEventEvent = ref _updateStarsFilter.Get1(i);
-                _headerPanelView.UpdateStars(updateControlPanelEventEvent);
-            }
+            foreach (var i in _currencyFilter)
+                _headerPanelView.UpdateCurrency(_currencyFilter.Get1(i));
 
             foreach (var i in _updateBtnLogicFilter)
             {

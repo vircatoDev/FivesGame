@@ -57,5 +57,15 @@ namespace Fives.Domain.Tests
             Assert.That(BoardMath.CellCount(6), Is.EqualTo(36));
             Assert.That(BoardMath.TileIdAt(5, 5, 6), Is.EqualTo(35));
         }
+
+        [Test]
+        public void ThemeProgress_CountsOnlyThisThemesPuzzles()
+        {
+            var progress = new ThemeProgress(new[] { "a", "b" }, new[] { "b", "other" });
+
+            Assert.That(progress.ToString(), Is.EqualTo("1/2"));
+            Assert.That(progress.IsComplete, Is.False);
+            Assert.That(new ThemeProgress(new[] { "a" }, new[] { "a" }).IsComplete, Is.True);
+        }
     }
 }

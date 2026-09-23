@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class GamePlayView : BaseView
+    public class GamePlayView : View<GamePlayPresenter>
     {
         [Header("UI Blocks")] [SerializeField] private RectTransform previewRectTransform;
         [SerializeField] private RectTransform infoRectTransform;
@@ -17,7 +17,6 @@ namespace Scripts.UI.Views
         [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private TextMeshProUGUI mainText;
 
-        private GamePlayPresenter _presenter;
         [SerializeField] private BoardControlsView controls;
     
         private Vector2 _initialLeftBlockPosition;
@@ -25,35 +24,21 @@ namespace Scripts.UI.Views
 
         private void Awake()
         {
-            controls?.Initialize(control => _presenter?.RequestControl(control));
+            controls?.Initialize(control => Presenter?.RequestControl(control));
             _initialLeftBlockPosition = previewRectTransform.anchoredPosition;
             _initialRightBlockPosition = infoRectTransform.anchoredPosition;
         }
 
-        private void LateUpdate() => _presenter?.RefreshControls();
+        private void LateUpdate() => Presenter?.RefreshControls();
 
         public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) =>
             controls?.Refresh(status, canUndo, canReplay, replaying);
-
-        public override void Initialize(BasePresenter initData)
-        {
-            if (initData is GamePlayPresenter presenter)
-            {
-                _presenter = presenter;
-                _presenter.Initialize(this);
-            }
-            else
-            {
-                Debug.LogError("GamePlayView: wrong initData");
-            }
-        }
 
         public void OnEnable()
         {
             ResetPositions();
 
-            if (_presenter != null)
-                _presenter.OnActivateView();
+            Presenter?.OnActivateView();
         }
 
         public override async UniTask PlayShowAnimation()

@@ -82,8 +82,7 @@ namespace Scripts
                 .OneFrame<BoardControlEvent>()
                 .OneFrame<BoardChangedEvent>()
                 .OneFrame<PlayFadeAnimationEvent>()
-                .OneFrame<UpdateControlPanelEnergyEvent>()
-                .OneFrame<UpdateControlPanelStarsEvent>()
+                .OneFrame<CurrencyChangedEvent>()
                 .OneFrame<UpdateControlPanelBtnLogicEvent>()
                 .OneFrame<ChangeStateEvent>()
                 .OneFrame<OpenScreenEvent>()
@@ -95,14 +94,9 @@ namespace Scripts
 
         private void AddSystems()
         {
-            var gamePlaySystems = AddGamePlaySystems();
-            _mainSystems.Add(gamePlaySystems);
-
-            var idx = _mainSystems.GetNamedRunSystem("gamePlay");
-            _mainSystems.SetRunSystemState(idx, false);
-
             _mainSystems
                 .Add(new GamePlayManagementSystem(_mainSystems))
+                .Add(AddGamePlaySystems())
                 .Add(new WinCheckSystem())
                 .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new GameStateSystem(_stateMachine))

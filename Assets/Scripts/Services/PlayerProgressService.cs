@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
+using Fives.Domain;
+using Scripts.Configs;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services.Interfaces;
@@ -35,6 +38,9 @@ namespace Scripts.Services
                 _progressData.CompletedPuzzles.Add(puzzleId);
             }
         }
+
+        public ThemeProgress GetThemeProgress(ThemeConfig theme) =>
+            new ThemeProgress(theme.Puzzles.Select(p => p.Name).ToArray(), _progressData.CompletedPuzzles);
 
         public PlayerProgressData GetProgressData()
         {

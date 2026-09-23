@@ -28,6 +28,10 @@ internal static partial class CorrectnessProbes
     private static void SetField(object target, string name, object value) =>
         target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(target, value);
 
+    // Binds a stub view without running OnActivateView.
+    private static void SetView(BasePresenter presenter, BaseView view) =>
+        presenter.GetType().BaseType.GetProperty("View", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(presenter, view);
+
     private static void CheckRepeatedStart()
     {
         var config = CreateConfig();
@@ -36,16 +40,16 @@ internal static partial class CorrectnessProbes
         config.Themes[0].Puzzles = new[] { puzzle };
         var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
         var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
-        var session = new GameSession();
+        var session = new GameSession(CreateConfig());
         var world = new EcsWorld();
         var start = new GameStartService(session, energy, world);
         var progress = new PlayerProgressService(save);
         var view = new SelectMenuView();
         var select = new SelectMenuPresenter(config, start, new StarService(save), progress, world);
-        SetField(select, "_view", view);
+        SetView(select, view);
         SetField(select, "_selectedTheme", "Cities");
         var main = new MainMenuPresenter(config, progress, start, world);
-        SetField(main, "_view", new MainMenuView());
+        SetView(main, new MainMenuView());
 
         select.OnStartGame("One");
         select.OnStartGame("One");
@@ -74,13 +78,13 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         var state = world.NewEntity();
         state.Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
-        var session = new GameSession();
+        var session = new GameSession(CreateConfig());
         session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
         var boardEntity = CreateBoard(world, 3, 8, 1, 1);
         var board = boardEntity.Get<BoardComponent>().State;
         var solvingTile = board[8];
-        var destination = new Vector3(solvingTile % 3, solvingTile / 3);
+        var destination = solvingTile;
         var tiles = CreateTiles(world, board);
         var systems = CreateBoardSystems(world, session);
         systems.Init();
@@ -90,14 +94,14 @@ internal static partial class CorrectnessProbes
             "last move is still animating");
         world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
         systems.Run();
-        Check("reverse click during movement is ignored", tiles[solvingTile].Get<TileComponent>().Position.Equals(destination),
+        Check("reverse click during movement is ignored", tiles[solvingTile].Get<TileComponent>().Cell == destination,
             "logical tile stays in destination");
         for (int i = 0; i < 3; i++) systems.Run();
         Check("win starts after final movement completes", !tiles[solvingTile].Has<MoveComponent>() && session.IsCompleted,
             "animation completed and game locked");
         world.NewEntity().Replace(new TileClickEvent { Id = solvingTile });
         systems.Run();
-        Check("solved board rejects further moves", tiles[solvingTile].Get<TileComponent>().Position.Equals(destination),
+        Check("solved board rejects further moves", tiles[solvingTile].Get<TileComponent>().Cell == destination,
             "board remains solved during result delay");
         Check("result delay keeps solved board visible", world.GetFilter(typeof(EcsFilter<GameEndEvent>)).GetEntitiesCount() == 0,
             "no early cleanup");
@@ -136,7 +140,7 @@ internal static partial class CorrectnessProbes
         var systems = new EcsSystems(world)
             .Add(new EnergyRecoverySystem(energy))
             .Add(new CommonUIHeaderPanelSystem(header, energy, new StarService(save)))
-            .Add(new StorageSystem()).OneFrame<UpdateControlPanelEnergyEvent>().Inject(save);
+            .Add(new StorageSystem()).OneFrame<CurrencyChangedEvent>().Inject(save);
         systems.Init();
         Check("header uses recovered balance during initialization", header.EnergyText == "2" && energy.GetBalance() == 2,
             $"header={header.EnergyText}");
@@ -173,7 +177,7 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         var energy = new EnergyService(config, recoveredSave, new FakeClock { UtcNow = DateTime.UtcNow });
         var menu = new MainMenuPresenter(config, new PlayerProgressService(recoveredSave),
-            new GameStartService(new GameSession(), energy, world), world);
+            new GameStartService(new GameSession(CreateConfig()), energy, world), world);
         menu.Initialize(new MainMenuView());
         Check("partial save and removed theme still allow menu startup",
             recoveredSave.GetPlayerData().Energy.LastRecoveryTime != default

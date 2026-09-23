@@ -28,14 +28,14 @@ namespace Scripts.Services
             if (!_energy.Spend(1))
             {
                 _world.PlaySound(AudioKeyCollection.WrongClick);
-                _world.Send(new UpdateControlPanelEnergyEvent { EnergyNotEnough = true });
+                _world.Send(CurrencyChangedEvent.NotEnough(Currency.Energy));
                 return false;
             }
 
             _session.SetSelectedTheme(theme);
             _session.SetSelectedImage(puzzle);
             _session.BeginRun();
-            _world.Send(new UpdateControlPanelEnergyEvent { EnergyAmount = _energy.GetBalance(), EnergyChange = -1 });
+            _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energy.GetBalance(), -1));
             _world.Send(new SaveDataEvent { StorableObject = _energy });
             return true;
         }

@@ -12,13 +12,11 @@ namespace Scripts.Systems
         private readonly EcsWorld _world;
         private readonly GameSession _session;
         private readonly EcsFilter<BoardComponent> _boards;
-        private readonly EcsFilter<GameStateComponent> _states;
         private readonly EcsFilter<GameEndEvent> _ends;
 
         public void Run()
         {
-            if (!_session.IsRunning || _states.Get1(0).CurrentState != GameStateType.Playing
-                || _ends.GetEntitiesCount() > 0 || _boards.GetEntitiesCount() > 0)
+            if (!_session.IsRunning || _ends.GetEntitiesCount() > 0 || _boards.GetEntitiesCount() > 0)
                 return;
 
             var size = _session.SelectedGameMode.BoardSize;

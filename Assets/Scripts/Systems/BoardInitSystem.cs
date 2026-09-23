@@ -11,15 +11,13 @@ namespace Scripts.Systems
 {
     public class BoardInitSystem : IEcsRunSystem
     {
-        private readonly EcsFilter<GameStateComponent> _stateFilter = null;
+        private readonly EcsFilter<BoardComponent>.Exclude<BoardViewComponent> _newBoards = null;
 
         private readonly EcsWorld _world;
         private readonly GlobalConfig _settings;
         private readonly GameSession _gameSession;
         private readonly Transform _boardParent;
 
-        private bool _boardWasCreated;
-        private GameSettings _roundSetting;
         private GameObject _boardObject;
 
         public BoardInitSystem(Transform boardParent)
@@ -29,15 +27,9 @@ namespace Scripts.Systems
 
         public void Run()
         {
-            if (_stateFilter.Get1(0).CurrentState != GameStateType.Playing)
+            foreach (var i in _newBoards)
             {
-                _boardWasCreated = false;
-                return;
-            }
-
-            if (!_boardWasCreated)
-            {
-                _boardWasCreated = true;
+                _newBoards.GetEntity(i).Get<BoardViewComponent>();
                 CreateBoard();
                 _world.Send<BoardInitializedEvent>();
             }
@@ -45,44 +37,35 @@ namespace Scripts.Systems
 
         private void CreateBoard()
         {
-            _roundSetting = _gameSession.SelectedGameMode;
             _boardObject = InstantiatePrefab(_settings.BoardPrefab, _boardParent);
             if (_boardObject == null) return;
 
             _boardObject.GetComponent<Image>().DOFade(1, 1).SetLink(_boardObject, LinkBehaviour.KillOnDestroy);
 
-            int boardSize = _roundSetting.BoardSize;
-            float tileSize = _roundSetting.TileSize;
-            float spacing = _roundSetting.TileSpacing;
-            Vector2 startPosition = GetTopLeftCorner(_boardParent);
-
+            var layout = _gameSession.SelectedGameMode;
             var source = _gameSession.SelectedPuzzle.Image;
 
-            for (int i = 0; i < boardSize * boardSize; i++)
+            for (int i = 0; i < layout.BoardSize * layout.BoardSize; i++)
             {
-                CreateTile(i, boardSize, tileSize, spacing, startPosition, source);
+                CreateTile(i, layout, source);
             }
         }
 
-        private void CreateTile(int id, int boardSize, float tileSize, float spacing, Vector2 startPosition,
-            Sprite source)
+        private void CreateTile(int id, GameSettings layout, Sprite source)
         {
             var tileEntity = _world.NewEntity();
             ref var tileComponent = ref tileEntity.Get<TileComponent>();
             tileComponent.Id = id;
+            tileComponent.Cell = id;
 
+            var boardSize = layout.BoardSize;
             int row = id / boardSize;
             int column = id % boardSize;
-
-            Vector2 position = startPosition + new Vector2(
-                column * (tileSize + spacing),
-                -row * (tileSize + spacing)
-            );
 
             var tileObject = InstantiatePrefab(_settings.TilePrefab, _boardObject.transform.GetChild(0));
             if (tileObject == null) return;
 
-            SetTileProperties(ref tileComponent, tileObject, tileSize, position);
+            SetTileProperties(ref tileComponent, tileObject, layout.TileSize, layout.CellToAnchored(id));
             var sourceRect = source.rect;
             var width = sourceRect.width / boardSize;
             var height = sourceRect.height / boardSize;
@@ -113,24 +96,6 @@ namespace Scripts.Systems
             }
 
             return UnityEngine.Object.Instantiate(prefab, parent);
-        }
-
-        private Vector2 GetTopLeftCorner(Transform board)
-        {
-            var rectTransform = board.GetComponent<RectTransform>();
-
-            var pivotOffset = new Vector2(
-                rectTransform.rect.width * rectTransform.pivot.x,
-                rectTransform.rect.height * rectTransform.pivot.y
-            );
-
-            var worldPosition = rectTransform.position;
-            var localPosition = (Vector2)worldPosition - pivotOffset;
-
-            return new Vector2(
-                localPosition.x + rectTransform.rect.width * (1 - rectTransform.pivot.x),
-                localPosition.y - rectTransform.rect.height * rectTransform.pivot.y
-            );
         }
     }
 }

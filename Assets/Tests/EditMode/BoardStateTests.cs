@@ -76,6 +76,8 @@ namespace Fives.Domain.Tests
             Assert.That(CopyTiles(board), Is.EqualTo(new[] { 0, 3, 2, 1 }));
             Assert.That(board.EmptyCell, Is.EqualTo(1));
             Assert.That(board.IsSolved, Is.False);
+            Assert.That(board.CellOf(1), Is.EqualTo(3));
+            Assert.That(board.CellOf(4), Is.EqualTo(-1));
 
             board.TryMove(0);
             Assert.That(tiles[1], Is.EqualTo(3), "Moving must not mutate the caller's array.");
@@ -199,6 +201,7 @@ namespace Fives.Domain.Tests
                 Assert.That(after, Is.EquivalentTo(solved));
                 Assert.That(after[board.EmptyCell], Is.EqualTo(board.EmptyTileId));
                 Assert.That(board.IsSolved, Is.EqualTo(after.SequenceEqual(solved)));
+                Assert.That(Enumerable.Range(0, board.CellCount).All(c => board.CellOf(after[c]) == c));
 
                 if (!legal)
                 {
