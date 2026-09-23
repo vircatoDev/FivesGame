@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
 using TMPro;
@@ -22,38 +21,10 @@ namespace Scripts.UI.Views
         [SerializeField] private TextMeshProUGUI energyAmountText;
         [SerializeField] private CurrencyAnimationComponent currencyAnimationComponentPrefab;
 
-        private EcsWorld _world;
-    
-
-        public void Initialize(EcsWorld world)
-        {
-            _world = world;
-        }
-
         public void UpdateViewContent(string starsAmount, string energyAmount)
         {
             starsAmountText.text = starsAmount;
             energyAmountText.text = energyAmount;
-        }
-
-        private void OnHomeClick()
-        {
-            var stateChangeEvent = _world.NewEntity();
-
-            stateChangeEvent.Replace(new ChangeStateEvent
-            {
-                NewStateName = GameStateType.MainMenu
-            });
-        }
-
-        private void OnSettingsClick()
-        {
-            var stateChangeEvent = _world.NewEntity();
-
-            stateChangeEvent.Replace(new ChangeStateEvent
-            {
-                NewStateName = GameStateType.Settings
-            });
         }
 
         public void UpdateButtonLogic(UpdateControlPanelBtnLogicEvent btnLogicEvent)

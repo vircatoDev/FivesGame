@@ -1,34 +1,22 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
-using Scripts.Services;
 using Scripts.UI.Presenters;
-using UnityEngine;
 
 namespace Scripts.Helpers.StateMachine.States
 {
-    public class PlayingState : GameStateBase
+    /// <summary>The gameplay screen; starts a run once the screen is open.</summary>
+    public sealed class PlayingState : ScreenState
     {
-        private readonly ECSCommandService _commandService;
-
-        public PlayingState(ECSCommandService commandService, StateConfig config, BasePresenter presenter) : base(commandService, config, presenter)
+        public PlayingState(EcsWorld world, StateConfig config, BasePresenter presenter) : base(world, config, presenter)
         {
-            _commandService = commandService;
         }
 
-        public override async UniTask Enter(IGameState prevState)
+        public override async UniTask Enter(ScreenState prevState)
         {
             await base.Enter(prevState);
-            Debug.Log("Playing: Start gameplay");
-            _commandService.CreateSimpleEventCommand<GameStartEvent>().Execute();
-      
-        }
-
-        public override async UniTask Exit(IGameState newState)
-        {
-            await base.Exit(newState);
-            Debug.Log("Playing: Pause gameplay");
-       
+            World.Send<GameStartEvent>();
         }
     }
 }

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Scripts.Services
 {
-    public class EnergyService : ICurrencyService, IStorable
+    public class EnergyService : IStorable
     {
         private readonly int _maxEnergy;
         private readonly TimeSpan _recoveryInterval;
@@ -56,19 +56,9 @@ namespace Scripts.Services
             return _wallet.LastRecoveryUtc;
         }
 
-        public TimeSpan GetRecoveryInterval()
-        {
-            return _recoveryInterval;
-        }
-
         public TimeSpan GetTimeUntilNextRecovery()
         {
             return _wallet.TimeUntilNextRecovery(_clock.UtcNow);
-        }
-
-        public bool IsFull()
-        {
-            return _wallet.IsFull;
         }
 
         public void SetDataFromSave(EnergyData data)

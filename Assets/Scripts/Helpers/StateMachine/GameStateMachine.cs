@@ -10,8 +10,8 @@ namespace Scripts.Helpers.StateMachine
 {
     public class GameStateMachine
     {
-        private IGameState _currentState;
-        private readonly Dictionary<GameStateType, IGameState> _states = new();
+        private ScreenState _currentState;
+        private readonly Dictionary<GameStateType, ScreenState> _states = new();
         private bool _isTransitioning;
         private GameStateType? _pendingState;
 
@@ -19,7 +19,7 @@ namespace Scripts.Helpers.StateMachine
         {
             foreach (GameStateType stateType in Enum.GetValues(typeof(GameStateType)))
             {
-                _states[stateType] = factory.GetState(stateType);
+                _states[stateType] = factory.Create(stateType);
             }
         }
 

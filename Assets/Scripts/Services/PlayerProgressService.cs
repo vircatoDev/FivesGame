@@ -41,11 +41,6 @@ namespace Scripts.Services
             return _progressData;
         }
 
-        public PlayerProgressData GetDataForSave()
-        {
-            return _progressData;
-        }
-
         public void SetDataFromSave(PlayerProgressData data)
         {
             _progressData = data;

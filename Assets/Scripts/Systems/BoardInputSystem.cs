@@ -33,7 +33,7 @@ namespace Scripts.Systems
                 if (control == BoardControl.StopReplay && replaying)
                 {
                     entity.Del<BoardReplayComponent>();
-                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+                    _world.Send(new BoardChangedEvent { Snap = true });
                 }
                 else if (_moves.GetEntitiesCount() == 0 && !replaying)
                 {
@@ -49,11 +49,7 @@ namespace Scripts.Systems
             {
                 var accepted = TryMoveTile(_clicks.Get1(i).Id);
 
-                _world.NewEntity().Replace(new PlaySoundEffectEvent
-                {
-                    Key = accepted ? AudioKeyCollection.RightTap : AudioKeyCollection.WrongClick,
-                    Volume = 1f
-                });
+                _world.PlaySound(accepted ? AudioKeyCollection.RightTap : AudioKeyCollection.WrongClick);
                 return;
             }
         }
@@ -71,7 +67,7 @@ namespace Scripts.Systems
                 if (!board.TryMove(cell))
                     return false;
                 _boards.Get2(0).Moves.Add(cell);
-                _world.NewEntity().Get<BoardChangedEvent>();
+                _world.Send<BoardChangedEvent>();
                 return true;
             }
             return false;
@@ -92,7 +88,7 @@ namespace Scripts.Systems
                     var previousEmptyCell = count == 1 ? history.InitialEmptyCell : history.Moves[count - 2];
                     board.TryMove(previousEmptyCell);
                     history.Moves.RemoveAt(count - 1);
-                    _world.NewEntity().Get<BoardChangedEvent>();
+                    _world.Send<BoardChangedEvent>();
                     break;
                 case BoardControl.Replay:
                     var data = new ReplayData(ReplayData.CurrentVersion, board.Size, board.EmptyTileId,
@@ -102,7 +98,7 @@ namespace Scripts.Systems
                         Data = data,
                         State = data.CreatePlaybackBoard()
                     });
-                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+                    _world.Send(new BoardChangedEvent { Snap = true });
                     break;
             }
         }

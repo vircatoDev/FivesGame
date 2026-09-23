@@ -16,7 +16,7 @@ internal static partial class CorrectnessProbes
         var entity = world.NewEntity();
         entity.Replace(new BoardComponent { State = SeededShuffle.Create(3, 8, 42, 36) });
         entity.Replace(new BoardHistoryComponent { Seed = 42, Moves = new List<int>() });
-        var presenter = new GamePlayPresenter(session, new ECSCommandService(world), world);
+        var presenter = new GamePlayPresenter(session, world);
         SetField(presenter, "_view", new GamePlayView());
         for (var i = 0; i < 1000; i++) presenter.RefreshControls();
         var before = GC.GetAllocatedBytesForCurrentThread();

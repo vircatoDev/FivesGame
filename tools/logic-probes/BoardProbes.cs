@@ -57,7 +57,7 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         world.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
         var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
+        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
         var entity = CreateBoard(world, 3, 8, 42, 36);
         var board = entity.Get<BoardComponent>().State;
@@ -83,7 +83,7 @@ internal static partial class CorrectnessProbes
         var state = world.NewEntity();
         state.Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
         var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
+        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
         var entity = CreateBoard(world, 3, 8, 42, 36);
         var board = entity.Get<BoardComponent>().State;
@@ -206,7 +206,7 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         world.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
         var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3 }, false);
+        session.SetGameMode(new GameSettings { BoardSize = 3 });
         session.BeginRun();
         var systems = new EcsSystems(world).Add(new BoardSetupSystem()).Add(new BoardDestroySystem(new Transform()))
             .OneFrame<GameEndEvent>().Inject(session);
@@ -233,7 +233,7 @@ internal static partial class CorrectnessProbes
         var world = new EcsWorld();
         world.NewEntity().Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
         var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 6 }, false);
+        session.SetGameMode(new GameSettings { BoardSize = 6 });
         session.BeginRun();
         var systems = new EcsSystems(world).Add(new BoardSetupSystem()).Inject(session);
         systems.Init(); systems.Run(); systems.Run();

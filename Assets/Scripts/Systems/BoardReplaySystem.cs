@@ -25,13 +25,13 @@ namespace Scripts.Systems
                 if (replay.Position == replay.Data.Moves.Count)
                 {
                     _replays.GetEntity(i).Del<BoardReplayComponent>();
-                    _world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+                    _world.Send(new BoardChangedEvent { Snap = true });
                     continue;
                 }
 
                 replay.State.TryMove(replay.Data.Moves[replay.Position]);
                 replay.Position++;
-                _world.NewEntity().Get<BoardChangedEvent>();
+                _world.Send<BoardChangedEvent>();
             }
         }
     }

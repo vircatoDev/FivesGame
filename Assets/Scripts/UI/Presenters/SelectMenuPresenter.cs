@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Scripts.Commands;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services;
@@ -16,7 +17,7 @@ namespace Scripts.UI.Presenters
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
         private readonly List<ThemeConfig> _themeConfig;
-        private readonly ECSCommandService _ecsCommandService;
+        private readonly EcsWorld _world;
 
         private SelectMenuView _view;
         private string _selectedTheme;
@@ -26,13 +27,13 @@ namespace Scripts.UI.Presenters
             GameStartService gameStartService,
             StarService starService,
             PlayerProgressService playerProgressService,
-            ECSCommandService ecsCommandService)
+            EcsWorld world)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
             _starService = starService;
             _playerProgressService = playerProgressService;
-            _ecsCommandService = ecsCommandService;
+            _world = world;
         }
 
         public override void Initialize(BaseView initData)
@@ -65,10 +66,6 @@ namespace Scripts.UI.Presenters
             ChangeGameState(GameStateType.Playing);
         }
 
-        public void OnSettings()
-        {
-        }
-
         public void OnExit()
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
@@ -94,10 +91,7 @@ namespace Scripts.UI.Presenters
             return _themeConfig.FirstOrDefault(t => t.ThemeName == _selectedTheme);
         }
 
-        private void ChangeGameState(GameStateType newState)
-        {
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(newState).Execute();
-        }
+        private void ChangeGameState(GameStateType newState) => _world.ChangeState(newState);
 
         private void UpdateThemeSelectionView(bool playAnimation)
         {
@@ -227,18 +221,17 @@ namespace Scripts.UI.Presenters
 
         private void ClearSelectedTheme() => _selectedTheme = string.Empty;
 
-        private void PlaySoundEffect(string key) =>
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(key, 1f).Execute();
+        private void PlaySoundEffect(string key) => _world.PlaySound(key);
 
-        private void UpdateHeaderButton() => _ecsCommandService
-            .CreateCommand<UpdateHeaderBtnLogicCommand>(OnExit, HeaderBtnType.Back).Execute();
+        private void UpdateHeaderButton() =>
+            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnExit, BtnType = HeaderBtnType.Back });
 
-        private void ShowNoStarsAnimation() => _ecsCommandService.CreateCommand<HeaderNoStarsAnimationCommand>().Execute();
+        private void ShowNoStarsAnimation() => _world.Send(new UpdateControlPanelStarsEvent { StarsNotEnough = true });
 
         private void UpdateStarBalance(int amount) =>
-            _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService, amount).Execute();
+            _world.Send(new UpdateControlPanelStarsEvent { StarsAmount = _starService.GetBalance(), StarsChange = amount });
 
-        private void SaveStarData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_starService).Execute();
-        private void SaveProgressData() => _ecsCommandService.CreateCommand<SaveDataCommand>(_playerProgressService).Execute();
+        private void SaveStarData() => _world.Send(new SaveDataEvent { StorableObject = _starService });
+        private void SaveProgressData() => _world.Send(new SaveDataEvent { StorableObject = _playerProgressService });
     }
 }

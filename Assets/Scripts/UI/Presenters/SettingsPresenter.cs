@@ -1,5 +1,5 @@
-﻿using Scripts.Commands;
-using Scripts.Helpers.StateMachine;
+﻿using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
@@ -8,15 +8,14 @@ namespace Scripts.UI.Presenters
 {
     public class SettingsPresenter : BasePresenter
     {
-        private readonly GameStateMachine _stateMachine;
         private readonly SoundService _soundService;
-        private readonly ECSCommandService _ecsCommandService;
+        private readonly EcsWorld _world;
         private SettingsView _view;
 
-        public SettingsPresenter(SoundService soundService, ECSCommandService ecsCommandService)
+        public SettingsPresenter(SoundService soundService, EcsWorld world)
         {
             _soundService = soundService;
-            _ecsCommandService = ecsCommandService;
+            _world = world;
         }
 
         public override void Initialize(BaseView initData)
@@ -57,8 +56,8 @@ namespace Scripts.UI.Presenters
 
         public void OnClose()
         {
-            _ecsCommandService.CreateCommand<SaveDataCommand>(_soundService).Execute();
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.MainMenu).Execute();
+            _world.Send(new SaveDataEvent { StorableObject = _soundService });
+            _world.ChangeState(GameStateType.MainMenu);
         }
     }
 }

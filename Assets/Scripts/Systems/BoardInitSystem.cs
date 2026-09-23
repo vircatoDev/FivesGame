@@ -39,7 +39,7 @@ namespace Scripts.Systems
             {
                 _boardWasCreated = true;
                 CreateBoard();
-                _world.NewEntity().Get<BoardInitializedEvent>();
+                _world.Send<BoardInitializedEvent>();
             }
         }
 

@@ -39,7 +39,7 @@ namespace Scripts.Systems
                 }
 
                 _gameSession.CompleteRun();
-                SendWinSound();
+                _world.PlaySound(AudioKeyCollection.Win);
             }
 
             if (_elapsedSinceWin >= ResultStateDelay)
@@ -52,22 +52,8 @@ namespace Scripts.Systems
                 return;
             }
 
-            _world.NewEntity().Get<GameEndEvent>();
-            _world.NewEntity().Replace(new ChangeStateEvent
-            {
-                NewStateName = GameStateType.Finished
-            });
-        }
-
-        private void SendWinSound()
-        {
-            Debug.Log("Game completed!");
-
-            _world.NewEntity().Replace(new PlaySoundEffectEvent
-            {
-                Key = AudioKeyCollection.Win,
-                Volume = 1f
-            });
+            _world.Send<GameEndEvent>();
+            _world.ChangeState(GameStateType.Finished);
         }
     }
 }

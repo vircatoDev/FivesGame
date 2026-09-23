@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Scripts.Services
 {
-    public class SoundService : ISoundService, IStorable
+    public class SoundService : IStorable
     {
         private readonly List<GameSoundCollection> _audioClipsCollection;
 
@@ -20,9 +20,6 @@ namespace Scripts.Services
         {
             _soundSettings = saveHelper.GetPlayerData().SoundSettings ?? new SoundSettingsData();
             _audioClipsCollection = gameSettings.AudioClipsCollection;
-
-            SetMusicVolume(_soundSettings.MusicVolume);
-            SetSoundEffectVolume(_soundSettings.SoundEffectsVolume);
         }
 
         public void PlaySoundEffect(string key, float volume = 1f)
@@ -59,34 +56,12 @@ namespace Scripts.Services
         }
 
 
-        public void TurnOnBackgroundMusic()
-        {
-            if (_backgroundMusicGo == null)
-                return;
-
-            _backgroundMusicGo.Play();
-            _backgroundMusicGo.DOFade(_soundSettings.MusicVolume, 0.5f);
-        }
-
-        public void TurnOffBackgrounMusic()
-        {
-            if (_backgroundMusicGo == null)
-                return;
-
-            _backgroundMusicGo
-                .DOFade(0f, 0.5f)
-                .OnComplete(() =>
-                    _backgroundMusicGo.Stop());
-        }
-
         public void SetMusicVolume(float volume)
         {
             _soundSettings.MusicVolume = volume;
             if (_backgroundMusicGo != null)
                 _backgroundMusicGo.volume = volume;
         }
-
-        public void SetDataFromSave(SoundSettingsData data) => _soundSettings = data;
 
         public void UpdatePlayerData(GameSaveData playerData) => playerData.SoundSettings = _soundSettings;
 

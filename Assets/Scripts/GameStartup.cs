@@ -148,7 +148,7 @@ namespace Scripts
 
         private void SetDefaultGameSettings()
         {
-            _gameSession.SetGameMode(_config.GameModes[0], false);
+            _gameSession.SetGameMode(_config.GameModes[0]);
         }
     }
 }

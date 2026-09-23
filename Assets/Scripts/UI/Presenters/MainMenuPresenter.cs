@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Scripts.Commands;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
-using UnityEngine;
 
 namespace Scripts.UI.Presenters
 {
@@ -14,16 +14,16 @@ namespace Scripts.UI.Presenters
         private readonly GlobalConfig _themeConfig;
         private readonly PlayerProgressService _playerProgressService;
         private readonly GameStartService _gameStartService;
-        private readonly ECSCommandService _ecsCommandService;
+        private readonly EcsWorld _world;
         private MainMenuView _view;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, ECSCommandService ecsCommandService)
+            GameStartService gameStartService, EcsWorld world)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
             _gameStartService = gameStartService;
-            _ecsCommandService = ecsCommandService;
+            _world = world;
         }
 
         public override void Initialize(BaseView initData)
@@ -39,12 +39,12 @@ namespace Scripts.UI.Presenters
             _view.PlayShowAnimation();
             _view.UpdateViewContent(GetThemeProgress(theme), theme.ThemeName, theme.ThemeLogo);
 
-            _ecsCommandService.CreateCommand<UpdateHeaderBtnLogicCommand>(OnSettings, HeaderBtnType.Settings).Execute();
+            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnSettings, BtnType = HeaderBtnType.Settings });
         }
 
         public async void OnStartGame()
         {
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
 
             var theme = GetLastActiveTheme();
             var nextPuzzle = FindNextUncompletedPuzzle(theme);
@@ -53,21 +53,20 @@ namespace Scripts.UI.Presenters
             
             await _view.PlayHideAnimation();
             
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.Playing).Execute();
+            _world.ChangeState(GameStateType.Playing);
         }
 
         public void OnSettings()
         {
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.Settings).Execute();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
+            _world.ChangeState(GameStateType.Settings);
         }
 
         public async void OnSelectMenu()
         {
-            Debug.Log("MainMenuPresenter: Start Game clicked");
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
             await _view.PlayHideAnimation();
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.SelectMenu).Execute();
+            _world.ChangeState(GameStateType.SelectMenu);
         }
 
         private List<string> GetCompletedPuzzleForThemeIntersect(ThemeConfig theme)

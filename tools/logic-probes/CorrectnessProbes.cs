@@ -77,9 +77,8 @@ internal static partial class CorrectnessProbes
         var energy = new EnergyService(config, save, clock);
         var progress = new PlayerProgressService(save);
         var world = new EcsWorld();
-        var commands = new ECSCommandService(world);
 
-        var select = new SelectMenuPresenter(config, new GameStartService(new GameSession(), energy, commands), stars, progress, commands);
+        var select = new SelectMenuPresenter(config, new GameStartService(new GameSession(), energy, world), stars, progress, world);
         typeof(SelectMenuPresenter).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(select, new SelectMenuView());
         select.OnThemeBuy("Cities");
         Check("theme purchase debits once", stars.GetBalance() == 140, $"balance={stars.GetBalance()}");
@@ -89,7 +88,7 @@ internal static partial class CorrectnessProbes
 
         var session = new GameSession();
         session.BeginRun();
-        var resultPresenter = new GameResultPresenter(session, stars, progress, commands);
+        var resultPresenter = new GameResultPresenter(session, stars, progress, world);
         var beforeReward = stars.GetBalance();
         resultPresenter.GetReward(false);
         resultPresenter.GetReward(true);

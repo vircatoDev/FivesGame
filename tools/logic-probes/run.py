@@ -21,12 +21,12 @@ shared = runtime / "shared/Microsoft.NETCore.App/6.0.21"
 files = [probe / "EngineStubs.cs", probe / "CorrectnessProbes.cs", probe / "LifecycleProbes.cs", probe / "BoardProbes.cs", probe / "PresenterProbes.cs"]
 files += list(domain.glob("*.cs"))
 files += list((ecs_candidates[-1] / "src").glob("*.cs"))
-for directory in ["Configs", "Models", "Components", "Commands", "Services/Interfaces"]:
+for directory in ["Configs", "Models", "Components", "Services/Interfaces"]:
     files += list((source / directory).glob("*.cs"))
 for name in [
     "Services/GameStartService", "Services/StorageService", "Services/SoundService",
     "Services/EnergyService", "Services/StarService", "Services/PlayerProgressService",
-    "Services/ECSCommandService", "Helpers/PlayerDataSaveHelper",
+    "Helpers/PlayerDataSaveHelper",
     "UI/Presenters/BasePresenter", "UI/Presenters/SelectMenuPresenter", "UI/Presenters/GameResultPresenter",
     "UI/Presenters/GamePlayPresenter", "UI/Presenters/MainMenuPresenter", "UI/TileUiProvider", "Systems/CommonUIHeaderPanelSystem",
     "Systems/WinCheckSystem", "Systems/EnergyRecoverySystem", "Systems/StorageSystem",

@@ -1,4 +1,5 @@
-using Scripts.Commands;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.UI.Views;
@@ -11,19 +12,19 @@ namespace Scripts.UI.Presenters
         private readonly GameSession _gameSession;
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
-        private readonly ECSCommandService _ecsCommandService;
+        private readonly EcsWorld _world;
         private GameResultView _view;
 
         public GameResultPresenter(
             GameSession gameSession,
             StarService starService,
             PlayerProgressService playerProgressService,
-            ECSCommandService ecsCommandService)
+            EcsWorld world)
         {
             _gameSession = gameSession;
             _starService = starService;
             _playerProgressService = playerProgressService;
-            _ecsCommandService = ecsCommandService;
+            _world = world;
         }
 
         public override void Initialize(BaseView initData)
@@ -62,14 +63,14 @@ namespace Scripts.UI.Presenters
         private void GiveReward(int rewardAmount)
         {
             _starService.Add(rewardAmount);
-            _ecsCommandService.CreateCommand<UpdateStarBalanceCommand>(_starService,rewardAmount).Execute();
+            _world.Send(new UpdateControlPanelStarsEvent { StarsAmount = _starService.GetBalance(), StarsChange = rewardAmount });
         }
 
   
         private void UpdateProgress() => _playerProgressService.MarkPuzzleCompleted(_gameSession.SelectedPuzzle.Name);
-        private void SavePlayerProgress() => _ecsCommandService.CreateCommand<SaveDataCommand>(_playerProgressService).Execute();
-        private void SaveReward() => _ecsCommandService.CreateCommand<SaveDataCommand>(_starService).Execute();
-        private void PlayOpenPopUpAudioEffects() => _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.OpenPopUp,1f).Execute();
-        private void BackToMainMenu() => _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.MainMenu).Execute();
+        private void SavePlayerProgress() => _world.Send(new SaveDataEvent { StorableObject = _playerProgressService });
+        private void SaveReward() => _world.Send(new SaveDataEvent { StorableObject = _starService });
+        private void PlayOpenPopUpAudioEffects() => _world.PlaySound(AudioKeyCollection.OpenPopUp);
+        private void BackToMainMenu() => _world.ChangeState(GameStateType.MainMenu);
     }
 }

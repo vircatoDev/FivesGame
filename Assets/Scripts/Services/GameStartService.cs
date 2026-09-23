@@ -1,4 +1,5 @@
-using Scripts.Commands;
+using Leopotam.Ecs;
+using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 
@@ -8,13 +9,13 @@ namespace Scripts.Services
     {
         private readonly GameSession _session;
         private readonly EnergyService _energy;
-        private readonly ECSCommandService _commands;
+        private readonly EcsWorld _world;
 
-        public GameStartService(GameSession session, EnergyService energy, ECSCommandService commands)
+        public GameStartService(GameSession session, EnergyService energy, EcsWorld world)
         {
             _session = session;
             _energy = energy;
-            _commands = commands;
+            _world = world;
         }
 
         public bool TryStart(ThemeConfig theme, PuzzleData puzzle)
@@ -26,16 +27,16 @@ namespace Scripts.Services
 
             if (!_energy.Spend(1))
             {
-                _commands.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.WrongClick, 1f).Execute();
-                _commands.CreateCommand<HeaderNoEnergyAnimationCommand>().Execute();
+                _world.PlaySound(AudioKeyCollection.WrongClick);
+                _world.Send(new UpdateControlPanelEnergyEvent { EnergyNotEnough = true });
                 return false;
             }
 
             _session.SetSelectedTheme(theme);
             _session.SetSelectedImage(puzzle);
             _session.BeginRun();
-            _commands.CreateCommand<UpdateEnergyBalanceCommand>(_energy, -1).Execute();
-            _commands.CreateCommand<SaveDataCommand>(_energy).Execute();
+            _world.Send(new UpdateControlPanelEnergyEvent { EnergyAmount = _energy.GetBalance(), EnergyChange = -1 });
+            _world.Send(new SaveDataEvent { StorableObject = _energy });
             return true;
         }
     }

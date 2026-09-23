@@ -1,6 +1,5 @@
 using Fives.Domain;
 using Scripts.Configs;
-using UnityEngine;
 
 namespace Scripts.Models
 {
@@ -14,8 +13,6 @@ namespace Scripts.Models
         public GameResult LastGameResult { get; private set; }
         public bool IsRunning { get; private set; }
         public bool IsCompleted { get; private set; }
-        public bool IsTimedMode { get; private set; }
-        public float RemainingTime { get; private set; }
 
         public void SetSelectedImage(PuzzleData puzzle)
         {
@@ -50,30 +47,9 @@ namespace Scripts.Models
             SelectedTheme = theme;
         }
 
-        public void SetGameMode(GameSettings gameMode, bool isTimed)
+        public void SetGameMode(GameSettings gameMode)
         {
             SelectedGameMode = gameMode;
-            IsTimedMode = isTimed;
-        }
-
-        public void UpdateRemainingTime(float deltaTime)
-        {
-            if (IsTimedMode)
-            {
-                RemainingTime = Mathf.Max(0, RemainingTime - deltaTime);
-            }
-        }
-
-        public void ResetSession()
-        {
-            IsRunning = false;
-            IsCompleted = false;
-            SelectedPuzzle = null;
-            SelectedGameMode = null;
-            LastGameResult = null;
-            _rewardClaim.Reset();
-            IsTimedMode = false;
-            RemainingTime = 0;
         }
     }
 }

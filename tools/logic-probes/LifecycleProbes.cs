@@ -38,14 +38,13 @@ internal static partial class CorrectnessProbes
         var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
         var session = new GameSession();
         var world = new EcsWorld();
-        var commands = new ECSCommandService(world);
-        var start = new GameStartService(session, energy, commands);
+        var start = new GameStartService(session, energy, world);
         var progress = new PlayerProgressService(save);
         var view = new SelectMenuView();
-        var select = new SelectMenuPresenter(config, start, new StarService(save), progress, commands);
+        var select = new SelectMenuPresenter(config, start, new StarService(save), progress, world);
         SetField(select, "_view", view);
         SetField(select, "_selectedTheme", "Cities");
-        var main = new MainMenuPresenter(config, progress, start, commands);
+        var main = new MainMenuPresenter(config, progress, start, world);
         SetField(main, "_view", new MainMenuView());
 
         select.OnStartGame("One");
@@ -76,7 +75,7 @@ internal static partial class CorrectnessProbes
         var state = world.NewEntity();
         state.Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
         var session = new GameSession();
-        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 }, false);
+        session.SetGameMode(new GameSettings { BoardSize = 3, TileSize = 1 });
         session.BeginRun();
         var boardEntity = CreateBoard(world, 3, 8, 1, 1);
         var board = boardEntity.Get<BoardComponent>().State;
@@ -172,10 +171,9 @@ internal static partial class CorrectnessProbes
         var config = CreateConfig();
         var recoveredSave = new PlayerDataSaveHelper(storage, config);
         var world = new EcsWorld();
-        var commands = new ECSCommandService(world);
         var energy = new EnergyService(config, recoveredSave, new FakeClock { UtcNow = DateTime.UtcNow });
         var menu = new MainMenuPresenter(config, new PlayerProgressService(recoveredSave),
-            new GameStartService(new GameSession(), energy, commands), commands);
+            new GameStartService(new GameSession(), energy, world), world);
         menu.Initialize(new MainMenuView());
         Check("partial save and removed theme still allow menu startup",
             recoveredSave.GetPlayerData().Energy.LastRecoveryTime != default

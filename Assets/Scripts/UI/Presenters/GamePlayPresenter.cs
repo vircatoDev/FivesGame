@@ -1,8 +1,6 @@
 ﻿using Leopotam.Ecs;
-using Scripts.Commands;
 using Scripts.Components;
 using Scripts.Models;
-using Scripts.Services;
 using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
@@ -10,7 +8,6 @@ namespace Scripts.UI.Presenters
     public class GamePlayPresenter : BasePresenter
     {
         private readonly GameSession _gameSession;
-        private readonly ECSCommandService _ecsCommandService;
         private readonly EcsWorld _world;
         private readonly EcsFilter<BoardComponent, BoardHistoryComponent> _boards;
         private readonly EcsFilter<BoardReplayComponent> _replays;
@@ -19,14 +16,13 @@ namespace Scripts.UI.Presenters
         private (int Seed, int Moves, bool Replaying, int Position)? _statusKey;
         private string _status = "";
 
-        public GamePlayPresenter(GameSession gameSession, ECSCommandService ecsCommandService, EcsWorld world)
+        public GamePlayPresenter(GameSession gameSession, EcsWorld world)
         {
             _world = world;
             _boards = (EcsFilter<BoardComponent, BoardHistoryComponent>)world.GetFilter(typeof(EcsFilter<BoardComponent, BoardHistoryComponent>));
             _replays = (EcsFilter<BoardReplayComponent>)world.GetFilter(typeof(EcsFilter<BoardReplayComponent>));
             _moves = (EcsFilter<TileComponent, MoveComponent>)world.GetFilter(typeof(EcsFilter<TileComponent, MoveComponent>));
             _gameSession = gameSession;
-            _ecsCommandService = ecsCommandService;
         }
 
         public override void Initialize(BaseView initData)
@@ -40,11 +36,11 @@ namespace Scripts.UI.Presenters
             _view.UpdateViewContent(_gameSession.SelectedPuzzle);
             _view.PlayShowAnimation();
 
-            _ecsCommandService.CreateCommand<UpdateHeaderBtnLogicCommand>(BackToMainMenu, HeaderBtnType.Back).Execute();
+            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = BackToMainMenu, BtnType = HeaderBtnType.Back });
         }
 
         public void RequestControl(BoardControl control) =>
-            _world.NewEntity().Replace(new BoardControlEvent { Control = control });
+            _world.Send(new BoardControlEvent { Control = control });
 
         public void RefreshControls()
         {
@@ -73,9 +69,9 @@ namespace Scripts.UI.Presenters
 
         private void BackToMainMenu()
         {
-            _ecsCommandService.CreateCommand<PlaySoundEffectCommand>(AudioKeyCollection.MenuClick, 1f).Execute();
-            _ecsCommandService.CreateSimpleEventCommand<GameEndEvent>().Execute();
-            _ecsCommandService.CreateCommand<ChangeGameStateCommand>(GameStateType.MainMenu).Execute();
+            _world.PlaySound(AudioKeyCollection.MenuClick);
+            _world.Send<GameEndEvent>();
+            _world.ChangeState(GameStateType.MainMenu);
         }
     }
 }
