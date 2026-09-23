@@ -36,6 +36,7 @@ ExportedObj/
 !/tools/domain-tests/**/*.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user

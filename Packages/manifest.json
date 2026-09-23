@@ -6,6 +6,7 @@
     "com.leopotam.ecs-ui": "https://github.com/Leopotam/ecs-ui.git#8c8148b306fce1a3efff776c2cf2da8991c4780d",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ide.rider": "3.0.39",
+    "com.unity.ide.visualstudio": "2.0.27",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
     "com.unity.render-pipelines.universal": "17.0.4",
     "com.unity.test-framework": "1.6.0",
