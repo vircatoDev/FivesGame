@@ -58,7 +58,7 @@ namespace UnityEngine
     public class AudioClip { }
     public class RectTransform { public Vector2 anchoredPosition; public bool IsChildOf(Transform parent) => false; public T[] GetComponentsInChildren<T>() => Array.Empty<T>(); }
     public static class Debug { public static void Log(object value) { } public static void LogError(object value) { } public static void LogWarning(object value) { } }
-    public static class Time { public static float time; public static float unscaledDeltaTime = 0.1f; public static float deltaTime = 1; }
+    public static class Time { public static float time; public static float realtimeSinceStartup; public static float unscaledDeltaTime = 0.1f; public static float deltaTime = 1; }
     public static class Mathf
     {
         public static float Max(float a, float b) => Math.Max(a, b);
@@ -166,7 +166,7 @@ namespace Scripts.UI.Views
 
 namespace UnityEngine.UI
 {
-    public class Image { public bool raycastTarget; public UnityEngine.Sprite sprite; public UnityEngine.Color color; }
+    public class Graphic { public bool raycastTarget; public UnityEngine.Color color; }
 }
 namespace UnityEngine.EventSystems
 {

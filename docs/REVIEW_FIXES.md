@@ -24,7 +24,7 @@ Validation:
 - `git diff --check` passes.
 - EditMode execution is blocked by the running Editor. PlayMode, Android build and native-memory profiling remain unverified.
 
-The sprite cleanup probe executes the real component's destruction callback against an Object substitute; it verifies which Destroy calls are made, not Unity native-memory reclamation. Source review verifies that board creation no longer calls `new Texture2D`/`GetPixels`.
+Tiles no longer own sprites: each `RawImage` shows its `uvRect` of the shared puzzle texture, so board creation allocates no textures or sprites and there is nothing to destroy.
 
 ## Editor checks to complete
 

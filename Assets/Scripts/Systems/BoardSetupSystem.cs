@@ -31,7 +31,8 @@ namespace Scripts.Systems
                 Seed = seed,
                 ShuffleSteps = steps,
                 InitialEmptyCell = board.EmptyCell,
-                Moves = new List<int>()
+                Moves = new List<int>(),
+                StartTime = Time.realtimeSinceStartup
             });
         }
     }

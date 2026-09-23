@@ -34,10 +34,10 @@ namespace Scripts.Systems
                 var empty = tile.Id == board.EmptyTileId;
                 if (initial && empty)
                 {
-                    foreach (var image in tile.Rect.GetComponentsInChildren<UnityEngine.UI.Image>())
+                    foreach (var graphic in tile.Rect.GetComponentsInChildren<UnityEngine.UI.Graphic>())
                     {
-                        image.raycastTarget = false;
-                        image.color = Color.clear;
+                        graphic.raycastTarget = false;
+                        graphic.color = Color.clear;
                     }
                 }
 

@@ -8,5 +8,6 @@ namespace Scripts.Components
         public int ShuffleSteps;
         public int InitialEmptyCell;
         public List<int> Moves;
+        public float StartTime;
     }
 }

@@ -23,13 +23,6 @@
       "dependencies": {},
       "hash": "1213c31c9ef8325d48e74a52b345c4db242d038b"
     },
-    "com.leopotam.ecs-ui": {
-      "version": "https://github.com/Leopotam/ecs-ui.git#8c8148b306fce1a3efff776c2cf2da8991c4780d",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "8c8148b306fce1a3efff776c2cf2da8991c4780d"
-    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,

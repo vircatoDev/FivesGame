@@ -1,5 +1,4 @@
 using Leopotam.Ecs;
-using Leopotam.Ecs.Ui.Systems;
 using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Helpers;
@@ -16,9 +15,7 @@ namespace Scripts
 {
     public class GameStartup : MonoBehaviour
     {
-        [SerializeField] EcsUiEmitter _uiEmitter;
         [SerializeField] HeaderPanelView _headerPanelView;
-        [SerializeField] CanvasGroup _fadeScreen;
 
         [SerializeField] Transform _rootLayer;
         [SerializeField] Transform _popUpLayer;
@@ -76,8 +73,7 @@ namespace Scripts
         {
             _mainSystems.Inject(_gameSession)
                 .Inject(_config)
-                .Inject(_playerDataSaveHelper)
-                .InjectUi(_uiEmitter);
+                .Inject(_playerDataSaveHelper);
         }
 
         // Every event lives one frame and is removed here, after all systems. Events sent outside Run
@@ -88,7 +84,6 @@ namespace Scripts
             _mainSystems.OneFrame<TileClickEvent>()
                 .OneFrame<BoardControlEvent>()
                 .OneFrame<BoardChangedEvent>()
-                .OneFrame<PlayFadeAnimationEvent>()
                 .OneFrame<CurrencyChangedEvent>()
                 .OneFrame<UpdateControlPanelBtnLogicEvent>()
                 .OneFrame<ChangeStateEvent>()
@@ -113,7 +108,6 @@ namespace Scripts
                 .Add(new UISystem(_rootLayer, _popUpLayer))
                 .Add(new SoundSystem(_soundService))
                 .Add(new CommonUIHeaderPanelSystem(_headerPanelView, _energyService, _starService))
-                .Add(new FadeSystem(_fadeScreen))
                 .Add(new StorageSystem());
         }
 
