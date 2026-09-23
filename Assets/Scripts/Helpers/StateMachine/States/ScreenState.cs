@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
@@ -10,44 +9,39 @@ namespace Scripts.Helpers.StateMachine.States
     /// <summary>A game state that shows its screen on enter and closes it on exit, as described by its StateConfig.</summary>
     public class ScreenState
     {
-        private const int TransitionDelayMs = 300;
-
+        private readonly EcsWorld _world;
         private readonly StateConfig _config;
         private readonly BasePresenter _presenter;
         private GameStateType _prevStateName = GameStateType.MainMenu;
 
         public ScreenState(EcsWorld world, StateConfig config, BasePresenter presenter)
         {
-            World = world;
+            _world = world;
             _config = config;
             _presenter = presenter;
         }
 
         public bool IsPopup => _config.IsPopup;
-        public string PrefabName => _config.ScreenPrefab;
         public GameStateType StateName => _config.StateName;
-        protected EcsWorld World { get; }
 
-        public virtual async UniTask Enter(ScreenState prevState)
+        public void Enter(ScreenState prevState)
         {
             if (prevState != null)
                 _prevStateName = prevState.StateName;
 
-            World.Send(new OpenScreenEvent { PrefabName = PrefabName, IsPopup = IsPopup, InitData = _presenter });
-            await UniTask.Delay(TransitionDelayMs);
+            _world.Send(new OpenScreenEvent { Config = _config, Presenter = _presenter });
         }
 
-        public async UniTask Exit(ScreenState nextState)
+        /// <summary>A popup opens over this screen; leaving a popup for the screen below closes only the popup.</summary>
+        public void Exit(ScreenState nextState)
         {
-            if (!nextState.IsPopup)
-            {
-                if (_prevStateName != nextState.StateName)
-                    World.Send(new CloseAllScreensEvent { NextScreenPrefabName = nextState.PrefabName });
-                else
-                    World.Send(new CloseScreenEvent { PrefabName = PrefabName, IsPopup = IsPopup });
-            }
+            if (nextState.IsPopup)
+                return;
 
-            await UniTask.Delay(TransitionDelayMs);
+            if (_prevStateName == nextState.StateName)
+                _world.Send(new CloseScreenEvent { State = StateName });
+            else
+                _world.Send<CloseAllScreensEvent>();
         }
     }
 }

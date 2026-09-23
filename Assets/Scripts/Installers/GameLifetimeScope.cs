@@ -42,7 +42,7 @@ namespace Scripts.Installers
         
             builder.Register<MainMenuPresenter>(Lifetime.Transient);
             builder.Register<SelectMenuPresenter>(Lifetime.Transient);
-            builder.Register<GamePlayPresenter>(Lifetime.Transient);
+            builder.Register<GamePlayPresenter>(Lifetime.Singleton);
             builder.Register<GameResultPresenter>(Lifetime.Transient);
             builder.Register<SettingsPresenter>(Lifetime.Transient);
 

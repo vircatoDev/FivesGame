@@ -140,7 +140,7 @@ internal static partial class CorrectnessProbes
         var systems = new EcsSystems(world)
             .Add(new EnergyRecoverySystem(energy))
             .Add(new CommonUIHeaderPanelSystem(header, energy, new StarService(save)))
-            .Add(new StorageSystem()).OneFrame<CurrencyChangedEvent>().Inject(save);
+            .Add(new StorageSystem()).OneFrame<SaveDataEvent>().OneFrame<CurrencyChangedEvent>().Inject(save);
         systems.Init();
         Check("header uses recovered balance during initialization", header.EnergyText == "2" && energy.GetBalance() == 2,
             $"header={header.EnergyText}");

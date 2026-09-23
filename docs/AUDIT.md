@@ -32,7 +32,7 @@ The correctness branch addresses all eight defects:
 
 `tools/logic-probes/run.py` compiles the current production sources with the locked LeoECS revision and reports `34 correctness probes passed`. Five additional NUnit EditMode tests protect the pure domain rules.
 
-State transitions now run through one small latest-request queue on Unity's main thread. The win presentation delay is an ordinary ECS update, and board cleanup runs immediately when it receives `GameEndEvent`; neither starts unowned async work. DOTween animations are linked to their owning GameObjects and stop when those objects are destroyed.
+State transitions are synchronous: `GameStateSystem` applies the latest request of the frame, and `UISystem` closes and opens screens in that same frame, with no timed delays. The win presentation delay is an ordinary ECS update, and board cleanup runs immediately when it receives `GameEndEvent`; neither starts unowned async work. DOTween animations are linked to their owning GameObjects and stop when those objects are destroyed.
 
 ## Additional review fixes (2026-09-21)
 

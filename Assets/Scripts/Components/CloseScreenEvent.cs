@@ -1,7 +1,9 @@
-﻿namespace Scripts.Components
+﻿using Scripts.Models;
+
+namespace Scripts.Components
 {
-    public struct CloseScreenEvent {
-        public string PrefabName;
-        public bool IsPopup;
+    public struct CloseScreenEvent
+    {
+        public GameStateType State;
     }
 }

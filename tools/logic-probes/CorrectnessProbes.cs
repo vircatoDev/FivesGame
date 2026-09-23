@@ -114,6 +114,7 @@ internal static partial class CorrectnessProbes
         var saveStars = new StarService(saveHelper);
         var saveSystems = new EcsSystems(saveWorld)
             .Add(new StorageSystem())
+            .OneFrame<SaveDataEvent>()
             .Add(new EmitSave { Target = saveStars })
             .Inject(saveHelper);
         saveSystems.Init();

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
@@ -31,7 +32,7 @@ namespace Scripts.UI.Presenters
             UpdateProgress();
             SavePlayerProgress();
             View.UpdateViewContent(_gameSession.LastGameResult, _gameSession.SelectedTheme, _gameSession.SelectedPuzzle);
-            View.PlayShowAnimation();
+            View.PlayShowAnimation().Forget();
         }
 
         public void GetReward(bool doubleReward)

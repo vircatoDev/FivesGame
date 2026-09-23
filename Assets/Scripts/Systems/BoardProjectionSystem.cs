@@ -53,9 +53,6 @@ namespace Scripts.Systems
                     });
                 }
             }
-
-            foreach (var i in _initialized)
-                _initialized.GetEntity(i).Destroy();
         }
     }
 }

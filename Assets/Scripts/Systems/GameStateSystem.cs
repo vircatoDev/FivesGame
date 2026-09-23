@@ -5,10 +5,11 @@ using Scripts.Models;
 
 namespace Scripts.Systems
 {
+    /// <summary>Applies the latest state request of the frame to both GameStateComponent and the screen state machine.</summary>
     public class GameStateSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly EcsFilter<ChangeStateEvent> _stateChangeFilter;
-        private readonly EcsFilter<GameStateComponent> _gameStateFilter;
+        private readonly EcsFilter<ChangeStateEvent> _stateChangeFilter = null;
+        private readonly EcsFilter<GameStateComponent> _gameStateFilter = null;
         private readonly GameStateMachine _stateMachine;
 
         public GameStateSystem(GameStateMachine stateMachine)
@@ -23,19 +24,13 @@ namespace Scripts.Systems
 
         public void Run()
         {
-            foreach (var i in _stateChangeFilter)
-            {
-                ref var stateChangeEvent = ref _stateChangeFilter.Get1(i);
+            var count = _stateChangeFilter.GetEntitiesCount();
+            if (count == 0)
+                return;
 
-                foreach (var j in _gameStateFilter)
-                {
-                    ref var gameState = ref _gameStateFilter.Get1(j);
-                    gameState.CurrentState = stateChangeEvent.NewStateName;
-                }
-
-                _stateMachine.ChangeState(stateChangeEvent.NewStateName);
-                _stateChangeFilter.GetEntity(i).Destroy();
-            }
+            var nextState = _stateChangeFilter.Get1(count - 1).NewStateName;
+            _gameStateFilter.Get1(0).CurrentState = nextState;
+            _stateMachine.ChangeState(nextState);
         }
     }
 }

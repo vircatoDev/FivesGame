@@ -53,8 +53,6 @@ namespace Scripts.Systems
                     _isFading = false;
                     onComplete?.Invoke();
                 });
-
-                _fadeEventFilter.GetEntity(i).Destroy();
             }
         }
 

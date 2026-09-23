@@ -1,4 +1,5 @@
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
@@ -28,7 +29,7 @@ namespace Scripts.UI.Presenters
         {
             var theme = GetLastActiveTheme();
 
-            View.PlayShowAnimation();
+            View.PlayShowAnimation().Forget();
             View.UpdateViewContent(_playerProgressService.GetThemeProgress(theme).ToString(), theme.ThemeName, theme.ThemeLogo);
 
             _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnSettings, BtnType = HeaderBtnType.Settings });

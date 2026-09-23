@@ -31,7 +31,7 @@ for name in [
     "UI/Presenters/GamePlayPresenter", "UI/Presenters/MainMenuPresenter", "UI/TileUiProvider", "Systems/CommonUIHeaderPanelSystem",
     "Systems/WinCheckSystem", "Systems/EnergyRecoverySystem", "Systems/StorageSystem",
     "Systems/BoardInputSystem", "Systems/BoardReplaySystem", "Systems/BoardSetupSystem",
-    "Systems/BoardProjectionSystem", "Systems/TileMoveSystem", "Systems/BoardDestroySystem"
+    "Systems/BoardProjectionSystem", "Systems/TileMoveSystem", "Systems/BoardDestroySystem", "Systems/BoardHudSystem"
 ]:
     files.append(source / f"{name}.cs")
 

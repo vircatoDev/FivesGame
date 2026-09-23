@@ -22,12 +22,7 @@ namespace Scripts.Helpers.Factory
 
         public ScreenState Create(GameStateType stateType)
         {
-            var config = _configs[stateType];
-            var presenter = _presenterFactory.CreatePresenter(stateType);
-
-            return stateType == GameStateType.Playing
-                ? new PlayingState(_world, config, presenter)
-                : new ScreenState(_world, config, presenter);
+            return new ScreenState(_world, _configs[stateType], _presenterFactory.CreatePresenter(stateType));
         }
     }
 }
