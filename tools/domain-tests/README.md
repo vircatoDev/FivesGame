@@ -16,9 +16,8 @@ The GitHub Actions workflow runs these commands on Linux and Windows and retains
 the TRX reports, including on test failure. It needs no Unity license or secrets.
 These are domain checks, not PlayMode, rendering, or Android build verification.
 
-The existing `python3 tools/logic-probes/run.py` remains the separate suite for
-legacy services/presenters/ECS with engine substitutes; it requires Unity's local
-compiler and resolved packages.
+Runtime behaviour (ECS systems, services, presenters, saves) is covered by the
+`Fives.Runtime.Tests` EditMode assembly, which runs in Unity's Test Runner only.
 
 ## Board coverage
 
@@ -31,9 +30,7 @@ compiler and resolved packages.
 - Four fixed shuffle vectors protect algorithm stability, including zero and negative seeds.
 - 4,004 seed/size combinations are deterministic permutations with no tile in its own cell.
 
-There are currently 59 standalone NUnit cases. The 70 local service/ECS probes
-also cover Undo/Redo, cleanup/restart and animation/input ordering.
-Those probes use engine substitutes and are not in the GitHub-hosted domain workflow.
+There are currently 59 standalone NUnit cases.
 
 The fixtures also remain available in Unity's EditMode Test Runner through the
 existing asmdef. Passing standalone tests does not imply they have run in Editor.

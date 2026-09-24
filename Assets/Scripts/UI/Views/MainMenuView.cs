@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class MainMenuView : View<MainMenuPresenter>
+    public class MainMenuView : View<MainMenuPresenter>, IMainMenuView
     {
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private Button startGameButton;

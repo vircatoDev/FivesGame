@@ -4,6 +4,7 @@ using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
 using UnityEngine;
+using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
@@ -11,6 +12,7 @@ namespace Scripts.Systems
     {
         private readonly EcsWorld _world;
         private readonly GameSession _session;
+        private readonly IFrameTime _time = null;
         private readonly EcsFilter<BoardComponent> _boards;
         private readonly EcsFilter<GameEndEvent> _ends;
 
@@ -27,7 +29,7 @@ namespace Scripts.Systems
                 Seed = seed,
                 Moves = new List<Swap>(),
                 Undone = new List<Swap>(),
-                StartTime = Time.realtimeSinceStartup
+                StartTime = _time.RealtimeSinceStartup
             });
         }
     }

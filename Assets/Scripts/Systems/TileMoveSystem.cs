@@ -2,6 +2,7 @@ using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
 using UnityEngine;
+using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
@@ -9,6 +10,7 @@ namespace Scripts.Systems
     {
         private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter = null;
         private readonly GameSession _gameSettings;
+        private readonly IFrameTime _time = null;
 
         public void Run()
         {
@@ -31,7 +33,7 @@ namespace Scripts.Systems
                     move.Started = true;
                 }
 
-                move.ElapsedTime += Time.deltaTime;
+                move.ElapsedTime += _time.DeltaTime;
                 var progress = move.Duration > 0f ? move.ElapsedTime / move.Duration : 1f;
                 tile.Rect.anchoredPosition = Vector2.Lerp(move.StartPosition, target, progress);
 

@@ -10,7 +10,7 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class MainMenuPresenter : Presenter<MainMenuView>
+    public class MainMenuPresenter : Presenter<IMainMenuView>
     {
         private readonly GlobalConfig _themeConfig;
         private readonly PlayerProgressService _playerProgressService;

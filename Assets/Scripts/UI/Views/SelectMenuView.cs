@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class SelectMenuView : View<SelectMenuPresenter>
+    public class SelectMenuView : View<SelectMenuPresenter>, ISelectMenuView
     {
         [Header("UI Elements")] [SerializeField]
         private RectTransform scrollView;

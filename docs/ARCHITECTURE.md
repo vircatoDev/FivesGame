@@ -68,7 +68,12 @@ Assemblies, each referencing only what it declares:
   VContainer remains the composition root.
 - `DOTween.Modules` — DOTween's UI/audio/physics extension sources, moved out of
   `Assembly-CSharp-firstpass` so an asmdef can reference them.
-- `Fives.Domain.Tests` and `Fives.UI.Editor.Tests` — typed tests against Domain and Runtime.
+- `Fives.Domain.Tests`, `Fives.Runtime.Tests` and `Fives.UI.Editor.Tests` — EditMode tests of the domain,
+  of ECS systems, services and presenters (with fake views and a fake `IFrameTime`), and of the
+  gameplay prefab. Runtime internals are visible to `Fives.Runtime.Tests` only.
+- Test boundaries in Runtime: `IFrameTime` for frame timing, view contracts in `ViewContracts.cs`
+  (`IMainMenuView`, `ISelectMenuView`, `IGamePlayView`, `IGameResultView`, `IHeaderPanelView`) and a key
+  prefix in `StorageService`, so tests never touch the player's save.
 
 More assemblies will be added only when they enforce a useful dependency boundary. ECS is not
 being replaced with an object-oriented application-service layer.
