@@ -1,0 +1,24 @@
+{
+    "name": "Fives.Runtime",
+    "rootNamespace": "Scripts",
+    "references": [
+        "Fives.Domain",
+        "DOTween.Modules",
+        "UniTask",
+        "UniTask.DOTween",
+        "Leopotam.Ecs",
+        "VContainer",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "SimpleScrollSnap"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

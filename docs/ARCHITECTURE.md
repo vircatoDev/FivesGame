@@ -60,9 +60,17 @@ and visuals. The one-frame events are cleared after consumers run.
 
 ## Boundaries
 
-`Fives.Domain` has no Unity/ECS references. Current systems and presentation remain
-in `Assembly-CSharp`; VContainer remains the composition root. More assemblies
-will be added only when they enforce a useful dependency boundary. ECS is not
+Assemblies, each referencing only what it declares:
+
+- `Fives.Domain` — board rules, shuffle, economy and save migration; no Unity or ECS references.
+- `Fives.Runtime` (`Assets/Scripts`) — ECS systems, services, presenters and views; references
+  Domain, LeoECS, VContainer, UniTask, DOTween.Modules, uGUI, TextMeshPro and Simple Scroll-Snap.
+  VContainer remains the composition root.
+- `DOTween.Modules` — DOTween's UI/audio/physics extension sources, moved out of
+  `Assembly-CSharp-firstpass` so an asmdef can reference them.
+- `Fives.Domain.Tests` and `Fives.UI.Editor.Tests` — typed tests against Domain and Runtime.
+
+More assemblies will be added only when they enforce a useful dependency boundary. ECS is not
 being replaced with an object-oriented application-service layer.
 
 See [the board, shuffle and Undo/Redo contracts](BOARD_STATE.md) for invariants,

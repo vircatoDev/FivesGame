@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
-using System.Linq;
 using NUnit.Framework;
+using Scripts.UI.Views;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -26,8 +26,7 @@ namespace Fives.UI.Tests
                     var screen = UnityEngine.Object.Instantiate(
                         Resources.Load<GameObject>("Prefabs/UI/Screens/GamePlayScreen"), canvas.transform);
                     yield return null; // Run Awake, OnEnable and the first frame on real Unity objects.
-                    var view = screen.GetComponents<MonoBehaviour>()
-                        .Single(component => component.GetType().FullName == "Scripts.UI.Views.GamePlayView");
+                    var view = screen.GetComponent<GamePlayView>();
                     var controls = screen.transform.Find("Panel/BoardControls");
                     Assert.That(controls, Is.Not.Null);
                     var undo = controls.Find("Undo").GetComponent<Button>();
@@ -36,14 +35,12 @@ namespace Fives.UI.Tests
                     Assert.That(undo.interactable, Is.False);
                     Assert.That(redo.interactable, Is.False);
 
-                    var refresh = view.GetType().GetMethod("UpdateControls");
-                    Assert.That(refresh, Is.Not.Null);
-                    refresh.Invoke(view, new object[] { "Moves: 2", true, false });
+                    view.UpdateControls("Moves: 2", true, false);
                     Assert.That(moves.text, Is.EqualTo("Moves: 2"));
                     Assert.That(undo.interactable, Is.True);
                     Assert.That(redo.interactable, Is.False);
 
-                    refresh.Invoke(view, new object[] { "Moves: 1", true, true });
+                    view.UpdateControls("Moves: 1", true, true);
                     Assert.That(moves.text, Is.EqualTo("Moves: 1"));
                     Assert.That(undo.interactable && redo.interactable, Is.True);
                     screen.SetActive(false);
@@ -75,10 +72,8 @@ namespace Fives.UI.Tests
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             Assert.That(prefab, Is.Not.Null);
 
-            // Runtime lives in Assembly-CSharp, which an asmdef cannot reference.
-            var controls = prefab.GetComponentsInChildren<MonoBehaviour>(true)
-                .Single(component => component != null
-                    && component.GetType().FullName == "Scripts.UI.Views.BoardControlsView");
+            var controls = prefab.GetComponentInChildren<BoardControlsView>(true);
+            Assert.That(controls, Is.Not.Null);
             using var serialized = new SerializedObject(controls);
             var property = serialized.FindProperty(field);
             Assert.That(property, Is.Not.Null, $"Missing serialized field: {field}");
