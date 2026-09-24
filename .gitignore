@@ -78,3 +78,7 @@ crashlytics-build.properties
 /tools/domain-tests/**/bin/
 /tools/domain-tests/**/obj/
 /tools/domain-tests/TestResults/
+
+# Unity batch builds
+/.utmp/
+mono_crash.*.json
