@@ -1,18 +1,14 @@
 using System;
-using System.IO;
-using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
-using UnityEngine;
 
 namespace Fives.Editor
 {
     public static class AndroidBuild
     {
-        private const string DefaultOutputPath = "Builds/Android/FivesGame.aab";
+        private const string DefaultOutputPath = "Builds/Android/FivesGame.apk";
 
-        [MenuItem("FivesGame/Build/Android App Bundle")]
+        [MenuItem("FivesGame/Build/Android APK")]
         public static void BuildFromMenu()
         {
             BuildRelease();
@@ -20,26 +16,11 @@ namespace Fives.Editor
 
         public static void BuildRelease()
         {
-            var outputPath = GetCommandLineValue("-buildPath") ?? DefaultOutputPath;
-            var scenes = EditorBuildSettings.scenes
-                .Where(scene => scene.enabled)
-                .Select(scene => scene.path)
-                .ToArray();
-
-            if (scenes.Length == 0)
+            var outputPath = PlayerBuild.OutputPath(DefaultOutputPath);
+            var appBundle = outputPath.EndsWith(".aab", StringComparison.OrdinalIgnoreCase);
+            if (!appBundle && !outputPath.EndsWith(".apk", StringComparison.OrdinalIgnoreCase))
             {
-                throw new BuildFailedException("No enabled scenes are configured in EditorBuildSettings.");
-            }
-
-            if (!outputPath.EndsWith(".aab", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new BuildFailedException("Android store builds must use an .aab output path.");
-            }
-
-            var outputDirectory = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
+                throw new BuildFailedException("Android builds must use an .apk or .aab output path.");
             }
 
             if (!EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android))
@@ -52,37 +33,9 @@ namespace Fives.Editor
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
             PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-            EditorUserBuildSettings.buildAppBundle = true;
+            EditorUserBuildSettings.buildAppBundle = appBundle;
 
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
-            {
-                scenes = scenes,
-                locationPathName = outputPath,
-                target = BuildTarget.Android,
-                options = BuildOptions.CleanBuildCache
-            });
-
-            var summary = report.summary;
-            Debug.Log($"Android build result: {summary.result}; size: {summary.totalSize}; time: {summary.totalTime}; output: {outputPath}");
-
-            if (summary.result != BuildResult.Succeeded)
-            {
-                throw new BuildFailedException($"Android build failed with {summary.totalErrors} errors.");
-            }
-        }
-
-        private static string GetCommandLineValue(string key)
-        {
-            var args = Environment.GetCommandLineArgs();
-            for (var index = 0; index < args.Length - 1; index++)
-            {
-                if (string.Equals(args[index], key, StringComparison.Ordinal))
-                {
-                    return args[index + 1];
-                }
-            }
-
-            return null;
+            PlayerBuild.Run(BuildTarget.Android, outputPath, BuildOptions.CleanBuildCache);
         }
     }
 }

@@ -2,6 +2,8 @@
 
 A casual swap-puzzle game and a modernization case study for production-oriented Unity development.
 
+**[Play in the browser](https://vircatodev.github.io/FivesGame/)**
+
 ![FivesGame menu](Content/FivesGame_Menu.gif)
 ![FivesGame gameplay](Content/FivesGame_GamePlay.gif)
 
@@ -32,13 +34,24 @@ See the [baseline report](docs/BASELINE.md), [audit summary](docs/AUDIT.md), [ta
 
 ## Open and build
 
-1. Install Unity **6000.0.71f1** with Android Build Support, SDK, NDK, and OpenJDK.
+1. Install Unity **6000.0.71f1** with Android Build Support (SDK, NDK, OpenJDK) and Web Build Support.
 2. Add this directory as a project.
 3. Let Unity Package Manager restore the locked dependencies.
 4. Open `Assets/Scenes/MainGame.unity`.
-5. Build an Android App Bundle from `FivesGame > Build > Android App Bundle`.
 
-The project targets Android only. The automated entry point is `Fives.Editor.AndroidBuild.BuildRelease`; its default output is `Builds/Android/FivesGame.aab`.
+Builds are made from the `FivesGame > Build` menu or from the terminal. Unity batch mode uses the
+editor license on this machine, so close the project in the editor first:
+
+```sh
+tools/unity.sh test      # EditMode tests, prints total/passed/failed
+tools/unity.sh apk       # Android APK into Builds/Android/FivesGame.apk
+tools/unity.sh webgl     # WebGL build into Builds/WebGL
+tools/unity.sh publish   # push Builds/WebGL to the gh-pages branch served by GitHub Pages
+```
+
+The Android entry point is `Fives.Editor.AndroidBuild.BuildRelease`: an APK by default,
+an App Bundle when `-buildPath` ends with `.aab`. GitHub Actions runs no Unity jobs: they would need
+a Unity license in repository secrets.
 
 ## Git Flow
 
@@ -57,8 +70,8 @@ Undo/Redo, projection, animation and completion. The current unfinished attempt
 has touch controls for Undo and Redo; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
-Unity's Test Runner (EditMode) runs **117 tests, all passing** in 6000.0.71f1 as of 2026-09-24:
-59 domain tests (`Fives.Domain.Tests`), 54 runtime tests on the real ECS systems, services and
+Unity's Test Runner (EditMode) runs **120 tests, all passing** in 6000.0.71f1 as of 2026-09-24:
+59 domain tests (`Fives.Domain.Tests`), 57 runtime tests on the real ECS systems, services and
 presenters (`Fives.Runtime.Tests`) and 4 gameplay prefab tests (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 
