@@ -2,9 +2,11 @@ using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Helpers;
+using Scripts.Helpers.Factory;
 using Scripts.Helpers.StateMachine;
 using Scripts.Models;
 using Scripts.Services;
+using Scripts.Services.Interfaces;
 using Scripts.Systems;
 using Scripts.UI.Presenters;
 using Scripts.UI.Views;
@@ -15,7 +17,6 @@ namespace Scripts
 {
     public class GameStartup : MonoBehaviour
     {
-        [SerializeField] HeaderPanelView _headerPanelView;
 
         [SerializeField] Transform _rootLayer;
         [SerializeField] Transform _popUpLayer;
@@ -33,6 +34,8 @@ namespace Scripts
         private GameSession _gameSession;
         private GamePlayPresenter _gamePlayPresenter;
         private PlayerProgressService _progressService;
+        private IHeaderPanelView _header;
+        private ScreenCatalog _screens;
 
 
         [Inject]
@@ -44,7 +47,9 @@ namespace Scripts
             GameStateMachine stateMachine, GameSession gameSession,
             PlayerDataSaveHelper playerDataSaveHelper,
             GamePlayPresenter gamePlayPresenter,
-            PlayerProgressService progressService)
+            PlayerProgressService progressService,
+            IHeaderPanelView header,
+            ScreenCatalog screens)
         {
             _world = world;
             _config = config;
@@ -56,6 +61,8 @@ namespace Scripts
             _playerDataSaveHelper = playerDataSaveHelper;
             _gamePlayPresenter = gamePlayPresenter;
             _progressService = progressService;
+            _header = header;
+            _screens = screens;
         }
 
         private void Start()
@@ -90,7 +97,6 @@ namespace Scripts
                 .OneFrame<BoardControlEvent>()
                 .OneFrame<BoardChangedEvent>()
                 .OneFrame<CurrencyChangedEvent>()
-                .OneFrame<UpdateControlPanelBtnLogicEvent>()
                 .OneFrame<ChangeStateEvent>()
                 .OneFrame<OpenScreenEvent>()
                 .OneFrame<CloseScreenEvent>()
@@ -110,10 +116,10 @@ namespace Scripts
                 .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new GameStateSystem(_stateMachine))
                 .Add(new EnergyRecoverySystem(_energyService))
-                .Add(new UISystem(_rootLayer, _popUpLayer))
+                .Add(new UISystem(_rootLayer, _popUpLayer, _screens))
                 .Add(new SoundSystem(_soundService))
-                .Add(new CommonUIHeaderPanelSystem(_headerPanelView, _energyService, _starService))
-                .Add(new StorageSystem());
+                .Add(new CommonUIHeaderPanelSystem(_header, _energyService, _starService))
+                .Add(new StorageSystem(Storables));
         }
 
         private EcsSystems AddGamePlaySystems()
@@ -143,8 +149,9 @@ namespace Scripts
 
         private void OnApplicationQuit() => SaveAll();
 
-        private void SaveAll() =>
-            _playerDataSaveHelper.SaveAll(_soundService, _energyService, _starService, _progressService);
+        private void SaveAll() => _playerDataSaveHelper.SaveAll(Storables);
+
+        private IStorable[] Storables => new IStorable[] { _soundService, _energyService, _starService, _progressService };
 
         private void OnDestroy()
         {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Leopotam.Ecs;
 using Scripts.Components;
+using Scripts.Helpers.Factory;
 using Scripts.Models;
 using Scripts.UI.Views;
 using UnityEngine;
@@ -17,11 +18,13 @@ namespace Scripts.Systems
         private readonly Dictionary<GameStateType, GameObject> _screens = new();
         private readonly Transform _uiRoot;
         private readonly Transform _popupLayer;
+        private readonly ScreenCatalog _catalog;
 
-        public UISystem(Transform uiRoot, Transform popupLayer)
+        public UISystem(Transform uiRoot, Transform popupLayer, ScreenCatalog catalog)
         {
             _uiRoot = uiRoot;
             _popupLayer = popupLayer;
+            _catalog = catalog;
         }
 
         public void Run()
@@ -45,7 +48,7 @@ namespace Scripts.Systems
 
         private void Open(in OpenScreenEvent evt)
         {
-            var config = evt.Config;
+            var config = _catalog.Config(evt.State);
             if (_screens.ContainsKey(config.StateName))
                 return;
 
@@ -58,7 +61,7 @@ namespace Scripts.Systems
 
             var screen = Object.Instantiate(prefab, config.IsPopup ? _popupLayer : _uiRoot);
             _screens[config.StateName] = screen;
-            screen.GetComponent<BaseView>().Initialize(evt.Presenter);
+            screen.GetComponent<BaseView>().Initialize(_catalog.Presenter(evt.State));
             screen.SetActive(true);
         }
     }

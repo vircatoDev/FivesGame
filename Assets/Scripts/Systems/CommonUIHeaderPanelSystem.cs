@@ -11,7 +11,6 @@ namespace Scripts.Systems
         private readonly EnergyService _energy;
         private readonly StarService _stars;
         private readonly EcsFilter<CurrencyChangedEvent> _currencyFilter;
-        private readonly EcsFilter<UpdateControlPanelBtnLogicEvent> _updateBtnLogicFilter;
 
 
         public CommonUIHeaderPanelSystem(IHeaderPanelView headerPanelView, EnergyService energy, StarService stars)
@@ -28,12 +27,6 @@ namespace Scripts.Systems
         {
             foreach (var i in _currencyFilter)
                 _headerPanelView.UpdateCurrency(_currencyFilter.Get1(i));
-
-            foreach (var i in _updateBtnLogicFilter)
-            {
-                ref var updateControlPanelEventEvent = ref _updateBtnLogicFilter.Get1(i);
-                _headerPanelView.UpdateButtonLogic(updateControlPanelEventEvent);
-            }
         }
     
     }

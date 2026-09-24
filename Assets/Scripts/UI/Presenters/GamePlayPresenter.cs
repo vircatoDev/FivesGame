@@ -9,10 +9,12 @@ namespace Scripts.UI.Presenters
     public class GamePlayPresenter : Presenter<IGamePlayView>
     {
         private readonly GameSession _gameSession;
+        private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
 
-        public GamePlayPresenter(GameSession gameSession, EcsWorld world)
+        public GamePlayPresenter(GameSession gameSession, IHeaderPanelView header, EcsWorld world)
         {
+            _header = header;
             _world = world;
             _gameSession = gameSession;
         }
@@ -22,7 +24,7 @@ namespace Scripts.UI.Presenters
             View.UpdateViewContent(_gameSession.SelectedPuzzle);
             View.PlayShowAnimation().Forget();
 
-            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = BackToMainMenu, BtnType = HeaderBtnType.Back });
+            _header.ShowButton(HeaderBtnType.Back, BackToMainMenu);
         }
 
         public void RequestControl(BoardControl control) =>

@@ -6,7 +6,6 @@ using Scripts.Components;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services;
-using Scripts.Services.Interfaces;
 using Scripts.Systems;
 using Scripts.UI.Presenters;
 using UnityEngine;
@@ -29,8 +28,7 @@ namespace Fives.Runtime.Tests
     internal sealed class SaveEveryFrame : IEcsRunSystem
     {
         private readonly EcsWorld _world = null;
-        public IStorable Target;
-        public void Run() => _world.Send(new SaveDataEvent { StorableObject = Target });
+        public void Run() => _world.Send<SaveDataEvent>();
     }
 
     public sealed class EconomyTests
@@ -60,14 +58,32 @@ namespace Fives.Runtime.Tests
             var stars = new StarService(save);
             var session = new GameSession(config);
             var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
-            var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world), stars,
-                new PlayerProgressService(save), session, _world);
+            var progress = new PlayerProgressService(save);
+            var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world),
+                new ThemeShop(stars, progress, _world), progress, session, new FakeHeaderPanelView(), _world);
             select.Initialize(new FakeSelectMenuView());
 
             select.OnThemeBuy("cities");
             select.OnThemeBuy("cities");
 
             Assert.That(stars.GetBalance(), Is.EqualTo(140));
+        }
+
+        [Test]
+        public void ThemeShop_WithoutEnoughStars_KeepsTheThemeLocked_AndSignalsTheHeader()
+        {
+            var config = _objects.Config(stars: 10);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            var stars = new StarService(save);
+            var progress = new PlayerProgressService(save);
+
+            var result = new ThemeShop(stars, progress, _world).TryUnlock(config.Themes[0]);
+
+            Assert.That(result, Is.EqualTo(PurchaseResult.NotEnoughStars));
+            Assert.That(progress.IsUnlocked(config.Themes[0]), Is.False);
+            Assert.That(stars.GetBalance(), Is.EqualTo(10));
+            Assert.That(_world.Count<CurrencyChangedEvent>(), Is.EqualTo(1));
+            Assert.That(_world.Count<SaveDataEvent>(), Is.Zero);
         }
 
         [Test]
@@ -164,7 +180,7 @@ namespace Fives.Runtime.Tests
             _systems = new EcsSystems(_world)
                 .Add(new EnergyRecoverySystem(energy))
                 .Add(new CommonUIHeaderPanelSystem(header, energy, new StarService(save)))
-                .Add(new StorageSystem()).OneFrame<SaveDataEvent>().OneFrame<CurrencyChangedEvent>()
+                .Add(new StorageSystem(energy)).OneFrame<SaveDataEvent>().OneFrame<CurrencyChangedEvent>()
                 .Inject(save).Inject(new FakeFrameTime());
             _systems.Init();
 

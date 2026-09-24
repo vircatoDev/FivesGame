@@ -1,11 +1,9 @@
-﻿using Scripts.Configs;
-using Scripts.UI.Presenters;
+﻿using Scripts.Models;
 
 namespace Scripts.Components
 {
     public struct OpenScreenEvent
     {
-        public StateConfig Config;
-        public BasePresenter Presenter;
+        public GameStateType State;
     }
 }

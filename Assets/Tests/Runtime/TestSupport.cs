@@ -175,6 +175,8 @@ namespace Fives.Runtime.Tests
     internal sealed class FakeHeaderPanelView : IHeaderPanelView
     {
         public string Energy;
+        public HeaderBtnType Button;
+        public Action OnButton;
         public void UpdateViewContent(string starsAmount, string energyAmount) => Energy = energyAmount;
 
         public void UpdateCurrency(in CurrencyChangedEvent evt)
@@ -183,6 +185,10 @@ namespace Fives.Runtime.Tests
                 Energy = evt.Balance.ToString();
         }
 
-        public void UpdateButtonLogic(UpdateControlPanelBtnLogicEvent btnLogicEvent) { }
+        public void ShowButton(HeaderBtnType type, Action onClick)
+        {
+            Button = type;
+            OnButton = onClick;
+        }
     }
 }

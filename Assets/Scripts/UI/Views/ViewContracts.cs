@@ -42,6 +42,7 @@ namespace Scripts.UI.Views
     {
         void UpdateViewContent(string starsAmount, string energyAmount);
         void UpdateCurrency(in CurrencyChangedEvent evt);
-        void UpdateButtonLogic(UpdateControlPanelBtnLogicEvent btnLogicEvent);
+        /// <summary>Shows the screen's header button; the callback stays in the presentation layer.</summary>
+        void ShowButton(HeaderBtnType type, Action onClick);
     }
 }

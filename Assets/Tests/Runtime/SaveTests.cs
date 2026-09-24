@@ -56,13 +56,33 @@ namespace Fives.Runtime.Tests
             var save = new PlayerDataSaveHelper(store, _objects.Config());
             var world = new EcsWorld();
             var systems = new EcsSystems(world)
-                .Add(new StorageSystem()).OneFrame<SaveDataEvent>()
-                .Add(new SaveEveryFrame { Target = new StarService(save) })
+                .Add(new StorageSystem(new StarService(save))).OneFrame<SaveDataEvent>()
+                .Add(new SaveEveryFrame())
                 .Inject(save);
             systems.Init();
             systems.Tick(2);
 
             Assert.That(store.Saves, Is.EqualTo(1), "a request made after StorageSystem is written on the next frame");
+            systems.Destroy();
+            world.Destroy();
+        }
+
+        [Test]
+        public void SeveralSaveRequestsInOneFrame_WriteOnce()
+        {
+            var store = new MemoryStorage();
+            var save = new PlayerDataSaveHelper(store, _objects.Config());
+            var stars = new StarService(save);
+            var world = new EcsWorld();
+            var systems = new EcsSystems(world).Add(new StorageSystem(stars)).OneFrame<SaveDataEvent>().Inject(save);
+            systems.Init();
+            stars.Add(5);
+            world.Send<SaveDataEvent>();
+            world.Send<SaveDataEvent>();
+            systems.Run();
+
+            Assert.That(store.Saves, Is.EqualTo(1));
+            Assert.That(store.Data.Stars, Is.EqualTo(205), "the save holds every service's current data");
             systems.Destroy();
             world.Destroy();
         }
@@ -145,7 +165,7 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             var view = new FakeMainMenuView();
 
-            new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world), session, world)
+            new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world), session, new FakeHeaderPanelView(), world)
                 .Initialize(view);
 
             Assert.That(save.GetPlayerData().Energy.LastRecoveryTime, Is.Not.EqualTo(default(DateTime)));
