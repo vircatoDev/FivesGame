@@ -90,3 +90,8 @@ format details, verification results and remaining manual checks.
 
 These should use the same ECS command flow where they affect gameplay. Storage,
 platform APIs and content loading can remain services behind the relevant systems.
+
+## Decisions
+
+- [ADR 0001: Keep GameStartup as the single ECS composition point](adr/0001-keep-gamestartup-composition.md)
+- [ADR 0002: Keep run state in GameSession](adr/0002-keep-run-state-in-gamesession.md)
