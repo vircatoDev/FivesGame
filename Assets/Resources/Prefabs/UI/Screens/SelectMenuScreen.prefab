@@ -564,7 +564,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 7992760621167787552}
-        m_TargetAssemblyTypeName: Scripts.UI.ThemeCardTilt, Assembly-CSharp
+        m_TargetAssemblyTypeName: Scripts.UI.ThemeCardTilt, Fives.Runtime
         m_MethodName: OnTransition
         m_Mode: 0
         m_Arguments:
