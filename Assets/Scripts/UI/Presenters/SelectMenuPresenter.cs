@@ -16,6 +16,7 @@ namespace Scripts.UI.Presenters
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
         private readonly List<ThemeConfig> _themeConfig;
+        private readonly GameSession _session;
         private readonly EcsWorld _world;
 
         private string _selectedTheme;
@@ -25,12 +26,14 @@ namespace Scripts.UI.Presenters
             GameStartService gameStartService,
             StarService starService,
             PlayerProgressService playerProgressService,
+            GameSession session,
             EcsWorld world)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
             _starService = starService;
             _playerProgressService = playerProgressService;
+            _session = session;
             _world = world;
         }
 
@@ -81,8 +84,10 @@ namespace Scripts.UI.Presenters
 
         private void UpdateThemeSelectionView(bool playAnimation)
         {
+            // Center the theme just left, or the one the main menu asked for.
+            var focus = GetSelectedTheme() ?? _session.SelectedTheme;
             var tiles = GetThemeItemData();
-            View.UpdateViewContent(tiles, "SELECT THEME", OnThemeSelected, playAnimation);
+            View.UpdateViewContent(tiles, "SELECT THEME", OnThemeSelected, playAnimation, Math.Max(0, _themeConfig.IndexOf(focus)));
             ClearSelectedTheme();
         }
 
@@ -131,7 +136,7 @@ namespace Scripts.UI.Presenters
                 Id = data.Name,
                 Image = data.Image,
                 TitleText = data.Name,
-                BottomText = IsPuzzleUnlocked(data.Name) ? "COMPLETED" : string.Empty
+                BottomText = IsPuzzleUnlocked(data.Name) ? "Complete" : "Play"
             }).ToArray();
 
             View.UpdateViewContent(tiles, "SELECT PUZZLE", OnStartGame, true);

@@ -138,7 +138,14 @@ namespace Scripts.UI.Views
         public readonly TaskCompletionSource<bool> HideCompletion = new TaskCompletionSource<bool>();
         public Cysharp.Threading.Tasks.UniTask PlayHideAnimation() => new Cysharp.Threading.Tasks.UniTask { Inner = HideCompletion.Task };
         public Cysharp.Threading.Tasks.UniTask PlayShowAnimation() => default;
-        public void UpdateViewContent(string progress, string name, UnityEngine.Sprite sprite) { }
+        public bool IsSliding => false;
+        public Scripts.Models.ThemeCard Previous, Current, Next;
+        public int Direction;
+        public bool CanBrowse;
+        public void ShowThemes(in Scripts.Models.ThemeCard previous, in Scripts.Models.ThemeCard current, in Scripts.Models.ThemeCard next, int direction, bool canBrowse)
+        {
+            Previous = previous; Current = current; Next = next; Direction = direction; CanBrowse = canBrowse;
+        }
     }
     public class HeaderPanelView
     {
@@ -152,7 +159,7 @@ namespace Scripts.UI.Views
     }
     public class SelectMenuView : BaseView
     {
-        public void UpdateViewContent(Scripts.Models.MenuItemData[] data, string title, Action<string> callback, bool animate) { }
+        public void UpdateViewContent(Scripts.Models.MenuItemData[] data, string title, Action<string> callback, bool animate, int centeredItem = 0) { }
         public void UnlockThemeItemByName(Scripts.Models.MenuItemData data, Action<string> callback) { }
         public readonly TaskCompletionSource<bool> HideCompletion = new TaskCompletionSource<bool>();
         public Cysharp.Threading.Tasks.UniTask PlayHideAnimation() => new Cysharp.Threading.Tasks.UniTask { Inner = HideCompletion.Task };

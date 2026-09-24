@@ -19,7 +19,6 @@ Touch UI → TileClickEvent / BoardControlEvent
                        ↓
     BoardProjectionSystem → MoveComponent → TileMoveSystem → uGUI
 
-Replay: optional BoardReplayComponent → BoardReplaySystem → same projection
 Victory: BoardComponent + completed animations → WinCheckSystem
 Exit: GameEndEvent → BoardDestroySystem
 ```
@@ -28,17 +27,16 @@ Exit: GameEndEvent → BoardDestroySystem
 
 - `BoardComponent.State` is the authoritative live board.
 - `BoardHistoryComponent` contains the seed, the accepted swaps and the start time.
-  Undo re-applies and removes the final swap. `TileSelectionComponent` marks a tapped tile.
-- `BoardReplayComponent` is temporary playback data on the same entity. Its board
-  is separate from the live attempt. Removing this component ends playback.
+  Undo re-applies the last swap and moves it to `Undone`; Redo moves it back; a new
+  move clears `Undone`. `TileSelectionComponent` marks a tapped tile.
 - `TileComponent.Cell` is a display destination; `GameSettings.CellToAnchored`
   converts it to a UI position. It cannot determine a legal move or victory.
   `MoveComponent` tracks animation progress only.
 - The existing `GameSession` retains selected content, run lifecycle, and rewards.
-  It has no new board, move, Undo, or replay operations.
+  It has no board, move or Undo operations.
 
 One board entity owns attempt data. Destroying it also discards its history and
-playback state. No cancellation tokens, delayed cleanup tasks, new locks, or run
+selection. No cancellation tokens, delayed cleanup tasks, new locks, or run
 identifiers were added.
 
 ## Systems and ordering
@@ -47,14 +45,15 @@ The `gamePlay` group runs:
 
 1. `BoardSetupSystem`: create one seeded board entity for an active run.
 2. `BoardInitSystem`: create the existing board/tile visuals.
-3. `BoardInputSystem`: accept at most one control or tile tap per tick. Controls
-   take precedence over taps; animation blocks edits. Stop can interrupt replay.
-4. `BoardReplaySystem`: advance playback only after the preceding animation ends.
-5. `BoardProjectionSystem`: synchronize tile destinations with the live/playback
-   board. Initial layout and replay start/stop snap instead of animating all tiles.
+3. `BoardInputSystem`: accept at most one Undo/Redo, swipe or tap per tick, in that
+   order; animation blocks all input.
+4. `BoardProjectionSystem`: synchronize tile destinations with the board. The
+   initial layout appears in place; later changes animate.
+5. `TileHighlightSystem`: raise the selected tile.
 6. `TileMoveSystem`: animate destinations without changing logical board state.
+7. `BoardHudSystem`: push the move count and Undo/Redo availability when they change.
 
-`WinCheckSystem` runs after that group. It reads the live board, ignores replay,
+`WinCheckSystem` runs after that group. It reads the board,
 waits for movement to finish, freezes input, then retains the existing two-second
 result display. `BoardDestroySystem` handles exit and releases the board entity
 and visuals. The one-frame events are cleared after consumers run.
@@ -66,12 +65,12 @@ in `Assembly-CSharp`; VContainer remains the composition root. More assemblies
 will be added only when they enforce a useful dependency boundary. ECS is not
 being replaced with an object-oriented application-service layer.
 
-See [the board, shuffle and replay contracts](BOARD_STATE.md) for invariants,
+See [the board, shuffle and Undo/Redo contracts](BOARD_STATE.md) for invariants,
 format details, verification results and remaining manual checks.
 
 ## Future work, not implemented here
 
-- Replay persistence and share/import UI; daily challenge and best results.
+- Daily challenge and best results.
 - Versioned saves, stable content IDs and explicit migrations.
 - Addressables with clear ownership, RU/EN localization and Input System actions.
 - Unity PlayMode automation, Android build artifacts and device profiling.

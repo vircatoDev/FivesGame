@@ -17,7 +17,7 @@ internal static partial class CorrectnessProbes
     {
         var entity = world.NewEntity();
         entity.Replace(new BoardComponent { State = board });
-        entity.Replace(new BoardHistoryComponent { Seed = seed, Moves = new List<Swap>() });
+        entity.Replace(new BoardHistoryComponent { Seed = seed, Moves = new List<Swap>(), Undone = new List<Swap>() });
         return entity;
     }
 
@@ -38,7 +38,7 @@ internal static partial class CorrectnessProbes
     }
 
     private static EcsSystems CreateBoardSystems(EcsWorld world, GameSession session) => new EcsSystems(world)
-        .Add(new BoardInputSystem()).Add(new BoardReplaySystem()).Add(new BoardProjectionSystem())
+        .Add(new BoardInputSystem()).Add(new BoardProjectionSystem())
         .Add(new TileMoveSystem()).Add(new WinCheckSystem())
         .OneFrame<TileClickEvent>().OneFrame<TileSwipeEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardChangedEvent>().Inject(session);
 
@@ -103,9 +103,10 @@ internal static partial class CorrectnessProbes
         var history = entity.Get<BoardHistoryComponent>().Moves;
         var systems = CreateBoardSystems(world, session);
         systems.Init();
+        var undone = entity.Get<BoardHistoryComponent>().Undone;
         Control(world, systems, BoardControl.Undo);
-        Control(world, systems, BoardControl.Replay);
-        Check("empty history ignores Undo and Replay", history.Count == 0 && !entity.Has<BoardReplayComponent>()
+        Control(world, systems, BoardControl.Redo);
+        Check("empty history ignores Undo and Redo", history.Count == 0 && undone.Count == 0
             && initial.SequenceEqual(Snapshot(board)), "no mutation");
 
         var afterMoves = new List<int[]>();
@@ -116,58 +117,28 @@ internal static partial class CorrectnessProbes
         }
         Check("accepted ECS moves populate history", history.Count == 3, "three moves");
         Control(world, systems, BoardControl.Undo);
-        Check("Undo animates and removes last move", history.Count == 2
-            && afterMoves[1].SequenceEqual(Snapshot(board))
-            && MovingTiles(world) == 2, "previous board restored, both tiles animating");
+        Check("Undo animates and moves the swap to the redo stack", history.Count == 2 && undone.Count == 1
+            && afterMoves[1].SequenceEqual(Snapshot(board)) && MovingTiles(world) == 2, "previous board restored, both tiles animating");
         Control(world, systems, BoardControl.Undo);
         Check("Undo during animation is ignored", history.Count == 2, "no overlapping inverse moves");
         Settle(systems);
-
-        var live = Snapshot(board);
-        Control(world, systems, BoardControl.Replay);
-        Check("Replay starts from seeded layout", entity.Has<BoardReplayComponent>()
-            && initial.SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State)), "separate playback board");
-        world.NewEntity().Replace(new TileClickEvent { Id = board[0] });
-        systems.Run();
-        Check("Replay ignores taps and preserves live history", history.Count == 2 && live.SequenceEqual(Snapshot(board)),
-            "only the playback component advanced");
-        Check("Replay advances the board and schedules the visible tile", entity.Get<BoardReplayComponent>().Position == 1
-            && afterMoves[0].SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State))
-            && MovingTiles(world) == 2, "first recorded layout, with both tiles animating");
-        systems.Run();
-        Check("Replay waits for tile animation", entity.Get<BoardReplayComponent>().Position == 1
-            && afterMoves[0].SequenceEqual(Snapshot(entity.Get<BoardReplayComponent>().State)), "no skipped frames");
-        Control(world, systems, BoardControl.StopReplay);
-        Check("Stop during replay animation restores live view", !entity.Has<BoardReplayComponent>()
-            && live.SequenceEqual(Snapshot(board)) && Enumerable.Range(0, 9).All(cell =>
-                tiles[board[cell]].Get<TileComponent>().Rect.anchoredPosition.Equals(new Vector2(cell % 3, -(cell / 3)))),
-            "no leftover moving tiles");
-        Control(world, systems, BoardControl.Replay);
-        for (var step = 0; step < history.Count; step++)
-        {
-            systems.Run();
-            var replay = entity.Get<BoardReplayComponent>();
-            Check($"Replay reconstructs step {step + 1}", replay.Position == step + 1
-                && afterMoves[step].SequenceEqual(Snapshot(replay.State))
-                && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Cell == cell), "logical state and projection match recorded move");
-            for (var frame = 0; frame < 3; frame++) systems.Run();
-            Check($"Replay completes visible step {step + 1}", replay.Position == entity.Get<BoardReplayComponent>().Position
-                && Enumerable.Range(0, 9).All(cell => tiles[replay.State[cell]].Get<TileComponent>().Rect.anchoredPosition
-                    .Equals(new Vector2(cell % 3, -(cell / 3)))), "tile reached its expected screen position before the next step");
-        }
-        systems.Run();
-        Check("completed replay returns to live game without win", !entity.Has<BoardReplayComponent>()
-            && !session.IsCompleted && history.Count == 2 && live.SequenceEqual(Snapshot(board))
-            && world.GetFilter(typeof(EcsFilter<GameEndEvent>)).GetEntitiesCount() == 0,
-            "no result or reward flow from playback");
+        Control(world, systems, BoardControl.Undo); Settle(systems);
+        Control(world, systems, BoardControl.Redo);
+        Check("Redo re-applies the last undone swap", history.Count == 2 && undone.Count == 1
+            && afterMoves[1].SequenceEqual(Snapshot(board)) && MovingTiles(world) == 2, "one step forward, animated");
+        Settle(systems);
+        Control(world, systems, BoardControl.Redo); Settle(systems);
+        Check("Redo walks forward to the latest move", history.Count == 3 && undone.Count == 0
+            && afterMoves[2].SequenceEqual(Snapshot(board)), "all undone moves restored");
+        Control(world, systems, BoardControl.Redo); Settle(systems);
+        Check("Redo with nothing undone does nothing", history.Count == 3 && afterMoves[2].SequenceEqual(Snapshot(board)), "no mutation");
 
         while (history.Count > 0) { Control(world, systems, BoardControl.Undo); Settle(systems); }
-        Check("Undo all returns exactly to shuffled layout", initial.SequenceEqual(Snapshot(board)), "seeded layout restored");
+        Check("Undo all returns exactly to shuffled layout", initial.SequenceEqual(Snapshot(board)) && undone.Count == 3,
+            "seeded layout restored");
         Swipe(world, systems, board[8], 0, -1); Settle(systems);
-        Control(world, systems, BoardControl.Replay);
-        Check("new move after Undo replaces abandoned history", entity.Get<BoardReplayComponent>().Data.Moves.Count == 1
-            && entity.Get<BoardReplayComponent>().Data.Moves[0].Equals(new Swap(5, 8)), "replay contains the current path only");
-        Control(world, systems, BoardControl.StopReplay);
+        Check("new move after Undo clears the redo stack", history.Count == 1 && undone.Count == 0
+            && history[0].Equals(new Swap(5, 8)), "abandoned moves cannot be redone");
         Tap(world, systems, -1);
         Swipe(world, systems, -1, 1, 0);
         Check("invalid tile ID leaves board and history intact", history.Count == 1
@@ -226,18 +197,25 @@ internal static partial class CorrectnessProbes
         var board = entity.Get<BoardComponent>().State;
         var tiles = CreateTiles(world, board);
         var systems = new EcsSystems(world).Add(new BoardProjectionSystem())
-            .OneFrame<BoardChangedEvent>().Inject(session);
+            .OneFrame<BoardChangedEvent>().OneFrame<BoardInitializedEvent>().Inject(session);
         systems.Init();
         // A sentinel proves an idle tick does not walk and rewrite tile positions.
         tiles[0].Get<TileComponent>().Cell = -1;
         systems.Run();
         Check("idle projection leaves tiles untouched", tiles[0].Get<TileComponent>().Cell == -1
             && !tiles[0].Has<MoveComponent>(), "no board event, no projection work");
-        world.NewEntity().Replace(new BoardChangedEvent { Snap = true });
+        world.NewEntity().Get<BoardInitializedEvent>();
         systems.Run();
-        Check("refresh projects every tile", Enumerable.Range(0, 9).All(cell =>
+        Check("initial projection places every tile instantly", Enumerable.Range(0, 9).All(cell =>
             tiles[board[cell]].Get<TileComponent>().Cell == cell
-            && tiles[board[cell]].Get<MoveComponent>().InstaMove), "explicit refresh restores the view");
+            && tiles[board[cell]].Get<MoveComponent>().InstaMove), "first layout appears in place");
+        foreach (var tile in tiles) tile.Del<MoveComponent>();
+        board.TrySwap(new Swap(0, 1));
+        world.NewEntity().Get<BoardChangedEvent>();
+        systems.Run();
+        Check("a board change animates only the moved tiles", tiles[board[0]].Has<MoveComponent>() && tiles[board[1]].Has<MoveComponent>()
+            && !tiles[board[0]].Get<MoveComponent>().InstaMove && Enumerable.Range(2, 7).All(cell => !tiles[board[cell]].Has<MoveComponent>()),
+            "two animated tiles");
         systems.Destroy(); world.Destroy();
     }
 
@@ -252,19 +230,21 @@ internal static partial class CorrectnessProbes
             .OneFrame<GameEndEvent>().Inject(session);
         systems.Init(); systems.Run();
         var boards = (EcsFilter<BoardComponent>)world.GetFilter(typeof(EcsFilter<BoardComponent>));
-        boards.GetEntity(0).Get<BoardReplayComponent>();
+        boards.GetEntity(0).Get<TileSelectionComponent>();
+        boards.GetEntity(0).Get<BoardHistoryComponent>().Undone.Add(new Swap(0, 1));
         world.NewEntity().Get<GameEndEvent>();
         systems.Run();
-        Check("cleanup removes board, history and replay even without a view", boards.GetEntitiesCount() == 0
+        Check("cleanup removes board, history and selection even without a view", boards.GetEntitiesCount() == 0
             && world.GetFilter(typeof(EcsFilter<BoardHistoryComponent>)).GetEntitiesCount() == 0
-            && world.GetFilter(typeof(EcsFilter<BoardReplayComponent>)).GetEntitiesCount() == 0 && !session.IsRunning,
+            && world.GetFilter(typeof(EcsFilter<TileSelectionComponent>)).GetEntitiesCount() == 0 && !session.IsRunning,
             "one entity owns all attempt data");
         systems.Run();
         Check("ended run cannot recreate a board", boards.GetEntitiesCount() == 0, "Playing state may still be awaiting navigation");
         session.BeginRun(); systems.Run();
         Check("next run creates fresh history", boards.GetEntitiesCount() == 1
             && boards.GetEntity(0).Get<BoardHistoryComponent>().Moves.Count == 0
-            && !boards.GetEntity(0).Has<BoardReplayComponent>(), "no old playback or moves");
+            && boards.GetEntity(0).Get<BoardHistoryComponent>().Undone.Count == 0
+            && !boards.GetEntity(0).Has<TileSelectionComponent>(), "no old moves, redo stack or selection");
         systems.Destroy(); world.Destroy();
     }
 

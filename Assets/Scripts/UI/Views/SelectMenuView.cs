@@ -62,14 +62,17 @@ namespace Scripts.UI.Views
         }
 
         public void UpdateViewContent(MenuItemData[] newContent, string titleText, Action<string> onClick,
-            bool playAnimation)
+            bool playAnimation, int centeredItem = 0)
         {
             Sequence sequence = CreateUpdateSequence(playAnimation);
 
             sequence.AppendCallback(() =>
             {
                 UpdateScrollViewContent(newContent, onClick);
-                textContainer.GetComponentInChildren<TextMeshProUGUI>().text = titleText;
+                if (centeredItem > 0)
+                    scrollSnap.GoToPanel(centeredItem);
+                // Two-word titles sit on the plate: the first word on the cloud, the second on the plank.
+                textContainer.GetComponentInChildren<TextMeshProUGUI>().text = titleText.Replace(' ', '\n');
             });
 
             sequence.Append(CreateRestoreSequence());

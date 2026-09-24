@@ -30,11 +30,9 @@ compiler and resolved packages.
 
 - Four fixed shuffle vectors protect algorithm stability, including zero and negative seeds.
 - 4,004 seed/size combinations are deterministic permutations with no tile in its own cell.
-- Replay reconstructs each swap, accepts a full solving path, and rejects invalid,
-  post-win or version-mismatched data; histories are copied.
 
-There are currently 65 standalone NUnit cases. The 66 local service/ECS probes
-also cover Undo, replay, interruption, cleanup/restart and animation/input ordering.
+There are currently 56 standalone NUnit cases. The 64 local service/ECS probes
+also cover Undo/Redo, cleanup/restart and animation/input ordering.
 Those probes use engine substitutes and are not in the GitHub-hosted domain workflow.
 
 The fixtures also remain available in Unity's EditMode Test Runner through the

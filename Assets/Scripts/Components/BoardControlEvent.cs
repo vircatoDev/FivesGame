@@ -1,6 +1,6 @@
 namespace Scripts.Components
 {
-    public enum BoardControl { Undo, Replay, StopReplay }
+    public enum BoardControl { Undo, Redo }
 
     public struct BoardControlEvent
     {

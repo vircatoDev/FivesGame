@@ -9,7 +9,6 @@ namespace Scripts.Systems
     {
         private readonly GameSession _session;
         private readonly EcsFilter<BoardComponent> _boards;
-        private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<TileComponent> _tiles;
         private readonly EcsFilter<BoardInitializedEvent> _initialized;
         private readonly EcsFilter<BoardChangedEvent> _changes;
@@ -22,11 +21,9 @@ namespace Scripts.Systems
             if (_initialized.GetEntitiesCount() == 0 && _changes.GetEntitiesCount() == 0)
                 return;
 
-            var board = _replays.GetEntitiesCount() > 0 ? _replays.Get1(0).State : _boards.Get1(0).State;
-            var initial = _initialized.GetEntitiesCount() > 0;
-            var snap = initial;
-            foreach (var i in _changes)
-                snap |= _changes.Get1(i).Snap;
+            var board = _boards.Get1(0).State;
+            // The first layout appears in place; later changes animate.
+            var snap = _initialized.GetEntitiesCount() > 0;
             foreach (var i in _tiles)
             {
                 ref var tile = ref _tiles.Get1(i);

@@ -8,6 +8,9 @@ namespace Scripts.UI.Views
 {
     public class MenuItemView : MonoBehaviour
     {
+        [SerializeField] private Image frame;
+        [SerializeField] private Sprite centeredFrame;
+        [SerializeField] private Sprite sideFrame;
         [SerializeField] private Image itemImage;
         [SerializeField] private GameObject lockImage;
         [SerializeField] private TextMeshProUGUI itemText;
@@ -54,6 +57,8 @@ namespace Scripts.UI.Views
             itemButton.onClick.RemoveAllListeners();
             itemButton.onClick.AddListener(() => onTileClick?.Invoke(_tileId));
         }
+
+        public void SetCentered(bool centered) => frame.sprite = centered ? centeredFrame : sideFrame;
 
         public string GetId()
         {

@@ -29,8 +29,8 @@ namespace Scripts.UI.Views
             _initialRightBlockPosition = infoRectTransform.anchoredPosition;
         }
 
-        public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) =>
-            controls?.Refresh(status, canUndo, canReplay, replaying);
+        public void UpdateControls(string moves, bool canUndo, bool canRedo) =>
+            controls?.Refresh(moves, canUndo, canRedo);
 
         public void OnEnable()
         {

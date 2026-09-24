@@ -30,10 +30,7 @@ namespace Scripts.UI.Presenters
 
         public void ShowHud(in BoardHud hud)
         {
-            var status = hud.Replaying
-                ? $"Повтор: {hud.ReplayPosition}/{hud.Moves}"
-                : $"Ходов: {hud.Moves}  ·  Seed: {hud.Seed}";
-            View.UpdateControls(status, hud.CanUndo, hud.CanReplay, hud.Replaying);
+            View.UpdateControls($"Moves: {hud.Moves}", hud.CanUndo, hud.CanRedo);
         }
 
         private void BackToMainMenu()

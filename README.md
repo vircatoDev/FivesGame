@@ -22,7 +22,7 @@ It was originally created as a two-week test assignment and is now maintained wi
 Development now focuses on a compact, verifiable architecture:
 
 - ECS gameplay systems with deterministic pure-C# board rules;
-- atomic moves, Undo, Replay, and seeded daily challenges;
+- atomic moves, Undo/Redo, and seeded daily challenges;
 - versioned saves with migrations and corruption recovery;
 - explicit async and resource ownership;
 - Addressables, RU/EN localization, and modern input;
@@ -53,8 +53,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit and pull-request rules.
 ## Verification status
 
 Gameplay now uses a seeded board owned by an ECS entity. Systems handle input,
-Undo, replay, projection, animation and completion. The current unfinished attempt
-has touch controls for Undo and replay; persistence/share codes and daily challenges
+Undo/Redo, projection, animation and completion. The current unfinished attempt
+has touch controls for Undo and Redo; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
 During the review fixes, **74 standalone NUnit tests** and **59 local service/ECS
@@ -63,7 +63,7 @@ at the owner's request: Domain, domain tests, runtime and Editor assemblies comp
 with Unity 6000.0.71f1 references. PlayMode interaction, the final toolbar layout,
 Android builds and device profiling remain unverified.
 
-The Riverside Village visual redesign is preserved. Undo/replay controls are
+The Kids Puzzle visual redesign replaces Riverside Village. Undo/Redo controls are
 serialized in `GamePlayScreen.prefab`; the view no longer builds UI at runtime.
 
 See [the board contract and acceptance steps](docs/BOARD_STATE.md),

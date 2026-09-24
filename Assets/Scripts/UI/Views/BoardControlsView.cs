@@ -2,6 +2,7 @@ using System;
 using Scripts.Components;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Scripts.UI.Views
 {
@@ -9,38 +10,35 @@ namespace Scripts.UI.Views
     public sealed class BoardControlsView : MonoBehaviour
     {
         [SerializeField] private UnityEngine.UI.Button undoButton;
-        [SerializeField] private UnityEngine.UI.Button replayButton;
-        [SerializeField] private TextMeshProUGUI replayLabel;
-        [SerializeField] private TextMeshProUGUI statusLabel;
+        [FormerlySerializedAs("replayButton")]
+        [SerializeField] private UnityEngine.UI.Button redoButton;
+        [SerializeField] private TextMeshProUGUI movesLabel;
 
         private Action<BoardControl> _onControl;
-        private bool _replaying;
 
         public void Initialize(Action<BoardControl> onControl) => _onControl = onControl;
 
         private void Awake()
         {
             undoButton.onClick.AddListener(Undo);
-            replayButton.onClick.AddListener(Replay);
-            Refresh("", false, false, false);
+            redoButton.onClick.AddListener(Redo);
+            Refresh("", false, false);
         }
 
         private void OnDestroy()
         {
             undoButton.onClick.RemoveListener(Undo);
-            replayButton.onClick.RemoveListener(Replay);
+            redoButton.onClick.RemoveListener(Redo);
         }
 
-        public void Refresh(string status, bool canUndo, bool canReplay, bool replaying)
+        public void Refresh(string moves, bool canUndo, bool canRedo)
         {
-            statusLabel.text = status;
+            movesLabel.text = moves;
             undoButton.interactable = canUndo;
-            replayButton.interactable = canReplay;
-            _replaying = replaying;
-            replayLabel.text = replaying ? "Стоп" : "Повтор";
+            redoButton.interactable = canRedo;
         }
 
         private void Undo() => _onControl?.Invoke(BoardControl.Undo);
-        private void Replay() => _onControl?.Invoke(_replaying ? BoardControl.StopReplay : BoardControl.Replay);
+        private void Redo() => _onControl?.Invoke(BoardControl.Redo);
     }
 }

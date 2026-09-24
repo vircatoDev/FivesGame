@@ -26,6 +26,7 @@ namespace Scripts.Systems
             {
                 Seed = seed,
                 Moves = new List<Swap>(),
+                Undone = new List<Swap>(),
                 StartTime = Time.realtimeSinceStartup
             });
         }

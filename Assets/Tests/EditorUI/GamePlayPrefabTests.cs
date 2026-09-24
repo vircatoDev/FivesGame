@@ -31,24 +31,21 @@ namespace Fives.UI.Tests
                     var controls = screen.transform.Find("Panel/BoardControls");
                     Assert.That(controls, Is.Not.Null);
                     var undo = controls.Find("Undo").GetComponent<Button>();
-                    var replay = controls.Find("Replay").GetComponent<Button>();
-                    var status = controls.Find("Status/Label").GetComponent<TextMeshProUGUI>();
-                    var replayLabel = controls.Find("Replay/Label").GetComponent<TextMeshProUGUI>();
+                    var redo = controls.Find("Redo").GetComponent<Button>();
+                    var moves = controls.Find("Moves/Label").GetComponent<TextMeshProUGUI>();
                     Assert.That(undo.interactable, Is.False);
-                    Assert.That(replay.interactable, Is.False);
+                    Assert.That(redo.interactable, Is.False);
 
                     var refresh = view.GetType().GetMethod("UpdateControls");
                     Assert.That(refresh, Is.Not.Null);
-                    refresh.Invoke(view, new object[] { "Ходов: 2", true, true, false });
-                    Assert.That(status.text, Is.EqualTo("Ходов: 2"));
-                    Assert.That(undo.interactable && replay.interactable, Is.True);
-                    Assert.That(replayLabel.text, Is.EqualTo("Повтор"));
+                    refresh.Invoke(view, new object[] { "Moves: 2", true, false });
+                    Assert.That(moves.text, Is.EqualTo("Moves: 2"));
+                    Assert.That(undo.interactable, Is.True);
+                    Assert.That(redo.interactable, Is.False);
 
-                    refresh.Invoke(view, new object[] { "Повтор: 1/2", false, true, true });
-                    Assert.That(status.text, Is.EqualTo("Повтор: 1/2"));
-                    Assert.That(undo.interactable, Is.False);
-                    Assert.That(replay.interactable, Is.True);
-                    Assert.That(replayLabel.text, Is.EqualTo("Стоп"));
+                    refresh.Invoke(view, new object[] { "Moves: 1", true, true });
+                    Assert.That(moves.text, Is.EqualTo("Moves: 1"));
+                    Assert.That(undo.interactable && redo.interactable, Is.True);
                     screen.SetActive(false);
                     screen.SetActive(true);
                     UnityEngine.Object.Destroy(screen);
@@ -70,9 +67,8 @@ namespace Fives.UI.Tests
         }
 
         [TestCase("undoButton", typeof(Button))]
-        [TestCase("replayButton", typeof(Button))]
-        [TestCase("replayLabel", typeof(TextMeshProUGUI))]
-        [TestCase("statusLabel", typeof(TextMeshProUGUI))]
+        [TestCase("redoButton", typeof(Button))]
+        [TestCase("movesLabel", typeof(TextMeshProUGUI))]
         public void ImportedPrefabHasControlReference(string field, Type expectedType)
         {
             AssetDatabase.ImportAsset(PrefabPath, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);

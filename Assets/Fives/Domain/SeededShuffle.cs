@@ -5,7 +5,7 @@ namespace Fives.Domain
     public static class SeededShuffle
     {
         // Version 2: xorshift32 driving Sattolo's algorithm. The result is a single cycle,
-        // so no tile starts in its own cell. Changing this algorithm requires a new replay format version.
+        // so no tile starts in its own cell. Changing this algorithm changes the layout of every seed.
         public static BoardState Create(int size, int seed)
         {
             var tiles = new int[BoardMath.CellCount(size)];
