@@ -32,6 +32,7 @@ namespace Scripts
         private GameStateMachine _stateMachine;
         private GameSession _gameSession;
         private GamePlayPresenter _gamePlayPresenter;
+        private PlayerProgressService _progressService;
 
 
         [Inject]
@@ -42,7 +43,8 @@ namespace Scripts
             StarService starService,
             GameStateMachine stateMachine, GameSession gameSession,
             PlayerDataSaveHelper playerDataSaveHelper,
-            GamePlayPresenter gamePlayPresenter)
+            GamePlayPresenter gamePlayPresenter,
+            PlayerProgressService progressService)
         {
             _world = world;
             _config = config;
@@ -53,6 +55,7 @@ namespace Scripts
             _gameSession = gameSession;
             _playerDataSaveHelper = playerDataSaveHelper;
             _gamePlayPresenter = gamePlayPresenter;
+            _progressService = progressService;
         }
 
         private void Start()
@@ -129,6 +132,18 @@ namespace Scripts
         {
             _mainSystems.Run();
         }
+
+        // Mobile OSes may kill a paused app without further callbacks, so unsaved settings and progress are written here.
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused)
+                SaveAll();
+        }
+
+        private void OnApplicationQuit() => SaveAll();
+
+        private void SaveAll() =>
+            _playerDataSaveHelper.SaveAll(_soundService, _energyService, _starService, _progressService);
 
         private void OnDestroy()
         {

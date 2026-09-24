@@ -9,6 +9,5 @@ namespace Scripts.Models
         public string TitleText;
         public string BottomText;
         public bool Offer;
-        public MenuItemType MenuItemType;
     }
 }

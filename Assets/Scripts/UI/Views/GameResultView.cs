@@ -1,7 +1,6 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Scripts.Configs;
+using Fives.Domain;
 using Scripts.Models;
 using Scripts.UI.Presenters;
 using TMPro;
@@ -39,21 +38,13 @@ namespace Scripts.UI.Views
             return default;
         }
 
-        public void UpdateViewContent(GameResult gameSessionLastGameResult, ThemeConfig selectedTheme, PuzzleData selectedPuzzle)
+        public void UpdateViewContent(GameResult result, string themeName, ThemeProgress progress)
         {
-            var puzzleIndex = Array.IndexOf(selectedTheme.Puzzles, selectedPuzzle);
-            var puzzlesCount = selectedTheme.Puzzles.Length;
-
-            if (gameSessionLastGameResult == null)
-                gameSessionLastGameResult = new GameResult();
-
-            puzzleIndex += 1;
-        
-            starsRewardText.text = $"+{gameSessionLastGameResult.StarCount} Stars";
-            statsText.text = $"Moves: {gameSessionLastGameResult.TurnCount}  ·  Time: {gameSessionLastGameResult.GameTime:mm\\:ss}";
-            levelProgressText.text = $"{puzzleIndex}/{puzzlesCount}";
-            themeNameText.text = selectedTheme.ThemeName;
-            var target = (float)puzzleIndex / (float)puzzlesCount;
+            starsRewardText.text = $"+{result.StarCount} Stars";
+            statsText.text = $"Moves: {result.TurnCount}  ·  Time: {result.GameTime:mm\\:ss}";
+            levelProgressText.text = progress.ToString();
+            themeNameText.text = themeName;
+            var target = progress.Total == 0 ? 1f : (float)progress.Completed / progress.Total;
             themeSliderProgress
                 .DOValue(target, 1f)
                 .SetDelay(0.7f)

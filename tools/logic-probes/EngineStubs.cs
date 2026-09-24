@@ -8,6 +8,7 @@ namespace UnityEngine
     public class SerializeField : Attribute { }
     public class Header : Attribute { public Header(string value) { } }
     public class CreateAssetMenuAttribute : Attribute { public string menuName; }
+    public class TooltipAttribute : Attribute { public TooltipAttribute(string tooltip) { } }
     public class ScriptableObject { }
     public class Object
     {
@@ -166,7 +167,8 @@ namespace Scripts.UI.Views
     }
     public class GameResultView : BaseView
     {
-        public void UpdateViewContent(Scripts.Models.GameResult result, Scripts.Configs.ThemeConfig theme, Scripts.Models.PuzzleData puzzle) { }
+        public string Progress;
+        public void UpdateViewContent(Scripts.Models.GameResult result, string themeName, Fives.Domain.ThemeProgress progress) { Progress = progress.ToString(); }
         public Cysharp.Threading.Tasks.UniTask PlayShowAnimation() => default;
     }
 }

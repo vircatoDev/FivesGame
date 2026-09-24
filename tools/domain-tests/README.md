@@ -31,7 +31,7 @@ compiler and resolved packages.
 - Four fixed shuffle vectors protect algorithm stability, including zero and negative seeds.
 - 4,004 seed/size combinations are deterministic permutations with no tile in its own cell.
 
-There are currently 56 standalone NUnit cases. The 64 local service/ECS probes
+There are currently 59 standalone NUnit cases. The 70 local service/ECS probes
 also cover Undo/Redo, cleanup/restart and animation/input ordering.
 Those probes use engine substitutes and are not in the GitHub-hosted domain workflow.
 

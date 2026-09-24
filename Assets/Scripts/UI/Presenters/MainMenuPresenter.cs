@@ -47,7 +47,7 @@ namespace Scripts.UI.Presenters
             _world.PlaySound(AudioKeyCollection.MenuClick);
 
             var theme = _themes[_themeIndex];
-            if (!_playerProgressService.GetProgressData().UnlockedThemes.Contains(theme.ThemeName))
+            if (!_playerProgressService.IsUnlocked(theme))
             {
                 // A locked theme is bought on the theme screen, which opens centered on it.
                 await OpenThemeScreen(theme);
@@ -105,27 +105,22 @@ namespace Scripts.UI.Presenters
             _world.ChangeState(GameStateType.SelectMenu);
         }
 
+        // The most recently unlocked theme; the first theme when no unlocked id matches the config
+        // (for example, a save from a build with themes that were later removed).
         private ThemeConfig GetLastActiveTheme()
         {
-            var lastActiveTheme = _playerProgressService.GetProgressData().UnlockedThemes
-                .Last(name => _themeConfig.Themes.Any(theme => theme.ThemeName == name));
-            var theme = _themeConfig.Themes.FirstOrDefault(x => x.ThemeName == lastActiveTheme);
-            return theme;
-        }
-
-        private PuzzleData FindNextUncompletedPuzzle(ThemeConfig lastUnlockedTheme)
-        {
-            var completedPuzzles = _playerProgressService.GetProgressData().CompletedPuzzles;
-
-            foreach (var puzzle in lastUnlockedTheme.Puzzles)
+            var unlocked = _playerProgressService.GetProgressData().UnlockedThemes;
+            for (var i = unlocked.Count - 1; i >= 0; i--)
             {
-                if (!completedPuzzles.Contains(puzzle.Name))
-                {
-                    return puzzle;
-                }
+                var theme = _themes.FirstOrDefault(t => t.Id == unlocked[i]);
+                if (theme != null)
+                    return theme;
             }
 
-            return lastUnlockedTheme.Puzzles.Last();
+            return _themes[0];
         }
+
+        private PuzzleData FindNextUncompletedPuzzle(ThemeConfig theme) =>
+            theme.Puzzles.FirstOrDefault(puzzle => !_playerProgressService.IsCompleted(puzzle)) ?? theme.Puzzles.Last();
     }
 }

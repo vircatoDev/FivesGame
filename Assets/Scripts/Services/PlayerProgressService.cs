@@ -23,24 +23,24 @@ namespace Scripts.Services
             SetDataFromSave(saveHelper.GetPlayerData().PlayerProgress);
         }
 
-        public void UnlockTheme(string theme)
+        public bool IsUnlocked(ThemeConfig theme) => _progressData.UnlockedThemes.Contains(theme.Id);
+
+        public bool IsCompleted(PuzzleData puzzle) => _progressData.CompletedPuzzles.Contains(puzzle.Id);
+
+        public void Unlock(ThemeConfig theme)
         {
-            if (!_progressData.UnlockedThemes.Contains(theme))
-            {
-                _progressData.UnlockedThemes.Add(theme);
-            }
+            if (!IsUnlocked(theme))
+                _progressData.UnlockedThemes.Add(theme.Id);
         }
 
-        public void MarkPuzzleCompleted(string puzzleId)
+        public void MarkCompleted(PuzzleData puzzle)
         {
-            if (!_progressData.CompletedPuzzles.Contains(puzzleId))
-            {
-                _progressData.CompletedPuzzles.Add(puzzleId);
-            }
+            if (!IsCompleted(puzzle))
+                _progressData.CompletedPuzzles.Add(puzzle.Id);
         }
 
         public ThemeProgress GetThemeProgress(ThemeConfig theme) =>
-            new ThemeProgress(theme.Puzzles.Select(p => p.Name).ToArray(), _progressData.CompletedPuzzles);
+            new ThemeProgress(theme.Puzzles.Select(p => p.Id).ToArray(), _progressData.CompletedPuzzles);
 
         public PlayerProgressData GetProgressData()
         {
