@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Fives.Domain;
 using Leopotam.Ecs;
@@ -19,6 +20,7 @@ internal static partial class CorrectnessProbes
     private static void RunLifecycleProbes()
     {
         CheckRepeatedStart();
+        CheckMenuCarousel();
         CheckMovementAndWin();
         CheckOfflineRecovery();
         CheckSaveRecovery();
@@ -45,11 +47,11 @@ internal static partial class CorrectnessProbes
         var start = new GameStartService(session, energy, world);
         var progress = new PlayerProgressService(save);
         var view = new SelectMenuView();
-        var select = new SelectMenuPresenter(config, start, new StarService(save), progress, world);
+        var select = new SelectMenuPresenter(config, start, new StarService(save), progress, session, world);
         SetView(select, view);
         SetField(select, "_selectedTheme", "Cities");
-        var main = new MainMenuPresenter(config, progress, start, world);
-        SetView(main, new MainMenuView());
+        var main = new MainMenuPresenter(config, progress, start, session, world);
+        main.Initialize(new MainMenuView());
 
         select.OnStartGame("One");
         select.OnStartGame("One");
@@ -68,6 +70,44 @@ internal static partial class CorrectnessProbes
         energy.Spend(energy.GetBalance());
         Check("no energy leaves session idle", !start.TryStart(config.Themes[0], puzzle) && !session.IsRunning,
             "no run created");
+        world.Destroy();
+    }
+
+    private static void CheckMenuCarousel()
+    {
+        var config = CreateConfig();
+        PuzzleData[] Puzzles(params string[] names) => names.Select(n => new PuzzleData { Name = n, Image = new Sprite() }).ToArray();
+        config.Themes[0].Puzzles = Puzzles("Paris");
+        config.Themes[1].Puzzles = Puzzles("Corgi", "Pug", "Shepherd");
+        config.Themes.Add(new ThemeConfig { ThemeName = "Cats", UnlockCost = 60, Puzzles = Puzzles("Siamese", "Ginger") });
+        config.DefaultUnlockedThemes = new[] { "Dogs", "Cats" };
+        var dogs = config.Themes[1]; var cats = config.Themes[2];
+        var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+        save.GetPlayerData().PlayerProgress.CompletedPuzzles.Add("Corgi");
+        var session = new GameSession(CreateConfig());
+        var world = new EcsWorld();
+        var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
+        var menu = new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world), session, world);
+        var view = new MainMenuView();
+        menu.Initialize(view);
+        Check("carousel opens on the last active theme with its next puzzle", view.Current.Title == "Cats"
+            && view.Current.Image == cats.Puzzles[0].Image && view.CanBrowse && view.Direction == 0, view.Current.Title);
+        Check("carousel lists every theme, locked ones included", view.Previous.Title == "Dogs" && view.Next.Title == "Cities",
+            $"{view.Previous.Title} | {view.Next.Title}");
+        Check("untouched theme shows 0/N and its first puzzle", view.Next.Progress == "0/1" && view.Next.Image == config.Themes[0].Puzzles[0].Image,
+            view.Next.Progress);
+        view.HideCompletion.SetResult(true);
+        menu.OnNextTheme();
+        menu.OnStartGame();
+        Check("play on a locked theme opens the theme screen focused on it", !session.IsRunning
+            && session.SelectedTheme == config.Themes[0]
+            && world.GetFilter(typeof(EcsFilter<ChangeStateEvent>)).GetEntitiesCount() == 1, session.SelectedTheme?.ThemeName);
+        menu.OnNextTheme();
+        Check("next theme wraps and shows its first uncompleted puzzle", view.Current.Title == "Dogs"
+            && view.Current.Image == dogs.Puzzles[1].Image && view.Current.Progress == "1/3" && view.Direction == 1, view.Current.Progress);
+        menu.OnStartGame();
+        Check("play starts the centered theme's next puzzle", session.IsRunning && session.SelectedTheme == dogs
+            && session.SelectedPuzzle == dogs.Puzzles[1], session.SelectedPuzzle?.Name);
         world.Destroy();
     }
 
@@ -179,11 +219,13 @@ internal static partial class CorrectnessProbes
         Check("successful save retains corrupt backup", PlayerPrefs.HasKey("GameSaveData.corrupt"), "backup still available");
         PlayerPrefs.SetString("GameSaveData", "{\"Energy\":{},\"PlayerProgress\":{\"UnlockedThemes\":[\"RemovedTheme\",null]}}");
         var config = CreateConfig();
+        config.Themes[1].Puzzles = new[] { new PuzzleData { Name = "Corgi" } };
         var recoveredSave = new PlayerDataSaveHelper(storage, config);
         var world = new EcsWorld();
         var energy = new EnergyService(config, recoveredSave, new FakeClock { UtcNow = DateTime.UtcNow });
+        var menuSession = new GameSession(CreateConfig());
         var menu = new MainMenuPresenter(config, new PlayerProgressService(recoveredSave),
-            new GameStartService(new GameSession(CreateConfig()), energy, world), world);
+            new GameStartService(menuSession, energy, world), menuSession, world);
         menu.Initialize(new MainMenuView());
         Check("partial save and removed theme still allow menu startup",
             recoveredSave.GetPlayerData().Energy.LastRecoveryTime != default

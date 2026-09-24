@@ -23,12 +23,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e3226d796d629e2488eb79d776c7b15d, type: 2}
   Themes:
   - {fileID: 11400000, guid: f44e75fe2f7f2dc479181e60bf11e762, type: 2}
-  - {fileID: 11400000, guid: 62e4259944a70b94190f362a284ddef6, type: 2}
-  - {fileID: 11400000, guid: efad52d7dad21a14f9d0c384875a8870, type: 2}
+  - {fileID: 11400000, guid: ae1b2c70dcdc941f5825b5e4f150c2e0, type: 2}
+  - {fileID: 11400000, guid: dceaf709e0bd342aa94dbac4cb470dd2, type: 2}
   InitialEnergy: 5
   MaxEnergy: 10
   EnergyRecoveryIntervalHours: 1
   InitialStars: 80
+  RewardStars: 10
   DefaultUnlockedThemes:
   - Dogs
   AudioClipsCollection:

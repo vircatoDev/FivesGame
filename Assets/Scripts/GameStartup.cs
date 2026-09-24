@@ -118,7 +118,6 @@ namespace Scripts
                 .Add(new BoardSetupSystem())
                 .Add(new BoardInitSystem(_gameLayer))
                 .Add(new BoardInputSystem())
-                .Add(new BoardReplaySystem())
                 .Add(new BoardProjectionSystem())
                 .Add(new TileHighlightSystem())
                 .Add(new TileMoveSystem())

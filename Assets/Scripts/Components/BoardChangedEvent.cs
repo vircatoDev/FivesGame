@@ -1,8 +1,7 @@
 namespace Scripts.Components
 {
-    // A changed layout needs projection; reset/replay switches also snap instead of animating.
+    // The live board layout changed and tile destinations must be projected again.
     public struct BoardChangedEvent
     {
-        public bool Snap;
     }
 }

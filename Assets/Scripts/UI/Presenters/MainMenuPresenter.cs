@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
@@ -14,23 +15,29 @@ namespace Scripts.UI.Presenters
         private readonly GlobalConfig _themeConfig;
         private readonly PlayerProgressService _playerProgressService;
         private readonly GameStartService _gameStartService;
+        private readonly GameSession _session;
         private readonly EcsWorld _world;
+        private ThemeConfig[] _themes;
+        private int _themeIndex;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, EcsWorld world)
+            GameStartService gameStartService, GameSession session, EcsWorld world)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
             _gameStartService = gameStartService;
+            _session = session;
             _world = world;
         }
 
         public override void OnActivateView()
         {
-            var theme = GetLastActiveTheme();
+            // Every theme with puzzles, locked ones included: Play on a locked theme leads to its purchase.
+            _themes = _themeConfig.Themes.Where(theme => theme.Puzzles.Length > 0).ToArray();
+            _themeIndex = Array.IndexOf(_themes, GetLastActiveTheme());
 
             View.PlayShowAnimation().Forget();
-            View.UpdateViewContent(_playerProgressService.GetThemeProgress(theme).ToString(), theme.ThemeName, theme.ThemeLogo);
+            ShowThemes(0);
 
             _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnSettings, BtnType = HeaderBtnType.Settings });
         }
@@ -39,15 +46,45 @@ namespace Scripts.UI.Presenters
         {
             _world.PlaySound(AudioKeyCollection.MenuClick);
 
-            var theme = GetLastActiveTheme();
-            var nextPuzzle = FindNextUncompletedPuzzle(theme);
-            if (!_gameStartService.TryStart(theme, nextPuzzle))
+            var theme = _themes[_themeIndex];
+            if (!_playerProgressService.GetProgressData().UnlockedThemes.Contains(theme.ThemeName))
+            {
+                // A locked theme is bought on the theme screen, which opens centered on it.
+                await OpenThemeScreen(theme);
+                return;
+            }
+
+            if (!_gameStartService.TryStart(theme, FindNextUncompletedPuzzle(theme)))
                 return;
             
             await View.PlayHideAnimation();
             
             _world.ChangeState(GameStateType.Playing);
         }
+
+        public void OnPreviousTheme() => BrowseThemes(-1);
+
+        public void OnNextTheme() => BrowseThemes(1);
+
+        private void BrowseThemes(int step)
+        {
+            if (View.IsSliding)
+                return;
+
+            _world.PlaySound(AudioKeyCollection.MenuClick);
+            _themeIndex = Wrap(_themeIndex + step);
+            ShowThemes(step);
+        }
+
+        private void ShowThemes(int direction) =>
+            View.ShowThemes(Card(_themes[Wrap(_themeIndex - 1)]), Card(_themes[_themeIndex]),
+                Card(_themes[Wrap(_themeIndex + 1)]), direction, _themes.Length > 1);
+
+        // A theme card shows the puzzle Play would start: the first uncompleted one, or the last when all are done.
+        private ThemeCard Card(ThemeConfig theme) => new ThemeCard(FindNextUncompletedPuzzle(theme).Image,
+            theme.ThemeName, _playerProgressService.GetThemeProgress(theme).ToString());
+
+        private int Wrap(int index) => (index % _themes.Length + _themes.Length) % _themes.Length;
 
         public void OnSettings()
         {
@@ -58,6 +95,12 @@ namespace Scripts.UI.Presenters
         public async void OnSelectMenu()
         {
             _world.PlaySound(AudioKeyCollection.MenuClick);
+            await OpenThemeScreen(_themes[_themeIndex]);
+        }
+
+        private async UniTask OpenThemeScreen(ThemeConfig focus)
+        {
+            _session.SetSelectedTheme(focus);
             await View.PlayHideAnimation();
             _world.ChangeState(GameStateType.SelectMenu);
         }

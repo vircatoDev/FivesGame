@@ -2,28 +2,23 @@ using System;
 
 namespace Scripts.Models
 {
-    /// <summary>What the gameplay HUD shows about the current board.</summary>
+    /// <summary>What the gameplay HUD shows about the current board. The seed identifies the board, so a new run always refreshes.</summary>
     public readonly struct BoardHud : IEquatable<BoardHud>
     {
         public readonly int Seed;
         public readonly int Moves;
-        public readonly int ReplayPosition;
-        public readonly bool Replaying;
         public readonly bool CanUndo;
-        public readonly bool CanReplay;
+        public readonly bool CanRedo;
 
-        public BoardHud(int seed, int moves, int replayPosition, bool replaying, bool canUndo, bool canReplay)
+        public BoardHud(int seed, int moves, bool canUndo, bool canRedo)
         {
             Seed = seed;
             Moves = moves;
-            ReplayPosition = replayPosition;
-            Replaying = replaying;
             CanUndo = canUndo;
-            CanReplay = canReplay;
+            CanRedo = canRedo;
         }
 
         public bool Equals(BoardHud other) =>
-            Seed == other.Seed && Moves == other.Moves && ReplayPosition == other.ReplayPosition
-            && Replaying == other.Replaying && CanUndo == other.CanUndo && CanReplay == other.CanReplay;
+            Seed == other.Seed && Moves == other.Moves && CanUndo == other.CanUndo && CanRedo == other.CanRedo;
     }
 }

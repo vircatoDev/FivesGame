@@ -16,7 +16,7 @@ internal static partial class CorrectnessProbes
         var session = new GameSession(CreateConfig()); session.BeginRun();
         var entity = world.NewEntity();
         entity.Replace(new BoardComponent { State = SeededShuffle.Create(3, 42) });
-        entity.Replace(new BoardHistoryComponent { Seed = 42, Moves = new List<Swap>() });
+        entity.Replace(new BoardHistoryComponent { Seed = 42, Moves = new List<Swap>(), Undone = new List<Swap>() });
         var presenter = new GamePlayPresenter(session, world);
         var view = new GamePlayView();
         SetView(presenter, view);
@@ -30,7 +30,7 @@ internal static partial class CorrectnessProbes
             $"{bytes} bytes, {view.Updates} view updates / 11000 frames");
         entity.Get<BoardHistoryComponent>().Moves.Add(new Swap(0, 1));
         systems.Run();
-        Check("HUD updates when history changes", view.Updates == 2 && view.Status.StartsWith("Ходов: 1"), view.Status);
+        Check("HUD updates when history changes", view.Updates == 2 && view.Status == "Moves: 1", view.Status);
         systems.Destroy(); world.Destroy();
     }
 }
@@ -42,6 +42,6 @@ namespace Scripts.UI.Views
         public Cysharp.Threading.Tasks.UniTask PlayShowAnimation() => default;
         public int Updates;
         public string Status = "";
-        public void UpdateControls(string status, bool canUndo, bool canReplay, bool replaying) { Updates++; Status = status; }
+        public void UpdateControls(string moves, bool canUndo, bool canRedo) { Updates++; Status = moves; }
     }
 }

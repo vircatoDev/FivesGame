@@ -11,7 +11,6 @@ namespace Scripts.Systems
         private const float ResultStateDelay = 2f;
 
         private readonly EcsFilter<BoardComponent, BoardHistoryComponent> _boards;
-        private readonly EcsFilter<BoardReplayComponent> _replays;
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
         private readonly EcsWorld _world;
         private readonly GameSession _gameSession;
@@ -29,7 +28,7 @@ namespace Scripts.Systems
             }
 
             // A manual exit takes precedence over the delayed result screen.
-            if (_endEvents.GetEntitiesCount() > 0 || !_gameSession.IsRunning || _replays.GetEntitiesCount() > 0)
+            if (_endEvents.GetEntitiesCount() > 0 || !_gameSession.IsRunning)
                 return;
 
             if (!_gameSession.IsCompleted)

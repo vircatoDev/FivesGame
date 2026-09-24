@@ -35,7 +35,7 @@ cryptographic randomness. The runtime picks a seed once per run and keeps it in
 `BoardHistoryComponent`; the UI shows it. Domain code never uses Unity random state
 or `System.Random`.
 
-## Input, Undo and replay
+## Input, Undo and Redo
 
 `TileUiProvider` sends `TileClickEvent` on a tap and `TileSwipeEvent` (column/row
 step, rows grow downward) when a drag ends. `BoardInputSystem` turns them into swaps:
@@ -45,34 +45,30 @@ step, rows grow downward) when a drag ends. `BoardInputSystem` turns them into s
   or tap any other tile to move the selection;
 - swipe from a tile toward a neighbor to swap them directly; a swipe off the edge is rejected.
 
-One input is accepted per tick. Input during movement, replay, exit or the result delay
+One input is accepted per tick. Input during movement, exit or the result delay
 is ignored. `TileHighlightSystem` raises the selected tile.
 
-History records accepted swaps. Undo applies the last swap again and removes it; a new
-move after Undo starts a new path. Undo does not refund energy or rewind time.
-
-`ReplayData` (version 2) stores size, seed and swaps. `CreatePlaybackBoard()` recreates
-the seeded board and validates the whole sequence on a copy, rejecting illegal swaps
-and moves after a solved board. Changing shuffle or move semantics requires a new
-version. Replay runs on a separate board in `BoardReplayComponent`, one swap per
-finished animation, and never triggers completion, energy or reward flows.
+History records accepted swaps in `Moves`. A swap is its own inverse: Undo re-applies
+the last move and pushes it onto `Undone`; Redo re-applies the last undone swap and
+moves it back. A new move clears `Undone`, so abandoned moves cannot be redone.
+Undo does not refund energy or rewind time.
 
 ## Display integration
 
 `BoardProjectionSystem` is the only bridge from board arrangement to tile destinations.
-It runs on initialization or `BoardChangedEvent`; a swap animates both tiles at once,
-and events with `Snap` restore the layout immediately. `TileMoveSystem` only animates.
+It runs on initialization or `BoardChangedEvent`; the first layout appears in place and
+a swap animates both tiles at once. `TileMoveSystem` only animates.
 `WinCheckSystem` uses the board's solved state.
 
 ## Verification
 
-- 65 NUnit domain tests pass (`dotnet test`, Release, .NET 10 runtime with roll-forward):
+- 56 NUnit domain tests pass (`dotnet test`, Release, .NET 10 runtime with roll-forward):
   fixed shuffle vectors, 4,004 seed/size combinations with no fragment in place,
   random swap sequences with permutation invariants, exhaustive 2x2 reachability
-  (all 24 arrangements), replay reconstruction, a full solving path and invalid input.
-- 66 ECS probes pass against the real systems with engine substitutes: tap selection,
-  swipes, edge rejection, rapid input, Undo, branching history, replay steps and
-  interruption, completion ordering and cleanup.
+  (all 24 arrangements) and invalid input.
+- 64 ECS probes pass against the real systems with engine substitutes: tap selection,
+  swipes, edge rejection, rapid input, Undo/Redo, redo-stack clearing, completion
+  ordering and cleanup.
 - Not verified in Play Mode or on a device yet.
 
 ### Manual acceptance in Unity
@@ -80,5 +76,5 @@ and events with `Snap` restore the layout immediately. `TileMoveSystem` only ani
 1. Start a puzzle: every cell is filled and no fragment is in place.
 2. Tap a tile: it is raised. Tap a neighbor: they swap. Tap a far tile: the selection moves.
 3. Swipe tiles in all four directions, including toward an edge (rejected).
-4. Undo all moves: the initial layout returns. Replay, stop mid-move, replay to the end.
+4. Undo all moves: the initial layout returns. Redo them, then make a new move: Redo is disabled.
 5. Solve the puzzle: moves and time appear on the result screen.

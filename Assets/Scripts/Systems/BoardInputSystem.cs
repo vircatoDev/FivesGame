@@ -7,7 +7,7 @@ namespace Scripts.Systems
 {
     /// <summary>
     /// Swaps neighboring tiles: tap one tile and then a neighbor, or swipe from a tile toward a neighbor.
-    /// Also applies Undo and Replay. One input is accepted per frame, and none while tiles are moving.
+    /// Also applies Undo and Redo. One input is accepted per frame, and none while tiles are moving.
     /// </summary>
     public class BoardInputSystem : IEcsRunSystem
     {
@@ -24,29 +24,14 @@ namespace Scripts.Systems
         public void Run()
         {
             if (!_session.IsRunning || _session.IsCompleted || _boards.GetEntitiesCount() != 1
-                || _ends.GetEntitiesCount() > 0 || _initialized.GetEntitiesCount() > 0)
+                || _ends.GetEntitiesCount() > 0 || _initialized.GetEntitiesCount() > 0 || _moves.GetEntitiesCount() > 0)
                 return;
 
-            var entity = _boards.GetEntity(0);
-            var replaying = entity.Has<BoardReplayComponent>();
-            // Stopping a replay can interrupt an animation: projection will snap to the live board.
             foreach (var i in _controls)
             {
-                var control = _controls.Get1(i).Control;
-                if (control == BoardControl.StopReplay && replaying)
-                {
-                    entity.Del<BoardReplayComponent>();
-                    _world.Send(new BoardChangedEvent { Snap = true });
-                }
-                else if (_moves.GetEntitiesCount() == 0 && !replaying)
-                {
-                    ApplyControl(control);
-                }
+                ApplyControl(_controls.Get1(i).Control);
                 return;
             }
-
-            if (replaying || _moves.GetEntitiesCount() > 0)
-                return;
 
             foreach (var i in _swipes)
             {
@@ -109,41 +94,29 @@ namespace Scripts.Systems
             if (board.IsSolved || !board.TrySwap(swap))
                 return false;
 
-            _boards.Get2(0).Moves.Add(swap);
+            ref var history = ref _boards.Get2(0);
+            history.Moves.Add(swap);
+            history.Undone.Clear();
             _boards.GetEntity(0).Del<TileSelectionComponent>();
             _world.Send<BoardChangedEvent>();
             _world.PlaySound(AudioKeyCollection.RightTap);
             return true;
         }
 
+        // A swap is its own inverse: Undo re-applies the last move, Redo re-applies the last undone one.
         private void ApplyControl(BoardControl control)
         {
-            var entity = _boards.GetEntity(0);
-            var board = _boards.Get1(0).State;
             ref var history = ref _boards.Get2(0);
-            var count = history.Moves.Count;
-            if (count == 0)
+            var (from, to) = control == BoardControl.Undo ? (history.Moves, history.Undone) : (history.Undone, history.Moves);
+            if (from.Count == 0)
                 return;
 
-            entity.Del<TileSelectionComponent>();
-            switch (control)
-            {
-                case BoardControl.Undo:
-                    // A swap is its own inverse.
-                    board.TrySwap(history.Moves[count - 1]);
-                    history.Moves.RemoveAt(count - 1);
-                    _world.Send<BoardChangedEvent>();
-                    break;
-                case BoardControl.Replay:
-                    var data = new ReplayData(ReplayData.CurrentVersion, board.Size, history.Seed, history.Moves);
-                    entity.Replace(new BoardReplayComponent
-                    {
-                        Data = data,
-                        State = data.CreatePlaybackBoard()
-                    });
-                    _world.Send(new BoardChangedEvent { Snap = true });
-                    break;
-            }
+            var swap = from[from.Count - 1];
+            _boards.Get1(0).State.TrySwap(swap);
+            from.RemoveAt(from.Count - 1);
+            to.Add(swap);
+            _boards.GetEntity(0).Del<TileSelectionComponent>();
+            _world.Send<BoardChangedEvent>();
         }
     }
 }

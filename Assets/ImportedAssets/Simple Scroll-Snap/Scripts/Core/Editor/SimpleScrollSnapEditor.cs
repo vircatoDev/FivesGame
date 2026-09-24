@@ -120,7 +120,7 @@ namespace DanielLochner.Assets.SimpleScrollSnap
                     EditorGUILayout.PropertyField(size, new GUIContent("Size", "The size (in pixels) that panels will be when automatically laid out."));
                     EditorGUI.indentLevel--;
                 }
-                EditorGUILayout.Slider(automaticLayoutSpacing, 0, 1, new GUIContent("Spacing", "The spacing between panels, calculated using a fraction of the panel’s width (if the movement axis is horizontal) or height (if the movement axis is vertical)."));
+                EditorGUILayout.Slider(automaticLayoutSpacing, -0.4f, 1, new GUIContent("Spacing", "The spacing between panels, calculated using a fraction of the panel’s width (if the movement axis is horizontal) or height (if the movement axis is vertical). Negative values overlap panels; with infinite scrolling of three panels keep it above -0.5."));
                 EditorGUILayout.PropertyField(automaticLayoutMargins, new GUIContent("Margins"));
                 EditorGUI.indentLevel--;
             }

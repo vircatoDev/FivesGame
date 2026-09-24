@@ -38,6 +38,7 @@ namespace Scripts.UI.Views
             {
                 commonButtonImg.sprite = skin.BtnSkin;
                 commonButtonText.text = skin.BtnText;
+                commonButtonText.color = skin.TextColor;
             }
         }
 
@@ -78,5 +79,6 @@ namespace Scripts.UI.Views
         public HeaderBtnType BtnType;
         public Sprite BtnSkin;
         public string BtnText;
+        public Color TextColor = Color.white;
     }
 }
