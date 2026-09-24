@@ -31,7 +31,8 @@ namespace Scripts.UI.Presenters
             PlayOpenPopUpAudioEffects();
             UpdateProgress();
             SavePlayerProgress();
-            View.UpdateViewContent(_gameSession.LastGameResult, _gameSession.SelectedTheme, _gameSession.SelectedPuzzle);
+            var theme = _gameSession.SelectedTheme;
+            View.UpdateViewContent(_gameSession.LastGameResult, theme.ThemeName, _playerProgressService.GetThemeProgress(theme));
             View.PlayShowAnimation().Forget();
         }
 
@@ -54,7 +55,7 @@ namespace Scripts.UI.Presenters
         }
 
   
-        private void UpdateProgress() => _playerProgressService.MarkPuzzleCompleted(_gameSession.SelectedPuzzle.Name);
+        private void UpdateProgress() => _playerProgressService.MarkCompleted(_gameSession.SelectedPuzzle);
         private void SavePlayerProgress() => _world.Send(new SaveDataEvent { StorableObject = _playerProgressService });
         private void SaveReward() => _world.Send(new SaveDataEvent { StorableObject = _starService });
         private void PlayOpenPopUpAudioEffects() => _world.PlaySound(AudioKeyCollection.OpenPopUp);

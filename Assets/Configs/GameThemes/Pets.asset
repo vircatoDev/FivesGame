@@ -12,24 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7f98e1140c74aebaac748898807403f, type: 3}
   m_Name: Pets
   m_EditorClassIdentifier: 
+  Id: pets
   ThemeName: Pets
   Puzzles:
-  - Image: {fileID: 21300000, guid: e7e238a9ed33f7343b30c6190c52ee8a, type: 3}
+  - Id: pets.biscuit
+    Image: {fileID: 21300000, guid: e7e238a9ed33f7343b30c6190c52ee8a, type: 3}
     Name: Biscuit
     Description: Biscuit is a happy Corgi who loves long walks and belly rubs.
-  - Image: {fileID: 21300000, guid: fb3a8396a04b746a5970041f27ff0db3, type: 3}
+  - Id: pets.luna
+    Image: {fileID: 21300000, guid: fb3a8396a04b746a5970041f27ff0db3, type: 3}
     Name: Luna
     Description: Luna is a curious Siamese kitten with sky-blue eyes.
-  - Image: {fileID: 21300000, guid: 473ee4e95179d4e4f89fb4038ba07e1d, type: 3}
+  - Id: pets.muffin
+    Image: {fileID: 21300000, guid: 473ee4e95179d4e4f89fb4038ba07e1d, type: 3}
     Name: Muffin
     Description: Muffin is a cheeky Pug who snores when she sleeps.
-  - Image: {fileID: 21300000, guid: 09d11b4937fa24482a3974c729964813, type: 3}
+  - Id: pets.smokey
+    Image: {fileID: 21300000, guid: 09d11b4937fa24482a3974c729964813, type: 3}
     Name: Smokey
     Description: Smokey is a fluffy grey cat who loves a warm sunny spot.
-  - Image: {fileID: 21300000, guid: e87be115a26bb294f82445b98f153229, type: 3}
+  - Id: pets.rex
+    Image: {fileID: 21300000, guid: e87be115a26bb294f82445b98f153229, type: 3}
     Name: Rex
     Description: Rex is a brave Shepherd who always guards the garden.
-  - Image: {fileID: 21300000, guid: 42fbe666dcbcd4fb69b6ed7aa6fd28e2, type: 3}
+  - Id: pets.tiger
+    Image: {fileID: 21300000, guid: 42fbe666dcbcd4fb69b6ed7aa6fd28e2, type: 3}
     Name: Tiger
     Description: Tiger is a playful ginger kitten who chases butterflies.
   ThemeLogo: {fileID: 21300000, guid: 42fbe666dcbcd4fb69b6ed7aa6fd28e2, type: 3}

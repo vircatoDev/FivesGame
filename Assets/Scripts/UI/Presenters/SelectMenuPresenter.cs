@@ -69,16 +69,10 @@ namespace Scripts.UI.Presenters
             }
         }
 
-        private PuzzleData GetPuzzleData(string puzzleName)
-        {
-            var theme = GetSelectedTheme();
-            return theme?.Puzzles.FirstOrDefault(p => p.Name == puzzleName);
-        }
+        private PuzzleData GetPuzzleData(string puzzleId) =>
+            GetSelectedTheme()?.Puzzles.FirstOrDefault(p => p.Id == puzzleId);
 
-        private ThemeConfig GetSelectedTheme()
-        {
-            return _themeConfig.FirstOrDefault(t => t.ThemeName == _selectedTheme);
-        }
+        private ThemeConfig GetSelectedTheme() => GetTheme(_selectedTheme);
 
         private void ChangeGameState(GameStateType newState) => _world.ChangeState(newState);
 
@@ -98,10 +92,10 @@ namespace Scripts.UI.Presenters
 
         private MenuItemData ToMenuItem(ThemeConfig theme)
         {
-            var unlocked = IsThemeUnlocked(theme);
+            var unlocked = _playerProgressService.IsUnlocked(theme);
             return new MenuItemData
             {
-                Id = theme.ThemeName,
+                Id = theme.Id,
                 Image = theme.ThemeLogo,
                 TitleText = theme.ThemeName,
                 BottomText = unlocked ? GetProgressText(theme) : $"Open {theme.UnlockCost}",
@@ -115,48 +109,31 @@ namespace Scripts.UI.Presenters
             return progress.IsComplete ? "COMPLETED" : progress.ToString();
         }
 
-        private bool IsThemeUnlocked(ThemeConfig theme)
-        {
-            return _playerProgressService.GetProgressData().UnlockedThemes.Contains(theme.ThemeName);
-        }
-
-        private bool IsPuzzleUnlocked(string puzzleName)
-        {
-            return _playerProgressService.GetProgressData().CompletedPuzzles.Contains(puzzleName);
-        }
-
-        private void OnThemeSelected(string themeName)
+        private void OnThemeSelected(string themeId)
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
-            _selectedTheme = themeName;
+            _selectedTheme = themeId;
 
-            var tiles = GetAllImagesByThemeName(themeName).Select(data => new MenuItemData
+            var puzzles = GetTheme(themeId)?.Puzzles ?? Array.Empty<PuzzleData>();
+            var tiles = puzzles.Select(puzzle => new MenuItemData
             {
-                Id = data.Name,
-                Image = data.Image,
-                TitleText = data.Name,
-                BottomText = IsPuzzleUnlocked(data.Name) ? "Complete" : "Play"
+                Id = puzzle.Id,
+                Image = puzzle.Image,
+                TitleText = puzzle.Name,
+                BottomText = _playerProgressService.IsCompleted(puzzle) ? "Complete" : "Play"
             }).ToArray();
 
             View.UpdateViewContent(tiles, "SELECT PUZZLE", OnStartGame, true);
         }
 
-        public void OnThemeBuy(string themeName)
+        public void OnThemeBuy(string themeId)
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
-            var theme = GetThemeByName(themeName);
-
-            if (theme == null)
-            {
+            var theme = GetTheme(themeId);
+            if (theme == null || _playerProgressService.IsUnlocked(theme))
                 return;
-            }
-
-            if (IsThemeUnlocked(theme))
-            {
-                return;
-            }
 
             if (theme.UnlockCost < 0 || (theme.UnlockCost > 0 && !_starService.Spend(theme.UnlockCost)))
             {
@@ -168,30 +145,16 @@ namespace Scripts.UI.Presenters
             UnlockTheme(theme);
         }
 
-        private ThemeConfig GetThemeByName(string themeName)
-        {
-            return _themeConfig.FirstOrDefault(t => t.ThemeName == themeName);
-        }
+        private ThemeConfig GetTheme(string themeId) => _themeConfig.FirstOrDefault(t => t.Id == themeId);
 
         private void UnlockTheme(ThemeConfig theme)
         {
             UpdateStarBalance(-theme.UnlockCost);
             SaveStarData();
 
-            _playerProgressService.UnlockTheme(theme.ThemeName);
+            _playerProgressService.Unlock(theme);
             SaveProgressData();
             View.UnlockThemeItemByName(ToMenuItem(theme), OnThemeSelected);
-        }
-
-        private PuzzleData[] GetAllImagesByThemeName(string themeName)
-        {
-            var theme = GetThemeByName(themeName);
-            if (theme == null)
-            {
-                return Array.Empty<PuzzleData>();
-            }
-
-            return theme.Puzzles;
         }
 
         private void BackToMainMenu() => ChangeGameState(GameStateType.MainMenu);

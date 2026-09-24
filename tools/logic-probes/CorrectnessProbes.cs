@@ -56,11 +56,11 @@ internal static partial class CorrectnessProbes
         InitialEnergy = 5,
         MaxEnergy = 10,
         EnergyRecoveryIntervalHours = 1,
-        DefaultUnlockedThemes = new[] { "Dogs" },
+        DefaultUnlockedThemes = new[] { "dogs" },
         Themes = new List<ThemeConfig>
         {
-            new ThemeConfig { ThemeName = "Cities", UnlockCost = 60, Puzzles = Array.Empty<PuzzleData>() },
-            new ThemeConfig { ThemeName = "Dogs", Puzzles = Array.Empty<PuzzleData>() }
+            new ThemeConfig { Id = "cities", ThemeName = "Cities", UnlockCost = 60, Puzzles = Array.Empty<PuzzleData>() },
+            new ThemeConfig { Id = "dogs", ThemeName = "Dogs", Puzzles = Array.Empty<PuzzleData>() }
         }
     };
 
@@ -85,7 +85,7 @@ internal static partial class CorrectnessProbes
         var selectSession = new GameSession(CreateConfig());
         var select = new SelectMenuPresenter(config, new GameStartService(selectSession, energy, world), stars, progress, selectSession, world);
         SetView(select, new SelectMenuView());
-        select.OnThemeBuy("Cities");
+        select.OnThemeBuy("cities");
         Check("theme purchase debits once", stars.GetBalance() == 140, $"balance={stars.GetBalance()}");
 
         var beforeNegativeSpend = stars.GetBalance();
@@ -132,6 +132,7 @@ internal static partial class CorrectnessProbes
             && Enumerable.Range(0, 36).All(i => generated[i] != i),
             $"cells={generated.CellCount}, every tile displaced");
         RunBoardProbes();
+        CheckResultProgress();
         CheckPresenterAllocation();
 
         RunLifecycleProbes();

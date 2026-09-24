@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Fives.Domain;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services;
@@ -19,7 +20,8 @@ namespace Scripts.Helpers
         {
             _storage = storage;
             _gameSaveData = _storage.Load<GameSaveData>(SAVE_KEY)
-                ?? new GameSaveData { Stars = gameSettings.InitialStars };
+                ?? new GameSaveData { Version = ProgressMigration.CurrentVersion, Stars = gameSettings.InitialStars };
+            Migrate(gameSettings);
             NormalizePlayerData(gameSettings);
         }
 
@@ -34,9 +36,31 @@ namespace Scripts.Helpers
             Save();
         }
 
+        /// <summary>Writes the current state of every service in one save, e.g. when the app is paused or closed.</summary>
+        public void SaveAll(params IStorable[] storables)
+        {
+            foreach (var storable in storables)
+                storable.UpdatePlayerData(_gameSaveData);
+            Save();
+        }
+
         private void Save()
         {
             _storage.Save(SAVE_KEY, _gameSaveData);
+        }
+
+        private void Migrate(GlobalConfig gameSettings)
+        {
+            if (_gameSaveData.Version < 1 && _gameSaveData.PlayerProgress != null)
+            {
+                var progress = _gameSaveData.PlayerProgress;
+                progress.UnlockedThemes = ProgressMigration.NamesToIds(progress.UnlockedThemes ?? new List<string>(),
+                    gameSettings.Themes.Select(theme => (theme.ThemeName, theme.Id)));
+                progress.CompletedPuzzles = ProgressMigration.NamesToIds(progress.CompletedPuzzles ?? new List<string>(),
+                    gameSettings.Themes.SelectMany(theme => theme.Puzzles).Select(puzzle => (puzzle.Name, puzzle.Id)));
+            }
+
+            _gameSaveData.Version = ProgressMigration.CurrentVersion;
         }
 
         private void NormalizePlayerData(GlobalConfig gameSettings)

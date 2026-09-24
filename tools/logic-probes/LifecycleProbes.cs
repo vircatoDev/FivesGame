@@ -23,6 +23,7 @@ internal static partial class CorrectnessProbes
         CheckMenuCarousel();
         CheckMovementAndWin();
         CheckOfflineRecovery();
+        CheckSaveMigration();
         CheckSaveRecovery();
         CheckSoundVolume();
     }
@@ -37,8 +38,8 @@ internal static partial class CorrectnessProbes
     private static void CheckRepeatedStart()
     {
         var config = CreateConfig();
-        config.DefaultUnlockedThemes = new[] { "Cities" };
-        var puzzle = new PuzzleData { Name = "One" };
+        config.DefaultUnlockedThemes = new[] { "cities" };
+        var puzzle = new PuzzleData { Id = "one", Name = "One" };
         config.Themes[0].Puzzles = new[] { puzzle };
         var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
         var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
@@ -49,12 +50,12 @@ internal static partial class CorrectnessProbes
         var view = new SelectMenuView();
         var select = new SelectMenuPresenter(config, start, new StarService(save), progress, session, world);
         SetView(select, view);
-        SetField(select, "_selectedTheme", "Cities");
+        SetField(select, "_selectedTheme", "cities");
         var main = new MainMenuPresenter(config, progress, start, session, world);
         main.Initialize(new MainMenuView());
 
-        select.OnStartGame("One");
-        select.OnStartGame("One");
+        select.OnStartGame("one");
+        select.OnStartGame("one");
         main.OnStartGame();
         Check("start is accepted once across both menus", energy.GetBalance() == 4 && session.IsRunning,
             $"energy={energy.GetBalance()}");
@@ -76,14 +77,14 @@ internal static partial class CorrectnessProbes
     private static void CheckMenuCarousel()
     {
         var config = CreateConfig();
-        PuzzleData[] Puzzles(params string[] names) => names.Select(n => new PuzzleData { Name = n, Image = new Sprite() }).ToArray();
+        PuzzleData[] Puzzles(params string[] names) => names.Select(n => new PuzzleData { Id = n.ToLowerInvariant(), Name = n, Image = new Sprite() }).ToArray();
         config.Themes[0].Puzzles = Puzzles("Paris");
         config.Themes[1].Puzzles = Puzzles("Corgi", "Pug", "Shepherd");
-        config.Themes.Add(new ThemeConfig { ThemeName = "Cats", UnlockCost = 60, Puzzles = Puzzles("Siamese", "Ginger") });
-        config.DefaultUnlockedThemes = new[] { "Dogs", "Cats" };
+        config.Themes.Add(new ThemeConfig { Id = "cats", ThemeName = "Cats", UnlockCost = 60, Puzzles = Puzzles("Siamese", "Ginger") });
+        config.DefaultUnlockedThemes = new[] { "dogs", "cats" };
         var dogs = config.Themes[1]; var cats = config.Themes[2];
         var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
-        save.GetPlayerData().PlayerProgress.CompletedPuzzles.Add("Corgi");
+        save.GetPlayerData().PlayerProgress.CompletedPuzzles.Add("corgi");
         var session = new GameSession(CreateConfig());
         var world = new EcsWorld();
         var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
@@ -196,6 +197,31 @@ internal static partial class CorrectnessProbes
         systems.Destroy(); world.Destroy();
     }
 
+    private static void CheckSaveMigration()
+    {
+        PlayerPrefs.DeleteAll();
+        var storage = new StorageService();
+        var config = CreateConfig();
+        config.Themes[1].Puzzles = new[] { new PuzzleData { Id = "dogs.corgi", Name = "Corgi" } };
+        PlayerPrefs.SetString("GameSaveData",
+            "{\"Stars\":7,\"PlayerProgress\":{\"UnlockedThemes\":[\"Dogs\",\"Flowers\"],\"CompletedPuzzles\":[\"Corgi\"]}}");
+        var migrated = new PlayerDataSaveHelper(storage, config).GetPlayerData();
+        var progress = migrated.PlayerProgress;
+        Check("version 0 save migrates names to ids", migrated.Version == Fives.Domain.ProgressMigration.CurrentVersion
+            && progress.UnlockedThemes.SequenceEqual(new[] { "dogs", "Flowers" })
+            && progress.CompletedPuzzles.SequenceEqual(new[] { "dogs.corgi" }) && migrated.Stars == 7,
+            $"themes=[{string.Join(",", progress.UnlockedThemes)}] puzzles=[{string.Join(",", progress.CompletedPuzzles)}]");
+        storage.Save("GameSaveData", migrated);
+        var reloaded = new PlayerDataSaveHelper(storage, config).GetPlayerData().PlayerProgress;
+        Check("migrated save loads unchanged", reloaded.CompletedPuzzles.SequenceEqual(new[] { "dogs.corgi" })
+            && reloaded.UnlockedThemes.SequenceEqual(new[] { "dogs", "Flowers" }), "no second migration");
+        var theme = config.Themes[1];
+        var service = new PlayerProgressService(new PlayerDataSaveHelper(storage, config));
+        theme.ThemeName = "Puppies"; theme.Puzzles[0].Name = "Welsh Corgi";
+        Check("renaming content keeps progress", service.IsUnlocked(theme) && service.IsCompleted(theme.Puzzles[0]), "ids, not names");
+        PlayerPrefs.DeleteAll();
+    }
+
     private static void CheckSaveRecovery()
     {
         PlayerPrefs.DeleteAll();
@@ -210,7 +236,7 @@ internal static partial class CorrectnessProbes
         PlayerPrefs.SetString("GameSaveData", "{\"Stars\":41,\"PlayerProgress\":{\"CompletedPuzzles\":[\"One\"]}}");
         var partial = new PlayerDataSaveHelper(storage, CreateConfig()).GetPlayerData();
         Check("partial save keeps progress and restores missing data", partial.Stars == 41
-            && partial.PlayerProgress.CompletedPuzzles.Contains("One") && partial.PlayerProgress.UnlockedThemes.Contains("Dogs")
+            && partial.PlayerProgress.CompletedPuzzles.Contains("One") && partial.PlayerProgress.UnlockedThemes.Contains("dogs")
             && partial.Energy.CurrentEnergy == 5 && partial.SoundSettings != null, "existing data retained");
         storage.Save("GameSaveData", partial);
         var restored = storage.Load<GameSaveData>("GameSaveData");
@@ -219,7 +245,7 @@ internal static partial class CorrectnessProbes
         Check("successful save retains corrupt backup", PlayerPrefs.HasKey("GameSaveData.corrupt"), "backup still available");
         PlayerPrefs.SetString("GameSaveData", "{\"Energy\":{},\"PlayerProgress\":{\"UnlockedThemes\":[\"RemovedTheme\",null]}}");
         var config = CreateConfig();
-        config.Themes[1].Puzzles = new[] { new PuzzleData { Name = "Corgi" } };
+        config.Themes[1].Puzzles = new[] { new PuzzleData { Id = "dogs.corgi", Name = "Corgi" } };
         var recoveredSave = new PlayerDataSaveHelper(storage, config);
         var world = new EcsWorld();
         var energy = new EnergyService(config, recoveredSave, new FakeClock { UtcNow = DateTime.UtcNow });

@@ -62,11 +62,11 @@ a swap animates both tiles at once. `TileMoveSystem` only animates.
 
 ## Verification
 
-- 56 NUnit domain tests pass (`dotnet test`, Release, .NET 10 runtime with roll-forward):
+- 59 NUnit domain tests pass (`dotnet test`, Release, .NET 10 runtime with roll-forward):
   fixed shuffle vectors, 4,004 seed/size combinations with no fragment in place,
   random swap sequences with permutation invariants, exhaustive 2x2 reachability
   (all 24 arrangements) and invalid input.
-- 64 ECS probes pass against the real systems with engine substitutes: tap selection,
+- 70 ECS probes pass against the real systems with engine substitutes: tap selection,
   swipes, edge rejection, rapid input, Undo/Redo, redo-stack clearing, completion
   ordering and cleanup.
 - Not verified in Play Mode or on a device yet.

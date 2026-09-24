@@ -27,32 +27,19 @@ namespace Scripts.UI.Views
             itemImage.sprite = itemData.Image;
             itemText.text = itemData.TitleText;
 
-            if (itemData.MenuItemType == MenuItemType.Theme)
+            // Themes and puzzles share one card: an offer shows the lock and the buy button, otherwise the status text.
+            lockImage.SetActive(itemData.Offer);
+            unlockButton.gameObject.SetActive(itemData.Offer);
+            progressText.gameObject.SetActive(!itemData.Offer);
+            if (itemData.Offer)
             {
-                if (itemData.Offer)
-                {
-                    lockImage.SetActive(true);
-                    progressText.gameObject.SetActive(false);
-
-                    unlockOfferText.text = itemData.BottomText;
-                    unlockButton.gameObject.SetActive(true);
-                    unlockButton.onClick.RemoveAllListeners();
-                    unlockButton.onClick.AddListener(() => onBuyClick?.Invoke(_tileId));
-                    return;
-                }
-                else
-                {
-                    lockImage.SetActive(false);
-                    unlockButton.gameObject.SetActive(false);
-
-                    progressText.text = itemData.BottomText;
-                    progressText.gameObject.SetActive(true);
-                }
+                unlockOfferText.text = itemData.BottomText;
+                unlockButton.onClick.RemoveAllListeners();
+                unlockButton.onClick.AddListener(() => onBuyClick?.Invoke(_tileId));
+                return;
             }
-            else
-            {
-                progressText.gameObject.SetActive(false);
-            }
+
+            progressText.text = itemData.BottomText;
 
             itemButton.onClick.RemoveAllListeners();
             itemButton.onClick.AddListener(() => onTileClick?.Invoke(_tileId));

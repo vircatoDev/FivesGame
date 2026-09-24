@@ -1,3 +1,5 @@
+using Scripts.Helpers;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using Leopotam.Ecs;
@@ -10,6 +12,21 @@ using Scripts.UI.Presenters;
 using Scripts.UI.Views;
 internal static partial class CorrectnessProbes
 {
+    private static void CheckResultProgress()
+    {
+        var config = CreateConfig();
+        var theme = config.Themes[1];
+        theme.Puzzles = new[] { "a", "b", "c" }.Select(id => new PuzzleData { Id = id, Name = id }).ToArray();
+        var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+        var session = new GameSession(config);
+        session.SetSelectedTheme(theme); session.SetSelectedImage(theme.Puzzles[2]); session.BeginRun();
+        var world = new EcsWorld();
+        var view = new GameResultView();
+        new GameResultPresenter(session, new StarService(save), new PlayerProgressService(save), world).Initialize(view);
+        Check("result shows solved puzzles, not the puzzle's position", view.Progress == "1/3", view.Progress);
+        world.Destroy();
+    }
+
     private static void CheckPresenterAllocation()
     {
         var world = new EcsWorld();
