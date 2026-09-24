@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Scripts.UI.Views
 {
-    public abstract class BaseView : MonoBehaviour
+    public abstract class BaseView : MonoBehaviour, IView
     {
         public abstract void Initialize(BasePresenter presenter);
         public abstract UniTask PlayShowAnimation();

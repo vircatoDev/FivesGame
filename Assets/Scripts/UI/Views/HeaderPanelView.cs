@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class HeaderPanelView : MonoBehaviour
+    public class HeaderPanelView : MonoBehaviour, IHeaderPanelView
     {
         [SerializeField] private Button commonButton;
         [SerializeField] private Image commonButtonImg;

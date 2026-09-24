@@ -24,10 +24,11 @@ namespace Scripts.Services
 
         public void PlaySoundEffect(string key, float volume = 1f)
         {
-            if (!TryGetClip(key, out var clip))
+            var effectVolume = EffectVolume(volume);
+            if (effectVolume <= 0f || !TryGetClip(key, out var clip))
                 return;
 
-            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volume * _soundSettings.SoundEffectsVolume);
+            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, effectVolume);
         }
 
         public void PlayBackgroundMusic(string key)
@@ -62,6 +63,9 @@ namespace Scripts.Services
         }
 
         private bool TryGetClip(string key, out AudioClip clip) => _clips.TryGetValue(key, out clip) && clip != null;
+
+        /// <summary>A sound effect's own volume scaled by the player's effects setting.</summary>
+        public float EffectVolume(float volume) => volume * _soundSettings.SoundEffectsVolume;
 
         public void UpdatePlayerData(GameSaveData playerData) => playerData.SoundSettings = _soundSettings;
 

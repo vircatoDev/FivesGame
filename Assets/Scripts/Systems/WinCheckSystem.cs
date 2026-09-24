@@ -3,6 +3,7 @@ using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
 using UnityEngine;
+using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
@@ -14,6 +15,7 @@ namespace Scripts.Systems
         private readonly EcsFilter<GameStateComponent> _stateFilter = null;
         private readonly EcsWorld _world;
         private readonly GameSession _gameSession;
+        private readonly IFrameTime _time = null;
 
         private readonly EcsFilter<TileComponent, MoveComponent> _moveFilter;
         private readonly EcsFilter<GameEndEvent> _endEvents;
@@ -40,14 +42,14 @@ namespace Scripts.Systems
 
                 ref var history = ref _boards.Get2(0);
                 _gameSession.CompleteRun(history.Moves.Count,
-                    TimeSpan.FromSeconds(Time.realtimeSinceStartup - history.StartTime));
+                    TimeSpan.FromSeconds(_time.RealtimeSinceStartup - history.StartTime));
                 _world.PlaySound(AudioKeyCollection.Win);
             }
 
             if (_elapsedSinceWin >= ResultStateDelay)
                 return;
 
-            _elapsedSinceWin += Time.unscaledDeltaTime;
+            _elapsedSinceWin += _time.UnscaledDeltaTime;
 
             if (_elapsedSinceWin < ResultStateDelay)
             {

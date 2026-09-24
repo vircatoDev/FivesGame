@@ -4,6 +4,7 @@ using Scripts.Components;
 using Scripts.Models;
 using Scripts.Services;
 using UnityEngine;
+using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
@@ -11,6 +12,7 @@ namespace Scripts.Systems
     {
         private readonly EcsWorld _world;
         private readonly EnergyService _energyService;
+        private readonly IFrameTime _time = null;
 
         private float _nextCheckTime = 0f;
 
@@ -26,7 +28,7 @@ namespace Scripts.Systems
 
         public void Run()
         {
-            if (Time.time >= _nextCheckTime)
+            if (_time.Time >= _nextCheckTime)
                 RecoverAndScheduleNextCheck();
         }
 
@@ -39,7 +41,7 @@ namespace Scripts.Systems
                 _world.Send(new SaveDataEvent { StorableObject = _energyService });
             }
 
-            _nextCheckTime = Time.time + GetNextCheckDelay();
+            _nextCheckTime = _time.Time + GetNextCheckDelay();
         }
 
         private float GetNextCheckDelay()

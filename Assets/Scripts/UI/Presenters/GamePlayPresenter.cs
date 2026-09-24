@@ -6,7 +6,7 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class GamePlayPresenter : Presenter<GamePlayView>
+    public class GamePlayPresenter : Presenter<IGamePlayView>
     {
         private readonly GameSession _gameSession;
         private readonly EcsWorld _world;

@@ -76,7 +76,8 @@ namespace Scripts
         {
             _mainSystems.Inject(_gameSession)
                 .Inject(_config)
-                .Inject(_playerDataSaveHelper);
+                .Inject(_playerDataSaveHelper)
+                .Inject(new UnityFrameTime());
         }
 
         // Every event lives one frame and is removed here, after all systems. Events sent outside Run

@@ -10,7 +10,7 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class SelectMenuPresenter : Presenter<SelectMenuView>
+    public class SelectMenuPresenter : Presenter<ISelectMenuView>
     {
         private readonly GameStartService _gameStartService;
         private readonly StarService _starService;

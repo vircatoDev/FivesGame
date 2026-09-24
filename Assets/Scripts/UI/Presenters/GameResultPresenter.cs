@@ -7,7 +7,7 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class GameResultPresenter : Presenter<GameResultView>
+    public class GameResultPresenter : Presenter<IGameResultView>
     {
         private readonly GameSession _gameSession;
         private readonly StarService _starService;

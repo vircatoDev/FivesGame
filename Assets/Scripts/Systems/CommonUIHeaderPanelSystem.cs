@@ -7,14 +7,14 @@ namespace Scripts.Systems
 {
     public class CommonUIHeaderPanelSystem : IEcsRunSystem,IEcsInitSystem
     {
-        private readonly HeaderPanelView _headerPanelView;
+        private readonly IHeaderPanelView _headerPanelView;
         private readonly EnergyService _energy;
         private readonly StarService _stars;
         private readonly EcsFilter<CurrencyChangedEvent> _currencyFilter;
         private readonly EcsFilter<UpdateControlPanelBtnLogicEvent> _updateBtnLogicFilter;
 
 
-        public CommonUIHeaderPanelSystem(HeaderPanelView headerPanelView, EnergyService energy, StarService stars)
+        public CommonUIHeaderPanelSystem(IHeaderPanelView headerPanelView, EnergyService energy, StarService stars)
         {
             _headerPanelView = headerPanelView;
             _energy = energy;

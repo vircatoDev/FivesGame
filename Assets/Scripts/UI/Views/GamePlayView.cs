@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class GamePlayView : View<GamePlayPresenter>
+    public class GamePlayView : View<GamePlayPresenter>, IGamePlayView
     {
         [Header("UI Blocks")] [SerializeField] private RectTransform previewRectTransform;
         [SerializeField] private RectTransform infoRectTransform;

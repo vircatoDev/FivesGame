@@ -1,0 +1,47 @@
+using System;
+using Cysharp.Threading.Tasks;
+using Fives.Domain;
+using Scripts.Components;
+using Scripts.Models;
+
+namespace Scripts.UI.Views
+{
+    // Screen contracts that presenters and systems depend on. MonoBehaviour views implement them;
+    // tests substitute plain fakes, so presentation logic runs without scenes or prefabs.
+
+    public interface IView
+    {
+        UniTask PlayShowAnimation();
+        UniTask PlayHideAnimation();
+    }
+
+    public interface IMainMenuView : IView
+    {
+        bool IsSliding { get; }
+        void ShowThemes(in ThemeCard previous, in ThemeCard current, in ThemeCard next, int direction, bool canBrowse);
+    }
+
+    public interface ISelectMenuView : IView
+    {
+        void UpdateViewContent(MenuItemData[] newContent, string titleText, Action<string> onClick, bool playAnimation, int centeredItem = 0);
+        void UnlockThemeItemByName(MenuItemData itemData, Action<string> onTileClick);
+    }
+
+    public interface IGamePlayView : IView
+    {
+        void UpdateViewContent(PuzzleData selectedPuzzle);
+        void UpdateControls(string moves, bool canUndo, bool canRedo);
+    }
+
+    public interface IGameResultView : IView
+    {
+        void UpdateViewContent(GameResult result, string themeName, ThemeProgress progress);
+    }
+
+    public interface IHeaderPanelView
+    {
+        void UpdateViewContent(string starsAmount, string energyAmount);
+        void UpdateCurrency(in CurrencyChangedEvent evt);
+        void UpdateButtonLogic(UpdateControlPanelBtnLogicEvent btnLogicEvent);
+    }
+}

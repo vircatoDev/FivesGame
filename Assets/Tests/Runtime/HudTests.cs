@@ -1,0 +1,54 @@
+using Fives.Domain;
+using Leopotam.Ecs;
+using NUnit.Framework;
+using Scripts.Components;
+using Scripts.Systems;
+using Scripts.UI.Presenters;
+using UnityEngine.TestTools.Constraints;
+using Is = UnityEngine.TestTools.Constraints.Is; // Extends NUnit's Is with AllocatingGCMemory.
+
+namespace Fives.Runtime.Tests
+{
+    public sealed class HudTests
+    {
+        private BoardFixture _board;
+        private FakeGamePlayView _view;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _board = new BoardFixture().WithSeededBoard(42);
+            var presenter = new GamePlayPresenter(_board.Session, _board.World);
+            _view = new FakeGamePlayView();
+            presenter.Initialize(_view);
+            _board.Systems = new EcsSystems(_board.World).Add(new BoardHudSystem(presenter)).Inject(_board.Session);
+            _board.Systems.Init();
+        }
+
+        [TearDown]
+        public void TearDown() => _board.Dispose();
+
+        [Test]
+        public void IdleFrames_UpdateTheViewOnce_AndDoNotAllocate()
+        {
+            _board.Systems.Tick(1000);
+
+            Assert.That(() => _board.Systems.Run(), Is.Not.AllocatingGCMemory());
+            Assert.That(_view.Updates, Is.EqualTo(1));
+            Assert.That(_view.Moves, Is.EqualTo("Moves: 0"));
+        }
+
+        [Test]
+        public void HistoryChange_UpdatesTheView()
+        {
+            _board.Systems.Run();
+            _board.Moves.Add(new Swap(0, 1));
+            _board.Systems.Run();
+
+            Assert.That(_view.Updates, Is.EqualTo(2));
+            Assert.That(_view.Moves, Is.EqualTo("Moves: 1"));
+            Assert.That(_view.CanUndo, Is.True);
+            Assert.That(_view.CanRedo, Is.False);
+        }
+    }
+}

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Scripts.UI.Views
 {
-    public class GameResultView : View<GameResultPresenter>
+    public class GameResultView : View<GameResultPresenter>, IGameResultView
     {
         [SerializeField] private Transform contentContainer;
         [SerializeField] private Image backgroundImage;

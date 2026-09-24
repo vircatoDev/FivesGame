@@ -57,10 +57,9 @@ Undo/Redo, projection, animation and completion. The current unfinished attempt
 has touch controls for Undo and Redo; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
-During the review fixes, **74 standalone NUnit tests** and **59 local service/ECS
-probes** passed. For the final integration, verification was limited to compilation
-at the owner's request: Domain, domain tests, runtime and Editor assemblies compile
-with Unity 6000.0.71f1 references. PlayMode interaction, the final toolbar layout,
+Unity's Test Runner (EditMode) runs **117 tests, all passing** in 6000.0.71f1 as of 2026-09-24:
+59 domain tests (`Fives.Domain.Tests`), 54 runtime tests on the real ECS systems, services and
+presenters (`Fives.Runtime.Tests`) and 4 gameplay prefab tests (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 
 The Kids Puzzle visual redesign replaces Riverside Village. Undo/Redo controls are
@@ -69,7 +68,8 @@ serialized in `GamePlayScreen.prefab`; the view no longer builds UI at runtime.
 See [the board contract and acceptance steps](docs/BOARD_STATE.md),
 [ECS architecture](docs/ARCHITECTURE.md) and [test commands](tools/domain-tests/README.md).
 The domain-only GitHub Actions workflow automatically runs on Linux and Windows
-for pushes and pull requests; it does not build Android or run the ECS probes.
+for pushes and pull requests; it does not build Android or run the Unity EditMode tests,
+which need a Unity license.
 
 ## Licensing
 
