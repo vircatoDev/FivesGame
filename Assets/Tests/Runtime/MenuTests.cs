@@ -38,9 +38,9 @@ namespace Fives.Runtime.Tests
             _energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             _start = new GameStartService(_session, _energy, _world);
             _selectView = new FakeSelectMenuView();
-            _select = new SelectMenuPresenter(config, _start, new StarService(save), progress, _session, _world);
+            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), progress, _world), progress, _session, new FakeHeaderPanelView(), _world);
             _select.Initialize(_selectView);
-            _main = new MainMenuPresenter(config, progress, _start, _session, _world);
+            _main = new MainMenuPresenter(config, progress, _start, _session, new FakeHeaderPanelView(), _world);
             _main.Initialize(new FakeMainMenuView());
         }
 
@@ -100,6 +100,7 @@ namespace Fives.Runtime.Tests
         private GameSession _session;
         private GlobalConfig _config;
         private FakeMainMenuView _view;
+        private FakeHeaderPanelView _header;
         private MainMenuPresenter _menu;
 
         [SetUp]
@@ -117,7 +118,8 @@ namespace Fives.Runtime.Tests
             _session = new GameSession(_config);
             var energy = new EnergyService(_config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             _view = new FakeMainMenuView();
-            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world), _session, _world);
+            _header = new FakeHeaderPanelView();
+            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world), _session, _header, _world);
             _menu.Initialize(_view);
             _view.Hide.TrySetResult();
         }
@@ -127,6 +129,15 @@ namespace Fives.Runtime.Tests
         {
             _world.Destroy();
             _objects.Dispose();
+        }
+
+        [Test]
+        public void HeaderButton_IsSettings_AndOpensTheSettingsScreen()
+        {
+            Assert.That(_header.Button, Is.EqualTo(HeaderBtnType.Settings));
+
+            _header.OnButton();
+            Assert.That(_world.Count<ChangeStateEvent>(), Is.EqualTo(1));
         }
 
         [Test]

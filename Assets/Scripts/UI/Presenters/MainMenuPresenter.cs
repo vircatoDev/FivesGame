@@ -16,17 +16,19 @@ namespace Scripts.UI.Presenters
         private readonly PlayerProgressService _playerProgressService;
         private readonly GameStartService _gameStartService;
         private readonly GameSession _session;
+        private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
         private ThemeConfig[] _themes;
         private int _themeIndex;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, GameSession session, EcsWorld world)
+            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
             _gameStartService = gameStartService;
             _session = session;
+            _header = header;
             _world = world;
         }
 
@@ -39,7 +41,7 @@ namespace Scripts.UI.Presenters
             View.PlayShowAnimation().Forget();
             ShowThemes(0);
 
-            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnSettings, BtnType = HeaderBtnType.Settings });
+            _header.ShowButton(HeaderBtnType.Settings, OnSettings);
         }
 
         public async void OnStartGame()

@@ -18,7 +18,7 @@ namespace Fives.Runtime.Tests
         public void SetUp()
         {
             _board = new BoardFixture().WithSeededBoard(42);
-            var presenter = new GamePlayPresenter(_board.Session, _board.World);
+            var presenter = new GamePlayPresenter(_board.Session, new FakeHeaderPanelView(), _board.World);
             _view = new FakeGamePlayView();
             presenter.Initialize(_view);
             _board.Systems = new EcsSystems(_board.World).Add(new BoardHudSystem(presenter)).Inject(_board.Session);

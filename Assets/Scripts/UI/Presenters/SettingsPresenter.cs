@@ -49,7 +49,7 @@ namespace Scripts.UI.Presenters
 
         public void OnClose()
         {
-            _world.Send(new SaveDataEvent { StorableObject = _soundService });
+            _world.Send<SaveDataEvent>();
             _world.ChangeState(GameStateType.MainMenu);
         }
     }

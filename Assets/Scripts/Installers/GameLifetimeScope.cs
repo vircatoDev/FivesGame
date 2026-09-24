@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Configs;
@@ -9,6 +9,7 @@ using Scripts.Models;
 using Scripts.Services;
 using Scripts.Services.Interfaces;
 using Scripts.UI.Presenters;
+using Scripts.UI.Views;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -36,9 +37,10 @@ namespace Scripts.Installers
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);
             builder.Register<GameStartService>(Lifetime.Singleton);
+            builder.Register<ThemeShop>(Lifetime.Singleton);
 
-            builder.Register<PresenterFactory>(Lifetime.Singleton);
-            builder.Register<GameStateFactory>(Lifetime.Singleton);
+            builder.Register<ScreenCatalog>(Lifetime.Singleton);
+            builder.RegisterComponentInHierarchy<HeaderPanelView>().As<IHeaderPanelView>();
         
             builder.Register<MainMenuPresenter>(Lifetime.Transient);
             builder.Register<SelectMenuPresenter>(Lifetime.Transient);

@@ -30,13 +30,7 @@ namespace Scripts.Helpers
             return _gameSaveData;
         }
 
-        public void SavePlayerData(GameSaveData saveData)
-        {
-            _gameSaveData = saveData;
-            Save();
-        }
-
-        /// <summary>Writes the current state of every service in one save, e.g. when the app is paused or closed.</summary>
+        /// <summary>Writes the current state of every service in one save.</summary>
         public void SaveAll(params IStorable[] storables)
         {
             foreach (var storable in storables)

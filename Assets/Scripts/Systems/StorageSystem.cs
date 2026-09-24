@@ -1,31 +1,26 @@
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Helpers;
-using Scripts.Models;
+using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
-    public class StorageSystem : IEcsRunSystem, IEcsInitSystem
+    /// <summary>Writes every service's data in one save when any save was requested this frame.</summary>
+    public class StorageSystem : IEcsRunSystem
     {
-        private EcsFilter<SaveDataEvent> _saveEvents;
-        private GameSaveData _gameSaveData;
-        private readonly PlayerDataSaveHelper _playerDataSaveHelper;
+        private readonly EcsFilter<SaveDataEvent> _saveEvents = null;
+        private readonly PlayerDataSaveHelper _playerDataSaveHelper = null;
+        private readonly IStorable[] _storables;
 
-        public void Init()
+        public StorageSystem(params IStorable[] storables)
         {
-            _gameSaveData = _playerDataSaveHelper.GetPlayerData() ?? new GameSaveData();
+            _storables = storables;
         }
 
         public void Run()
         {
-            foreach (var i in _saveEvents)
-            {
-                var storableObject = _saveEvents.Get1(i).StorableObject;
-
-                storableObject.UpdatePlayerData(_gameSaveData);
-
-                _playerDataSaveHelper.SavePlayerData(_gameSaveData);
-            }
+            if (_saveEvents.GetEntitiesCount() > 0)
+                _playerDataSaveHelper.SaveAll(_storables);
         }
     }
 }

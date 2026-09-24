@@ -38,7 +38,7 @@ namespace Scripts.Systems
             if (recoveredAmount > 0)
             {
                 _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energyService.GetBalance(), recoveredAmount));
-                _world.Send(new SaveDataEvent { StorableObject = _energyService });
+                _world.Send<SaveDataEvent>();
             }
 
             _nextCheckTime = _time.Time + GetNextCheckDelay();

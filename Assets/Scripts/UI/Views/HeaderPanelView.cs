@@ -27,12 +27,12 @@ namespace Scripts.UI.Views
             energyAmountText.text = energyAmount;
         }
 
-        public void UpdateButtonLogic(UpdateControlPanelBtnLogicEvent btnLogicEvent)
+        public void ShowButton(HeaderBtnType type, Action onClick)
         {
             commonButton.onClick.RemoveAllListeners();
-            commonButton.onClick.AddListener(btnLogicEvent.CommonBtnCallback.Invoke);
+            commonButton.onClick.AddListener(onClick.Invoke);
 
-            var skin = commonBtnSkins.FirstOrDefault(x => x.BtnType == btnLogicEvent.BtnType);
+            var skin = commonBtnSkins.FirstOrDefault(x => x.BtnType == type);
 
             if (skin != null)
             {

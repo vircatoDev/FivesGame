@@ -36,7 +36,7 @@ namespace Scripts.Services
             _session.SetSelectedImage(puzzle);
             _session.BeginRun();
             _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energy.GetBalance(), -1));
-            _world.Send(new SaveDataEvent { StorableObject = _energy });
+            _world.Send<SaveDataEvent>();
             return true;
         }
     }

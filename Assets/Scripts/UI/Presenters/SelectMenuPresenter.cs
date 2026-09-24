@@ -13,10 +13,11 @@ namespace Scripts.UI.Presenters
     public class SelectMenuPresenter : Presenter<ISelectMenuView>
     {
         private readonly GameStartService _gameStartService;
-        private readonly StarService _starService;
+        private readonly ThemeShop _shop;
         private readonly PlayerProgressService _playerProgressService;
         private readonly List<ThemeConfig> _themeConfig;
         private readonly GameSession _session;
+        private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
 
         private string _selectedTheme;
@@ -24,16 +25,18 @@ namespace Scripts.UI.Presenters
         public SelectMenuPresenter(
             GlobalConfig gameConfig,
             GameStartService gameStartService,
-            StarService starService,
+            ThemeShop shop,
             PlayerProgressService playerProgressService,
             GameSession session,
+            IHeaderPanelView header,
             EcsWorld world)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
-            _starService = starService;
+            _shop = shop;
             _playerProgressService = playerProgressService;
             _session = session;
+            _header = header;
             _world = world;
         }
 
@@ -129,33 +132,23 @@ namespace Scripts.UI.Presenters
 
         public void OnThemeBuy(string themeId)
         {
-            PlaySoundEffect(AudioKeyCollection.MenuClick);
-
             var theme = GetTheme(themeId);
-            if (theme == null || _playerProgressService.IsUnlocked(theme))
+            if (theme == null)
                 return;
 
-            if (theme.UnlockCost < 0 || (theme.UnlockCost > 0 && !_starService.Spend(theme.UnlockCost)))
+            switch (_shop.TryUnlock(theme))
             {
-                PlaySoundEffect(AudioKeyCollection.WrongClick);
-                ShowNoStarsAnimation();
-                return;
+                case PurchaseResult.Unlocked:
+                    PlaySoundEffect(AudioKeyCollection.MenuClick);
+                    View.UnlockThemeItemByName(ToMenuItem(theme), OnThemeSelected);
+                    break;
+                case PurchaseResult.NotEnoughStars:
+                    PlaySoundEffect(AudioKeyCollection.WrongClick);
+                    break;
             }
-
-            UnlockTheme(theme);
         }
 
         private ThemeConfig GetTheme(string themeId) => _themeConfig.FirstOrDefault(t => t.Id == themeId);
-
-        private void UnlockTheme(ThemeConfig theme)
-        {
-            UpdateStarBalance(-theme.UnlockCost);
-            SaveStarData();
-
-            _playerProgressService.Unlock(theme);
-            SaveProgressData();
-            View.UnlockThemeItemByName(ToMenuItem(theme), OnThemeSelected);
-        }
 
         private void BackToMainMenu() => ChangeGameState(GameStateType.MainMenu);
 
@@ -164,14 +157,6 @@ namespace Scripts.UI.Presenters
         private void PlaySoundEffect(string key) => _world.PlaySound(key);
 
         private void UpdateHeaderButton() =>
-            _world.Send(new UpdateControlPanelBtnLogicEvent { CommonBtnCallback = OnExit, BtnType = HeaderBtnType.Back });
-
-        private void ShowNoStarsAnimation() => _world.Send(CurrencyChangedEvent.NotEnough(Currency.Stars));
-
-        private void UpdateStarBalance(int amount) =>
-            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _starService.GetBalance(), amount));
-
-        private void SaveStarData() => _world.Send(new SaveDataEvent { StorableObject = _starService });
-        private void SaveProgressData() => _world.Send(new SaveDataEvent { StorableObject = _playerProgressService });
+            _header.ShowButton(HeaderBtnType.Back, OnExit);
     }
 }
