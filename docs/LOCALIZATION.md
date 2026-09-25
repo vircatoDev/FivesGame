@@ -37,7 +37,7 @@ and `GameStartup` starts the game only after localization has initialized (WebGL
 
 ## Font
 
-All texts must use characters present in `Assets/Content/Fonts/Ru/Lilita One SDF.asset`.
+All texts must use characters present in `Assets/Content/Fonts/Lilita One SDF.asset`.
 Its source font has no `Ё/ё`, so Russian texts use `Е/е`; use `-` instead of dashes and a
 straight apostrophe. A test fails when the sheet contains a character the font lacks.
 
