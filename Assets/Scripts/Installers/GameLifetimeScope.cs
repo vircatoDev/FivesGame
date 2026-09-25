@@ -33,6 +33,7 @@ namespace Scripts.Installers
             builder.Register<IStorageService, StorageService>(Lifetime.Singleton);
             builder.Register<GameSession>(Lifetime.Singleton);
             builder.Register<SoundService>(Lifetime.Singleton);
+            builder.Register<LanguageService>(Lifetime.Singleton);
             builder.Register<EnergyService>(Lifetime.Singleton);
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);

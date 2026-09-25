@@ -70,8 +70,11 @@ Undo, hints, projection, animation and completion. A hint (5 stars) shows the ro
 closest misplaced tile to its cell until the next move; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
-Unity's Test Runner (EditMode) runs **144 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
-75 domain tests (`Fives.Domain.Tests`), 64 runtime tests on the real ECS systems, services and
+Settings hold sound and music volume and the language (EN, RU, FR, IT, DE, ES), chosen with
+flags and saved with the player data (`LanguageService`); texts are localized in the next step.
+
+Unity's Test Runner (EditMode) runs **149 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
+75 domain tests (`Fives.Domain.Tests`), 69 runtime tests on the real ECS systems, services and
 presenters (`Fives.Runtime.Tests`) and 5 gameplay prefab tests (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 
