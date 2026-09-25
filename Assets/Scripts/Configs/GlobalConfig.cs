@@ -24,6 +24,7 @@ namespace Scripts.Configs
         [Header("Star Settings")] 
         public int InitialStars = 100;
         public int RewardStars = 10;
+        public int HintPrice = 5;
 
         [Header("Player Progress Settings")] 
         public string[] DefaultUnlockedThemes;

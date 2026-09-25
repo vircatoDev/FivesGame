@@ -130,6 +130,8 @@ namespace Scripts
                 .Add(new BoardSetupSystem())
                 .Add(new BoardInitSystem(_gameLayer))
                 .Add(new BoardInputSystem())
+                .Add(new BoardHintSystem(_starService))
+                .Add(new BoardHintViewSystem())
                 .Add(new BoardProjectionSystem())
                 .Add(new TileHighlightSystem())
                 .Add(new TileMoveSystem())

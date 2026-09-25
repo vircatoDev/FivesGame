@@ -46,13 +46,11 @@ namespace Fives.Runtime.Tests
         }
 
         [Test]
-        public void EmptyHistory_IgnoresUndoAndRedo()
+        public void EmptyHistory_IgnoresUndo()
         {
             _board.Control(BoardControl.Undo);
-            _board.Control(BoardControl.Redo);
 
             Assert.That(_board.Moves, Is.Empty);
-            Assert.That(_board.Undone, Is.Empty);
             Assert.That(_board.Snapshot(), Is.EqualTo(_initial));
         }
 
@@ -64,13 +62,12 @@ namespace Fives.Runtime.Tests
         }
 
         [Test]
-        public void Undo_AnimatesAndMovesTheSwapToTheRedoStack()
+        public void Undo_AnimatesAndForgetsTheLastSwap()
         {
             MakeThreeMoves();
             _board.Control(BoardControl.Undo);
 
             Assert.That(_board.Moves.Count, Is.EqualTo(2));
-            Assert.That(_board.Undone.Count, Is.EqualTo(1));
             Assert.That(_board.Snapshot(), Is.EqualTo(_afterMoves[1]));
             Assert.That(_board.MovingTiles, Is.EqualTo(2), "both swapped tiles animate");
         }
@@ -86,38 +83,6 @@ namespace Fives.Runtime.Tests
         }
 
         [Test]
-        public void Redo_ReappliesTheLastUndoneSwap()
-        {
-            MakeThreeMoves();
-            _board.Control(BoardControl.Undo); _board.Settle();
-            _board.Control(BoardControl.Undo); _board.Settle();
-            _board.Control(BoardControl.Redo);
-
-            Assert.That(_board.Moves.Count, Is.EqualTo(2));
-            Assert.That(_board.Undone.Count, Is.EqualTo(1));
-            Assert.That(_board.Snapshot(), Is.EqualTo(_afterMoves[1]));
-            Assert.That(_board.MovingTiles, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void Redo_WalksForwardToTheLatestMove_ThenDoesNothing()
-        {
-            MakeThreeMoves();
-            _board.Control(BoardControl.Undo); _board.Settle();
-            _board.Control(BoardControl.Undo); _board.Settle();
-            _board.Control(BoardControl.Redo); _board.Settle();
-            _board.Control(BoardControl.Redo); _board.Settle();
-
-            Assert.That(_board.Moves.Count, Is.EqualTo(3));
-            Assert.That(_board.Undone, Is.Empty);
-            Assert.That(_board.Snapshot(), Is.EqualTo(_afterMoves[2]));
-
-            _board.Control(BoardControl.Redo); _board.Settle();
-            Assert.That(_board.Moves.Count, Is.EqualTo(3));
-            Assert.That(_board.Snapshot(), Is.EqualTo(_afterMoves[2]));
-        }
-
-        [Test]
         public void UndoAll_ReturnsToTheShuffledLayout()
         {
             MakeThreeMoves();
@@ -128,23 +93,16 @@ namespace Fives.Runtime.Tests
             }
 
             Assert.That(_board.Snapshot(), Is.EqualTo(_initial));
-            Assert.That(_board.Undone.Count, Is.EqualTo(3));
         }
 
         [Test]
-        public void NewMoveAfterUndo_ClearsTheRedoStack()
+        public void Hint_IsNotABoardMove()
         {
             MakeThreeMoves();
-            while (_board.Moves.Count > 0)
-            {
-                _board.Control(BoardControl.Undo);
-                _board.Settle();
-            }
-            _board.Swipe(_board.Layout[8], 0, -1);
-            _board.Settle();
+            _board.Control(BoardControl.Hint);
 
-            Assert.That(_board.Moves, Is.EqualTo(new[] { new Swap(5, 8) }));
-            Assert.That(_board.Undone, Is.Empty);
+            Assert.That(_board.Moves.Count, Is.EqualTo(3));
+            Assert.That(_board.Snapshot(), Is.EqualTo(_afterMoves[2]));
         }
 
         [Test]

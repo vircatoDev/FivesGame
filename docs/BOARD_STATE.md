@@ -45,7 +45,7 @@ cryptographic randomness. The runtime picks a seed once per run and keeps it in
 `BoardHistoryComponent`; the UI shows it. Domain code never uses Unity random state
 or `System.Random`.
 
-## Input, Undo and Redo
+## Input and Undo
 
 `TileUiProvider` sends `TileClickEvent` on a tap and `TileSwipeEvent` (column/row
 step, rows grow downward) when a drag ends. `BoardInputSystem` turns them into swaps:
@@ -59,9 +59,23 @@ One input is accepted per tick. Input during movement, exit or the result delay
 is ignored. `TileHighlightSystem` raises the selected tile.
 
 History records accepted swaps in `Moves`. A swap is its own inverse: Undo re-applies
-the last move and pushes it onto `Undone`; Redo re-applies the last undone swap and
-moves it back. A new move clears `Undone`, so abandoned moves cannot be redone.
-Undo does not refund energy or rewind time.
+the last move and forgets it. Undo does not refund energy or rewind time.
+
+## Hints
+
+A hint costs `GlobalConfig.HintPrice` stars (5). `BoardHintSystem` picks one of the
+misplaced tiles closest to their cells (`BoardHint.ClosestMisplaced`, random among ties)
+and marks it with `BoardHintComponent`. The hint is shown once and ends with the next
+move (a swap of any tiles or Undo); while it is shown the button is disabled. It is not sold while
+tiles move or after the win; without enough stars the header reports it and nothing is spent.
+
+`BoardHint.PathOf` returns a shortest route of cells from the tile to its cell. Among
+the shortest routes it disturbs the fewest correctly placed tiles, horizontal first on ties.
+Following the route places the tile and moves every other tile by one cell at most.
+This guides one tile, not the whole board: it is not an optimal solver, and in rare
+layouts two hinted tiles can push each other out, so a solution is not promised.
+`BoardHintViewSystem` draws the route when the hint is bought: a frame on the tile,
+dots along the way, an arrow on the last step and a pulsing frame on the target.
 
 ## Display integration
 
@@ -72,13 +86,14 @@ a swap animates both tiles at once. `TileMoveSystem` only animates.
 
 ## Verification
 
-- 59 NUnit domain tests pass (`dotnet test`, Release, .NET 10 runtime with roll-forward):
-  fixed shuffle vectors, 4,004 seed/size combinations with no fragment in place,
+- 75 NUnit domain tests pass (`dotnet test`, Release, .NET 10 runtime with roll-forward):
+  fixed shuffle vectors, 5,005 seed/dimension combinations with no fragment in place,
   random swap sequences with permutation invariants, exhaustive 2x2 reachability
-  (all 24 arrangements) and invalid input.
-- 54 `Fives.Runtime.Tests` EditMode tests pass in Unity against the real ECS systems:
-  tap selection, swipes, edge rejection, rapid input, Undo/Redo, redo-stack clearing,
-  projection, completion ordering, result delay, manual exit and cleanup.
+  (all 24 arrangements), invalid input and hint routes over 300 seeds per board size.
+- 64 `Fives.Runtime.Tests` EditMode tests pass in Unity against the real ECS systems:
+  tap selection, swipes, edge rejection, rapid input, Undo, hints (price, repeat press,
+  not enough stars, movement lock, ending on any move or Undo), projection, completion ordering,
+  result delay, manual exit and cleanup.
 - Not verified on a device yet.
 
 ### Manual acceptance in Unity
@@ -86,5 +101,6 @@ a swap animates both tiles at once. `TileMoveSystem` only animates.
 1. Start a puzzle: every cell is filled and no fragment is in place.
 2. Tap a tile: it is raised. Tap a neighbor: they swap. Tap a far tile: the selection moves.
 3. Swipe tiles in all four directions, including toward an edge (rejected).
-4. Undo all moves: the initial layout returns. Redo them, then make a new move: Redo is disabled.
-5. Solve the puzzle: moves and time appear on the result screen.
+4. Undo all moves: the initial layout returns.
+5. Press the hint: 5 stars are spent and a route from a tile to its cell appears; any move hides it.
+6. Solve the puzzle: the tiles dissolve into the whole picture, then the result screen shows moves and time.

@@ -101,7 +101,6 @@ namespace Fives.Runtime.Tests
             Build(3, 3, true);
             _board.Systems.Run();
             _boards.GetEntity(0).Get<TileSelectionComponent>();
-            _boards.Get2(0).Undone.Add(new Swap(0, 1));
             _board.World.NewEntity().Get<GameEndEvent>();
             _board.Systems.Run();
 
@@ -123,7 +122,6 @@ namespace Fives.Runtime.Tests
             _board.Systems.Run();
             Assert.That(_boards.GetEntitiesCount(), Is.EqualTo(1));
             Assert.That(_boards.Get2(0).Moves, Is.Empty);
-            Assert.That(_boards.Get2(0).Undone, Is.Empty);
             Assert.That(_boards.GetEntity(0).Has<TileSelectionComponent>(), Is.False);
         }
     }

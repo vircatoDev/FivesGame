@@ -2,7 +2,7 @@
 
 `Assets/Tests/EditorUI/GamePlayPrefabTests.cs` contains four prefab-reference cases
 and one Unity lifecycle scenario. The scenario creates the real screen twice,
-checks the initial controls, updates the move text and Undo/Redo states, toggles
+checks the initial controls, updates the move text and Undo/Hint states, toggles
 visibility, and destroys the screen. Unexpected Unity exceptions fail the test.
 It does not test ECS command routing, victory/rewards, device input or rendering quality.
 
@@ -17,7 +17,7 @@ unity test . --mode EditMode --filter Fives.UI.Tests.GamePlayPrefabTests --outpu
 ```
 
 Status on 2026-09-25: the tests are typed against `Fives.Runtime` and pass in the regular
-Editor together with the domain and runtime EditMode suites (130 tests).
+Editor together with the domain and runtime EditMode suites (144 tests).
 
 ## Fast CI format guard
 

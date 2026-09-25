@@ -16,6 +16,9 @@ namespace Scripts.Configs
         public Vector2 BoardArea => new Vector2(Columns * TileSize + (Columns - 1) * TileSpacing,
             Rows * TileSize + (Rows - 1) * TileSpacing);
 
+        /// <summary>Centre of a board cell in the same space as <see cref="CellToAnchored"/>.</summary>
+        public Vector2 CellCenter(int cell) => CellToAnchored(cell) + new Vector2(TileSize, -TileSize) / 2;
+
         /// <summary>Anchored position of a board cell: row-major, rows grow downward.</summary>
         public Vector2 CellToAnchored(int cell)
         {

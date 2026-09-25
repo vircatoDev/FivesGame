@@ -21,7 +21,7 @@ namespace Fives.Runtime.Tests
             var presenter = new GamePlayPresenter(_board.Session, new FakeHeaderPanelView(), _board.World);
             _view = new FakeGamePlayView();
             presenter.Initialize(_view);
-            _board.Systems = new EcsSystems(_board.World).Add(new BoardHudSystem(presenter)).Inject(_board.Session);
+            _board.Systems = new EcsSystems(_board.World).Add(new BoardHudSystem(presenter)).Inject(_board.Session).Inject(_board.Objects.Config());
             _board.Systems.Init();
         }
 
@@ -48,7 +48,20 @@ namespace Fives.Runtime.Tests
             Assert.That(_view.Updates, Is.EqualTo(2));
             Assert.That(_view.Moves, Is.EqualTo("Moves: 1"));
             Assert.That(_view.CanUndo, Is.True);
-            Assert.That(_view.CanRedo, Is.False);
+            Assert.That(_view.CanHint, Is.True);
+        }
+
+        [Test]
+        public void ActiveHint_DisablesTheHintButton_AndShowsThePrice()
+        {
+            _board.Systems.Run();
+            Assert.That(_view.HintPrice, Is.EqualTo("5"));
+
+            _board.Board.Replace(new BoardHintComponent { TileId = 0 });
+            _board.Systems.Run();
+
+            Assert.That(_view.CanHint, Is.False);
+            Assert.That(_view.Updates, Is.EqualTo(2));
         }
     }
 }
