@@ -18,11 +18,12 @@ namespace Scripts.UI.Presenters
         private readonly GameSession _session;
         private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
+        private readonly ITexts _texts;
         private ThemeConfig[] _themes;
         private int _themeIndex;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world)
+            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world, ITexts texts)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
@@ -30,6 +31,7 @@ namespace Scripts.UI.Presenters
             _session = session;
             _header = header;
             _world = world;
+            _texts = texts;
         }
 
         public override void OnActivateView()
@@ -84,7 +86,7 @@ namespace Scripts.UI.Presenters
 
         // A theme card shows the puzzle Play would start: the first uncompleted one, or the last when all are done.
         private ThemeCard Card(ThemeConfig theme) => new ThemeCard(FindNextUncompletedPuzzle(theme).Image,
-            theme.ThemeName, _playerProgressService.GetThemeProgress(theme).ToString());
+            _texts.Get(TextKeys.Name(theme)), _playerProgressService.GetThemeProgress(theme).ToString());
 
         private int Wrap(int index) => (index % _themes.Length + _themes.Length) % _themes.Length;
 

@@ -1,0 +1,215 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_de
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: de
+  m_SharedData: {fileID: 11400000, guid: 50c0861e877a44af7925c9d9a2373557, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2895217942528
+    m_Localized: Einstellungen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895306022912
+    m_Localized: "Zur\xFCck"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411520
+    m_Localized: Einstellungen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411521
+    m_Localized: Spielen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994432
+    m_Localized: Level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994433
+    m_Localized: "W\xC4HLE EIN THEMA"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994434
+    m_Localized: "W\xC4HLE EIN PUZZLE"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994435
+    m_Localized: "\xD6ffnen {0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994436
+    m_Localized: GESCHAFFT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994437
+    m_Localized: Fertig
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994438
+    m_Localized: "Zur\xFCck"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994439
+    m_Localized: "Z\xFCge: {0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994440
+    m_Localized: Level geschafft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994441
+    m_Localized: BELOHNUNG
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994442
+    m_Localized: +{0} Sterne
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994443
+    m_Localized: "Z\xFCge: {0}  \xB7  Zeit: {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994444
+    m_Localized: Abholen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994445
+    m_Localized: Abholen x2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994446
+    m_Localized: Hunde
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994447
+    m_Localized: Katzen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994448
+    m_Localized: Haustiere
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994449
+    m_Localized: Corgi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994450
+    m_Localized: "Der Corgi ist ein kleiner H\xFCtehund, der walisischen Bauern beim
+      Schafeh\xFCten half."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994451
+    m_Localized: Mops
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994452
+    m_Localized: "Der Mops ist ein kr\xE4ftiger Hund mit quadratischem K\xF6rper."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994453
+    m_Localized: "Sch\xE4ferhund"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994454
+    m_Localized: "Der Deutsche Sch\xE4ferhund ist ein mutiger, treuer und besch\xFCtzender
+      H\xFCtehund."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994455
+    m_Localized: Siamkatze
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994456
+    m_Localized: Die Siamkatze hat leuchtend blaue Augen und dunkle Ohren, Pfoten
+      und einen dunklen Schwanz.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994457
+    m_Localized: Britisch Kurzhaar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994458
+    m_Localized: Die Britisch Kurzhaar ist eine ruhige, verschmuste Katze mit dichtem
+      grauem Fell.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994459
+    m_Localized: Rote Katze
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994460
+    m_Localized: Rote Katzen haben warmes, gestreiftes orangefarbenes Fell und spielen
+      gern.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994461
+    m_Localized: Biscuit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994462
+    m_Localized: "Biscuit ist ein fr\xF6hlicher Corgi, der lange Spazierg\xE4nge
+      und Bauchkraulen liebt."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994463
+    m_Localized: Luna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994464
+    m_Localized: "Luna ist ein neugieriges Siamk\xE4tzchen mit himmelblauen Augen."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994465
+    m_Localized: Muffin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188736
+    m_Localized: Muffin ist eine freche Mopsdame, die im Schlaf schnarcht.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188737
+    m_Localized: Smokey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188738
+    m_Localized: "Smokey ist ein flauschiger grauer Kater, der warme Sonnenpl\xE4tze
+      liebt."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188739
+    m_Localized: Rex
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188740
+    m_Localized: "Rex ist ein mutiger Sch\xE4ferhund, der immer den Garten bewacht."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188741
+    m_Localized: Tiger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188742
+    m_Localized: "Tiger ist ein verspieltes rotes K\xE4tzchen, das Schmetterlingen
+      nachjagt."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25938183053312
+    m_Localized: "W\xE4hle<br>dein<br>Thema!"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

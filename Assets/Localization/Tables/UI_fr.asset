@@ -1,0 +1,213 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_fr
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: fr
+  m_SharedData: {fileID: 11400000, guid: 50c0861e877a44af7925c9d9a2373557, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2895217942528
+    m_Localized: "R\xE9glages"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895306022912
+    m_Localized: Retour
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411520
+    m_Localized: "R\xE9glages"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411521
+    m_Localized: Jouer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994432
+    m_Localized: Niveaux
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994433
+    m_Localized: "CHOISIS UN TH\xC8ME"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994434
+    m_Localized: CHOISIS UN PUZZLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994435
+    m_Localized: Ouvrir {0}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994436
+    m_Localized: "TERMIN\xC9"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994437
+    m_Localized: "Termin\xE9"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994438
+    m_Localized: Annuler
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994439
+    m_Localized: 'Coups : {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994440
+    m_Localized: "Niveau termin\xE9"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994441
+    m_Localized: "R\xC9COMPENSE"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994442
+    m_Localized: "+{0} \xE9toiles"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994443
+    m_Localized: "Coups : {0}  \xB7  Temps : {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994444
+    m_Localized: "R\xE9cup\xE9rer"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994445
+    m_Localized: "R\xE9cup\xE9rer x2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994446
+    m_Localized: Chiens
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994447
+    m_Localized: Chats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994448
+    m_Localized: Animaux
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994449
+    m_Localized: Corgi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994450
+    m_Localized: "Le corgi est un petit chien de berger qui aidait les fermiers gallois
+      \xE0 garder les moutons."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994451
+    m_Localized: Carlin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994452
+    m_Localized: "Le carlin est un petit chien trapu et carr\xE9."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994453
+    m_Localized: Berger allemand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994454
+    m_Localized: "Le berger allemand est un chien de berger courageux, fid\xE8le
+      et protecteur."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994455
+    m_Localized: Siamois
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994456
+    m_Localized: "Le chat siamois a des yeux bleu vif et des oreilles, des pattes
+      et une queue fonc\xE9es."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994457
+    m_Localized: British
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994458
+    m_Localized: "Le British Shorthair est un chat calme et c\xE2lin au pelage gris
+      \xE9pais."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994459
+    m_Localized: Roux
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994460
+    m_Localized: "Les chats roux ont un pelage orange ray\xE9 et adorent jouer."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994461
+    m_Localized: Biscuit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994462
+    m_Localized: "Biscuit est un corgi joyeux qui adore les longues promenades et
+      les c\xE2lins sur le ventre."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994463
+    m_Localized: Luna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994464
+    m_Localized: Luna est une chatonne siamoise curieuse aux yeux bleu ciel.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994465
+    m_Localized: Muffin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188736
+    m_Localized: "Muffin est une petite carline espi\xE8gle qui ronfle en dormant."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188737
+    m_Localized: Smokey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188738
+    m_Localized: "Smokey est un chat gris tout doux qui adore les coins chauds et
+      ensoleill\xE9s."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188739
+    m_Localized: Rex
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188740
+    m_Localized: Rex est un berger courageux qui garde toujours le jardin.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188741
+    m_Localized: Tigre
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188742
+    m_Localized: "Tigre est un chaton roux joueur qui court apr\xE8s les papillons."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25938183053312
+    m_Localized: "Choisis<br>ton<br>th\xE8me !"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

@@ -30,6 +30,14 @@ MonoBehaviour:
   EnergyRecoveryIntervalHours: 1
   InitialStars: 80
   RewardStars: 10
+  HintPrice: 5
+  Languages:
+  - en
+  - ru
+  - fr
+  - it
+  - de
+  - es
   DefaultUnlockedThemes:
   - dogs
   AudioClipsCollection:

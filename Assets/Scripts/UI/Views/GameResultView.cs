@@ -38,10 +38,10 @@ namespace Scripts.UI.Views
             return default;
         }
 
-        public void UpdateViewContent(GameResult result, string themeName, ThemeProgress progress)
+        public void UpdateViewContent(string stars, string stats, string themeName, ThemeProgress progress)
         {
-            starsRewardText.text = $"+{result.StarCount} Stars";
-            statsText.text = $"Moves: {result.TurnCount}  ·  Time: {result.GameTime:mm\\:ss}";
+            starsRewardText.text = stars;
+            statsText.text = stats;
             levelProgressText.text = progress.ToString();
             themeNameText.text = themeName;
             var target = progress.Total == 0 ? 1f : (float)progress.Completed / progress.Total;

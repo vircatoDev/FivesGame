@@ -18,6 +18,7 @@ namespace Scripts.Services
 
         public string Current { get; private set; }
         public IReadOnlyList<string> Supported => _supported;
+        public event Action<string> Changed;
 
         public LanguageService(GlobalConfig config, PlayerDataSaveHelper saveHelper)
         {
@@ -33,6 +34,7 @@ namespace Scripts.Services
                 return false;
 
             Current = code;
+            Changed?.Invoke(code);
             return true;
         }
 

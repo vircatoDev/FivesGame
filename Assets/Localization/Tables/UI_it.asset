@@ -1,0 +1,214 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_it
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: it
+  m_SharedData: {fileID: 11400000, guid: 50c0861e877a44af7925c9d9a2373557, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2895217942528
+    m_Localized: Impostazioni
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895306022912
+    m_Localized: Indietro
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411520
+    m_Localized: Impostazioni
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411521
+    m_Localized: Gioca
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994432
+    m_Localized: Livelli
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994433
+    m_Localized: SCEGLI UN TEMA
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994434
+    m_Localized: SCEGLI UN PUZZLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994435
+    m_Localized: Apri {0}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994436
+    m_Localized: COMPLETATO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994437
+    m_Localized: Completato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994438
+    m_Localized: Annulla
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994439
+    m_Localized: 'Mosse: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994440
+    m_Localized: Livello completato
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994441
+    m_Localized: PREMIO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994442
+    m_Localized: +{0} stelle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994443
+    m_Localized: "Mosse: {0}  \xB7  Tempo: {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994444
+    m_Localized: Ritira
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994445
+    m_Localized: Ritira x2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994446
+    m_Localized: Cani
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994447
+    m_Localized: Gatti
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994448
+    m_Localized: Animali
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994449
+    m_Localized: Corgi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994450
+    m_Localized: "Il corgi \xE8 un piccolo cane da pastore che aiutava i contadini
+      gallesi a guidare le pecore."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994451
+    m_Localized: Carlino
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994452
+    m_Localized: "Il carlino \xE8 un cane robusto dal corpo quadrato."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994453
+    m_Localized: Pastore tedesco
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994454
+    m_Localized: "Il pastore tedesco \xE8 un cane da pastore coraggioso, fedele e
+      protettivo."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994455
+    m_Localized: Siamese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994456
+    m_Localized: Il gatto siamese ha occhi azzurri brillanti e orecchie, zampe e
+      coda scure.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994457
+    m_Localized: British
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994458
+    m_Localized: "Il British Shorthair \xE8 un gatto calmo e coccolone dal folto
+      pelo grigio."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994459
+    m_Localized: Rosso
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994460
+    m_Localized: I gatti rossi hanno un caldo pelo arancione a strisce e adorano
+      giocare.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994461
+    m_Localized: Biscuit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994462
+    m_Localized: "Biscuit \xE8 un corgi allegro che adora le lunghe passeggiate e
+      le grattatine sulla pancia."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994463
+    m_Localized: Luna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994464
+    m_Localized: "Luna \xE8 una gattina siamese curiosa con gli occhi azzurro cielo."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994465
+    m_Localized: Muffin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188736
+    m_Localized: "Muffin \xE8 una carlina birichina che russa quando dorme."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188737
+    m_Localized: Smokey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188738
+    m_Localized: "Smokey \xE8 un soffice gatto grigio che ama gli angolini caldi
+      e soleggiati."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188739
+    m_Localized: Rex
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188740
+    m_Localized: "Rex \xE8 un pastore coraggioso che fa sempre la guardia al giardino."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188741
+    m_Localized: Tigre
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188742
+    m_Localized: "Tigre \xE8 un gattino rosso giocherellone che insegue le farfalle."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25938183053312
+    m_Localized: Scegli<br>il tuo<br>tema!
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

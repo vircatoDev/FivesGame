@@ -1,0 +1,12 @@
+{
+    "name": "Fives.Editor",
+    "rootNamespace": "Fives.Editor",
+    "references": [
+        "Unity.Localization",
+        "Unity.Localization.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": true
+}

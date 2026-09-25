@@ -17,7 +17,7 @@ unity test . --mode EditMode --filter Fives.UI.Tests.GamePlayPrefabTests --outpu
 ```
 
 Status on 2026-09-25: the tests are typed against `Fives.Runtime` and pass in the regular
-Editor together with the domain and runtime EditMode suites (149 tests).
+Editor together with the domain and runtime EditMode suites (158 tests).
 
 ## Fast CI format guard
 

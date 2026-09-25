@@ -165,12 +165,12 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             var view = new FakeMainMenuView();
 
-            new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world), session, new FakeHeaderPanelView(), world)
+            new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world), session, new FakeHeaderPanelView(), world, new FakeTexts())
                 .Initialize(view);
 
             Assert.That(save.GetPlayerData().Energy.LastRecoveryTime, Is.Not.EqualTo(default(DateTime)));
             Assert.That(save.GetPlayerData().PlayerProgress.CompletedPuzzles, Is.Not.Null);
-            Assert.That(view.Current.Title, Is.EqualTo("Dogs"), "an unknown theme id falls back to a known theme");
+            Assert.That(view.Current.Title, Is.EqualTo("theme.dogs"), "an unknown theme id falls back to a known theme");
             world.Destroy();
         }
     }
