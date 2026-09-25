@@ -15,13 +15,17 @@ namespace Scripts.Services
             _language = language;
         }
 
-        /// <summary>Waits for the tables (all locales are preloaded) and applies the saved language.</summary>
+        /// <summary>Applies the saved language and waits until its tables are loaded.</summary>
         public async UniTask Initialize()
         {
-            await LocalizationSettings.InitializationOperation.Task;
+            await Ready();
             Select(_language.Current);
+            await Ready();
             _language.Changed += Select;
         }
+
+        // Changing the locale restarts the initialization operation, which loads that locale's tables.
+        public UniTask Ready() => LocalizationSettings.InitializationOperation.Task.AsUniTask();
 
         public string Get(string key, params object[] args) =>
             LocalizationSettings.StringDatabase.GetLocalizedString(Table, key, args);
