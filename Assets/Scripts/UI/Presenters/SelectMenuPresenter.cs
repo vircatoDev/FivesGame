@@ -19,6 +19,7 @@ namespace Scripts.UI.Presenters
         private readonly GameSession _session;
         private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
+        private readonly ITexts _texts;
 
         private string _selectedTheme;
 
@@ -29,7 +30,8 @@ namespace Scripts.UI.Presenters
             PlayerProgressService playerProgressService,
             GameSession session,
             IHeaderPanelView header,
-            EcsWorld world)
+            EcsWorld world,
+            ITexts texts)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
@@ -38,6 +40,7 @@ namespace Scripts.UI.Presenters
             _session = session;
             _header = header;
             _world = world;
+            _texts = texts;
         }
 
         public override void OnActivateView()
@@ -84,7 +87,7 @@ namespace Scripts.UI.Presenters
             // Center the theme just left, or the one the main menu asked for.
             var focus = GetSelectedTheme() ?? _session.SelectedTheme;
             var tiles = GetThemeItemData();
-            View.UpdateViewContent(tiles, "SELECT THEME", OnThemeSelected, playAnimation, Math.Max(0, _themeConfig.IndexOf(focus)));
+            View.UpdateViewContent(tiles, _texts.Get(TextKeys.SelectThemes), OnThemeSelected, playAnimation, Math.Max(0, _themeConfig.IndexOf(focus)));
             ClearSelectedTheme();
         }
 
@@ -100,8 +103,8 @@ namespace Scripts.UI.Presenters
             {
                 Id = theme.Id,
                 Image = theme.ThemeLogo,
-                TitleText = theme.ThemeName,
-                BottomText = unlocked ? GetProgressText(theme) : $"Open {theme.UnlockCost}",
+                TitleText = _texts.Get(TextKeys.Name(theme)),
+                BottomText = unlocked ? GetProgressText(theme) : _texts.Get(TextKeys.Open, theme.UnlockCost),
                 Offer = !unlocked
             };
         }
@@ -109,7 +112,7 @@ namespace Scripts.UI.Presenters
         private string GetProgressText(ThemeConfig theme)
         {
             var progress = _playerProgressService.GetThemeProgress(theme);
-            return progress.IsComplete ? "COMPLETED" : progress.ToString();
+            return progress.IsComplete ? _texts.Get(TextKeys.ThemeCompleted) : progress.ToString();
         }
 
         private void OnThemeSelected(string themeId)
@@ -123,11 +126,11 @@ namespace Scripts.UI.Presenters
             {
                 Id = puzzle.Id,
                 Image = puzzle.Image,
-                TitleText = puzzle.Name,
-                BottomText = _playerProgressService.IsCompleted(puzzle) ? "Complete" : "Play"
+                TitleText = _texts.Get(TextKeys.Name(puzzle)),
+                BottomText = _texts.Get(_playerProgressService.IsCompleted(puzzle) ? TextKeys.PuzzleCompleted : TextKeys.Play)
             }).ToArray();
 
-            View.UpdateViewContent(tiles, "SELECT PUZZLE", OnStartGame, true);
+            View.UpdateViewContent(tiles, _texts.Get(TextKeys.SelectPuzzles), OnStartGame, true);
         }
 
         public void OnThemeBuy(string themeId)

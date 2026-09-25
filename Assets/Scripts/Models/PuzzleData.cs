@@ -8,7 +8,7 @@ namespace Scripts.Models
         [Tooltip("Stable id stored in saves, unique across themes; never change it once released.")]
         public string Id;
         public Sprite Image;
+        [Tooltip("Name stored by version-0 saves, used only to migrate them. Display texts are in Localization/Strings.xlsx.")]
         public string Name;
-        public string Description;
     }
 }

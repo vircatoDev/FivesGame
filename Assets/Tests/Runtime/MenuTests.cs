@@ -38,9 +38,9 @@ namespace Fives.Runtime.Tests
             _energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             _start = new GameStartService(_session, _energy, _world);
             _selectView = new FakeSelectMenuView();
-            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), progress, _world), progress, _session, new FakeHeaderPanelView(), _world);
+            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), progress, _world), progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts());
             _select.Initialize(_selectView);
-            _main = new MainMenuPresenter(config, progress, _start, _session, new FakeHeaderPanelView(), _world);
+            _main = new MainMenuPresenter(config, progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts());
             _main.Initialize(new FakeMainMenuView());
         }
 
@@ -119,7 +119,7 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(_config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             _view = new FakeMainMenuView();
             _header = new FakeHeaderPanelView();
-            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world), _session, _header, _world);
+            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world), _session, _header, _world, new FakeTexts());
             _menu.Initialize(_view);
             _view.Hide.TrySetResult();
         }
@@ -143,7 +143,7 @@ namespace Fives.Runtime.Tests
         [Test]
         public void Opens_OnTheLastUnlockedTheme_WithItsNextPuzzle()
         {
-            Assert.That(_view.Current.Title, Is.EqualTo("Cats"));
+            Assert.That(_view.Current.Title, Is.EqualTo("theme.cats"));
             Assert.That(_view.Current.Image, Is.EqualTo(_config.Themes[2].Puzzles[0].Image));
             Assert.That(_view.CanBrowse, Is.True);
             Assert.That(_view.Direction, Is.Zero);
@@ -152,8 +152,8 @@ namespace Fives.Runtime.Tests
         [Test]
         public void ListsEveryTheme_LockedOnesIncluded_UntouchedAtZero()
         {
-            Assert.That(_view.Previous.Title, Is.EqualTo("Dogs"));
-            Assert.That(_view.Next.Title, Is.EqualTo("Cities"));
+            Assert.That(_view.Previous.Title, Is.EqualTo("theme.dogs"));
+            Assert.That(_view.Next.Title, Is.EqualTo("theme.cities"));
             Assert.That(_view.Next.Progress, Is.EqualTo("0/1"));
             Assert.That(_view.Next.Image, Is.EqualTo(_config.Themes[0].Puzzles[0].Image));
         }
@@ -176,7 +176,7 @@ namespace Fives.Runtime.Tests
             _menu.OnNextTheme();
 
             var dogs = _config.Themes[1];
-            Assert.That(_view.Current.Title, Is.EqualTo("Dogs"));
+            Assert.That(_view.Current.Title, Is.EqualTo("theme.dogs"));
             Assert.That(_view.Current.Image, Is.EqualTo(dogs.Puzzles[1].Image), "Corgi is solved, so Pug is next");
             Assert.That(_view.Current.Progress, Is.EqualTo("1/3"));
             Assert.That(_view.Direction, Is.EqualTo(1));

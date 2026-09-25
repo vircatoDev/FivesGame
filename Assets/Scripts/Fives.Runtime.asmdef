@@ -10,7 +10,9 @@
         "VContainer",
         "Unity.TextMeshPro",
         "UnityEngine.UI",
-        "SimpleScrollSnap"
+        "SimpleScrollSnap",
+        "Unity.Localization",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

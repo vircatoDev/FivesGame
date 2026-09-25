@@ -2,6 +2,7 @@
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
+using Scripts.Services;
 using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
@@ -11,9 +12,11 @@ namespace Scripts.UI.Presenters
         private readonly GameSession _gameSession;
         private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
+        private readonly ITexts _texts;
 
-        public GamePlayPresenter(GameSession gameSession, IHeaderPanelView header, EcsWorld world)
+        public GamePlayPresenter(GameSession gameSession, IHeaderPanelView header, EcsWorld world, ITexts texts)
         {
+            _texts = texts;
             _header = header;
             _world = world;
             _gameSession = gameSession;
@@ -21,7 +24,8 @@ namespace Scripts.UI.Presenters
 
         public override void OnActivateView()
         {
-            View.UpdateViewContent(_gameSession.SelectedPuzzle);
+            var puzzle = _gameSession.SelectedPuzzle;
+            View.UpdateViewContent(puzzle.Image, _texts.Get(TextKeys.Name(puzzle)), _texts.Get(TextKeys.About(puzzle)));
             View.PlayShowAnimation().Forget();
 
             _header.ShowButton(HeaderBtnType.Back, BackToMainMenu);
@@ -32,7 +36,7 @@ namespace Scripts.UI.Presenters
 
         public void ShowHud(in BoardHud hud)
         {
-            View.UpdateControls($"Moves: {hud.Moves}", hud.HintPrice.ToString(), hud.CanUndo, hud.CanHint);
+            View.UpdateControls(_texts.Get(TextKeys.Moves, hud.Moves), hud.HintPrice.ToString(), hud.CanUndo, hud.CanHint);
         }
 
         private void BackToMainMenu()

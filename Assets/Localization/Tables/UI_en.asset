@@ -1,0 +1,209 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 50c0861e877a44af7925c9d9a2373557, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 2895217942528
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895306022912
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411520
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895314411521
+    m_Localized: Play
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994432
+    m_Localized: Levels
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994433
+    m_Localized: SELECT THEME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994434
+    m_Localized: SELECT PUZZLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994435
+    m_Localized: Open {0}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994436
+    m_Localized: COMPLETED
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994437
+    m_Localized: Complete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994438
+    m_Localized: Undo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994439
+    m_Localized: 'Moves: {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994440
+    m_Localized: Level Complete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994441
+    m_Localized: REWARD
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994442
+    m_Localized: +{0} Stars
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994443
+    m_Localized: "Moves: {0}  \xB7  Time: {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994444
+    m_Localized: Claim
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994445
+    m_Localized: x2 Claim
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994446
+    m_Localized: Dogs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994447
+    m_Localized: Cats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994448
+    m_Localized: Pets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994449
+    m_Localized: Corgi
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994450
+    m_Localized: Corgi is a miniature sheepdog, a herding dog that helped Welsh farmers
+      herd sheep.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994451
+    m_Localized: Pug
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994452
+    m_Localized: The Pug is a stocky, square-bodied dog.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994453
+    m_Localized: Shepherd
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994454
+    m_Localized: The German Shepherd is a herding dog known for its courage, loyalty
+      and protective instinct.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994455
+    m_Localized: Siamese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994456
+    m_Localized: The Siamese cat has bright blue eyes and dark ears, paws and tail.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994457
+    m_Localized: British
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994458
+    m_Localized: The British Shorthair is a calm, cuddly cat with thick grey fur.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994459
+    m_Localized: Ginger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994460
+    m_Localized: Ginger cats have warm orange fur with stripes and love to play.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994461
+    m_Localized: Biscuit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994462
+    m_Localized: Biscuit is a happy Corgi who loves long walks and belly rubs.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994463
+    m_Localized: Luna
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994464
+    m_Localized: Luna is a curious Siamese kitten with sky-blue eyes.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895326994465
+    m_Localized: Muffin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188736
+    m_Localized: Muffin is a cheeky Pug who snores when she sleeps.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188737
+    m_Localized: Smokey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188738
+    m_Localized: Smokey is a fluffy grey cat who loves a warm sunny spot.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188739
+    m_Localized: Rex
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188740
+    m_Localized: Rex is a brave Shepherd who always guards the garden.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188741
+    m_Localized: Tiger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2895331188742
+    m_Localized: Tiger is a playful ginger kitten who chases butterflies.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25938183053312
+    m_Localized: Choose<br>your<br>theme!
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

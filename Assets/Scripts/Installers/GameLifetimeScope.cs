@@ -34,6 +34,7 @@ namespace Scripts.Installers
             builder.Register<GameSession>(Lifetime.Singleton);
             builder.Register<SoundService>(Lifetime.Singleton);
             builder.Register<LanguageService>(Lifetime.Singleton);
+            builder.Register<LocalizedTexts>(Lifetime.Singleton).As<ITexts>().AsSelf();
             builder.Register<EnergyService>(Lifetime.Singleton);
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);

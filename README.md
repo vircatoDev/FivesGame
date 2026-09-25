@@ -71,11 +71,12 @@ closest misplaced tile to its cell until the next move; persistence/share codes 
 remain future work. No separate application-session layer was introduced.
 
 Settings hold sound and music volume and the language (EN, RU, FR, IT, DE, ES), chosen with
-flags and saved with the player data (`LanguageService`); texts are localized in the next step.
+flags and saved with the player data (`LanguageService`). All texts come from `Localization/Strings.xlsx`
+through Unity Localization; see [localization](docs/LOCALIZATION.md).
 
-Unity's Test Runner (EditMode) runs **149 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
-75 domain tests (`Fives.Domain.Tests`), 69 runtime tests on the real ECS systems, services and
-presenters (`Fives.Runtime.Tests`) and 5 gameplay prefab tests (`Fives.UI.Editor.Tests`).
+Unity's Test Runner (EditMode) runs **158 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
+75 domain tests (`Fives.Domain.Tests`), 70 runtime tests on the real ECS systems, services and
+presenters (`Fives.Runtime.Tests`) and 13 editor tests for the gameplay prefab and localization (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 
 The Kids Puzzle visual redesign replaces Riverside Village. Undo and hint controls are

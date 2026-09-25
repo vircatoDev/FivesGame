@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Fives.Domain;
 using Scripts.Components;
 using Scripts.Models;
+using UnityEngine;
 
 namespace Scripts.UI.Views
 {
@@ -29,13 +30,13 @@ namespace Scripts.UI.Views
 
     public interface IGamePlayView : IView
     {
-        void UpdateViewContent(PuzzleData selectedPuzzle);
+        void UpdateViewContent(Sprite image, string title, string about);
         void UpdateControls(string moves, string hintPrice, bool canUndo, bool canHint);
     }
 
     public interface IGameResultView : IView
     {
-        void UpdateViewContent(GameResult result, string themeName, ThemeProgress progress);
+        void UpdateViewContent(string stars, string stats, string themeName, ThemeProgress progress);
     }
 
     public interface IHeaderPanelView

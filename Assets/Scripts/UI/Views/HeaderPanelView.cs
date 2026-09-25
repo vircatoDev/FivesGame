@@ -6,6 +6,8 @@ using Scripts.Components;
 using Scripts.Models;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Components;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Scripts.UI.Views
@@ -15,6 +17,7 @@ namespace Scripts.UI.Views
         [SerializeField] private Button commonButton;
         [SerializeField] private Image commonButtonImg;
         [SerializeField] private TextMeshProUGUI commonButtonText;
+        [SerializeField] private LocalizeStringEvent commonButtonLabel;
         [SerializeField] private List<HeaderCommonBtnSkins> commonBtnSkins;
 
         [SerializeField] private TextMeshProUGUI starsAmountText;
@@ -37,7 +40,7 @@ namespace Scripts.UI.Views
             if (skin != null)
             {
                 commonButtonImg.sprite = skin.BtnSkin;
-                commonButtonText.text = skin.BtnText;
+                commonButtonLabel.SetEntry(skin.TextKey);
                 commonButtonText.color = skin.TextColor;
             }
         }
@@ -78,7 +81,8 @@ namespace Scripts.UI.Views
     {
         public HeaderBtnType BtnType;
         public Sprite BtnSkin;
-        public string BtnText;
+        [Tooltip("Key in the UI string table.")]
+        [FormerlySerializedAs("BtnText")] public string TextKey;
         public Color TextColor = Color.white;
     }
 }

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
@@ -28,6 +29,7 @@ namespace Scripts
         private GlobalConfig _config;
         private SoundService _soundService;
         private LanguageService _languageService;
+        private LocalizedTexts _texts;
         private EnergyService _energyService;
         private StarService _starService;
         private PlayerDataSaveHelper _playerDataSaveHelper;
@@ -44,6 +46,7 @@ namespace Scripts
             GlobalConfig config,
             SoundService soundService,
             LanguageService languageService,
+            LocalizedTexts texts,
             EnergyService energyService,
             StarService starService,
             GameStateMachine stateMachine, GameSession gameSession,
@@ -57,6 +60,7 @@ namespace Scripts
             _config = config;
             _soundService = soundService;
             _languageService = languageService;
+            _texts = texts;
             _energyService = energyService;
             _starService = starService;
             _stateMachine = stateMachine;
@@ -68,8 +72,12 @@ namespace Scripts
             _screens = screens;
         }
 
-        private void Start()
+        private void Start() => StartAsync().Forget();
+
+        // The first screen needs its texts, so the ECS world starts once localization is ready.
+        private async UniTaskVoid StartAsync()
         {
+            await _texts.Initialize();
             _mainSystems = new EcsSystems(_world);
 
             AddSystems();
@@ -144,7 +152,7 @@ namespace Scripts
 
         private void Update()
         {
-            _mainSystems.Run();
+            _mainSystems?.Run();
         }
 
         // Mobile OSes may kill a paused app without further callbacks, so unsaved settings and progress are written here.
@@ -162,7 +170,7 @@ namespace Scripts
 
         private void OnDestroy()
         {
-            _mainSystems.Destroy();
+            _mainSystems?.Destroy();
             _world.Destroy();
         }
 

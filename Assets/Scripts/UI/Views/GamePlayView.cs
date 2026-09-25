@@ -57,11 +57,11 @@ namespace Scripts.UI.Views
             return default;
         }
 
-        public void UpdateViewContent(PuzzleData selectedPuzzle)
+        public void UpdateViewContent(Sprite image, string title, string about)
         {
-            puzzlePreviewImg.SetCover(selectedPuzzle.Image);
-            titleText.text = selectedPuzzle.Name;
-            mainText.text = selectedPuzzle.Description;
+            puzzlePreviewImg.SetCover(image);
+            titleText.text = title;
+            mainText.text = about;
         }
 
         public void ResetPositions()

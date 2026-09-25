@@ -60,7 +60,7 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             var progress = new PlayerProgressService(save);
             var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world),
-                new ThemeShop(stars, progress, _world), progress, session, new FakeHeaderPanelView(), _world);
+                new ThemeShop(stars, progress, _world), progress, session, new FakeHeaderPanelView(), _world, new FakeTexts());
             select.Initialize(new FakeSelectMenuView());
 
             select.OnThemeBuy("cities");
@@ -103,7 +103,7 @@ namespace Fives.Runtime.Tests
             var stars = new StarService(save);
             var session = new GameSession(config);
             session.BeginRun();
-            var result = new GameResultPresenter(session, stars, new PlayerProgressService(save), _world);
+            var result = new GameResultPresenter(session, stars, new PlayerProgressService(save), _world, new FakeTexts());
 
             result.GetReward(false);
             result.GetReward(true);
@@ -124,7 +124,7 @@ namespace Fives.Runtime.Tests
             session.BeginRun();
             var view = new FakeGameResultView();
 
-            new GameResultPresenter(session, new StarService(save), new PlayerProgressService(save), _world).Initialize(view);
+            new GameResultPresenter(session, new StarService(save), new PlayerProgressService(save), _world, new FakeTexts()).Initialize(view);
 
             Assert.That(view.Progress, Is.EqualTo("1/3"));
         }

@@ -13,17 +13,20 @@ namespace Scripts.UI.Presenters
         private readonly StarService _starService;
         private readonly PlayerProgressService _playerProgressService;
         private readonly EcsWorld _world;
+        private readonly ITexts _texts;
 
         public GameResultPresenter(
             GameSession gameSession,
             StarService starService,
             PlayerProgressService playerProgressService,
-            EcsWorld world)
+            EcsWorld world,
+            ITexts texts)
         {
             _gameSession = gameSession;
             _starService = starService;
             _playerProgressService = playerProgressService;
             _world = world;
+            _texts = texts;
         }
 
         public override void OnActivateView()
@@ -32,7 +35,10 @@ namespace Scripts.UI.Presenters
             UpdateProgress();
             SavePlayerProgress();
             var theme = _gameSession.SelectedTheme;
-            View.UpdateViewContent(_gameSession.LastGameResult, theme.ThemeName, _playerProgressService.GetThemeProgress(theme));
+            var result = _gameSession.LastGameResult;
+            View.UpdateViewContent(_texts.Get(TextKeys.RewardStars, result.StarCount),
+                _texts.Get(TextKeys.ResultStats, result.TurnCount, result.GameTime.ToString(@"mm\:ss")),
+                _texts.Get(TextKeys.Name(theme)), _playerProgressService.GetThemeProgress(theme));
             View.PlayShowAnimation().Forget();
         }
 

@@ -1,3 +1,4 @@
+using Scripts.Services;
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -174,14 +175,20 @@ namespace Fives.Runtime.Tests
         public string Moves = "";
         public bool CanUndo, CanHint;
         public string HintPrice = "";
-        public void UpdateViewContent(PuzzleData selectedPuzzle) { }
+        public void UpdateViewContent(Sprite image, string title, string about) { }
         public void UpdateControls(string moves, string hintPrice, bool canUndo, bool canHint) { Updates++; Moves = moves; HintPrice = hintPrice; CanUndo = canUndo; CanHint = canHint; }
     }
 
     internal sealed class FakeGameResultView : FakeView, IGameResultView
     {
         public string Progress;
-        public void UpdateViewContent(GameResult result, string themeName, ThemeProgress progress) => Progress = progress.ToString();
+        public void UpdateViewContent(string stars, string stats, string themeName, ThemeProgress progress) => Progress = progress.ToString();
+    }
+
+    /// <summary>Returns the key, with arguments after a colon, so tests do not depend on a language.</summary>
+    internal sealed class FakeTexts : ITexts
+    {
+        public string Get(string key, params object[] args) => args.Length == 0 ? key : key + ":" + string.Join(",", args);
     }
 
     internal sealed class FakeHeaderPanelView : IHeaderPanelView
