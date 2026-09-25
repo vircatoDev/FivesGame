@@ -1,55 +1,36 @@
 using Leopotam.Ecs;
 using Scripts.Components;
-using Scripts.Models;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Scripts.Systems
 {
+    /// <summary>Ends the run on GameEndEvent: the board entity with its view, the tiles and a start request not yet played.</summary>
     class BoardDestroySystem : IEcsRunSystem
     {
-        private readonly Transform _boardParent;
-        private readonly GameSession _session;
-
-        private readonly EcsFilter<BoardComponent> _boards;
-        private readonly EcsFilter<TileComponent> _tileFilter = null;
-        private readonly EcsFilter<GameEndEvent> _gameEndEvent = null;
-
-        public BoardDestroySystem(Transform boardParent)
-        {
-            _boardParent = boardParent;
-        }
+        private readonly EcsFilter<GameEndEvent> _ends = null;
+        private readonly EcsFilter<BoardComponent> _boards = null;
+        private readonly EcsFilter<TileComponent> _tiles = null;
+        private readonly EcsFilter<StartRunRequest> _requests = null;
 
         public void Run()
         {
-            if (_gameEndEvent.GetEntitiesCount() > 0)
-            {
-                foreach (var i in _boards)
-                    _boards.GetEntity(i).Destroy();
-                DestroyCurrentBoard();
-                _session.EndRun();
-            }
-        }
-
-        private void DestroyCurrentBoard()
-        {
-            if (_boardParent.childCount == 0)
-            {
+            if (_ends.IsEmpty())
                 return;
-            }
 
-            var board = _boardParent.GetChild(_boardParent.childCount - 1);
-
-            foreach (var i in _tileFilter)
+            foreach (var i in _boards)
             {
-                var tile = _tileFilter.Get1(i);
-                if (tile.Rect != null && tile.Rect.IsChildOf(board))
-                {
-                    _tileFilter.GetEntity(i).Destroy();
-                }
+                var entity = _boards.GetEntity(i);
+                if (entity.Has<BoardViewComponent>())
+                    Object.Destroy(entity.Get<BoardViewComponent>().View.gameObject); // the tiles are its children
+                entity.Destroy();
             }
 
-            Object.Destroy(board.gameObject);
+            // Tiles exist only with a board.
+            foreach (var i in _tiles)
+                _tiles.GetEntity(i).Destroy();
+
+            foreach (var i in _requests)
+                _requests.GetEntity(i).Destroy();
         }
     }
 }

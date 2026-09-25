@@ -75,16 +75,33 @@ namespace Fives.Runtime.Tests
             _board = new BoardFixture(columns, rows);
             _board.Systems = new EcsSystems(_board.World).Add(new BoardSetupSystem());
             if (withCleanup)
-                _board.Systems.Add(new BoardDestroySystem(_board.Objects.Rect("Board parent"))).OneFrame<GameEndEvent>();
+                _board.Systems.Add(new BoardDestroySystem()).OneFrame<GameEndEvent>();
             _board.Systems.Inject(_board.Session).Inject(_board.Time);
             _board.Systems.Init();
             _boards = (EcsFilter<BoardComponent, BoardHistoryComponent>)_board.World.GetFilter(typeof(EcsFilter<BoardComponent, BoardHistoryComponent>));
+        }
+
+        private void RequestRun() => _board.World.NewEntity().Get<StartRunRequest>();
+
+        [Test]
+        public void Setup_WaitsForARequest_AndConsumesIt()
+        {
+            Build(3, 3, false);
+            _board.Systems.Tick(2);
+            Assert.That(_boards.GetEntitiesCount(), Is.Zero, "no request, no board");
+
+            RequestRun();
+            RequestRun();
+            _board.Systems.Tick(2);
+            Assert.That(_boards.GetEntitiesCount(), Is.EqualTo(1), "a duplicate request does not make a second board");
+            Assert.That(_board.World.Count<StartRunRequest>(), Is.Zero);
         }
 
         [Test]
         public void Setup_CreatesOneReproducibleBoard()
         {
             Build(4, 3, false);
+            RequestRun();
             _board.Systems.Tick(2);
 
             Assert.That(_boards.GetEntitiesCount(), Is.EqualTo(1));
@@ -99,6 +116,7 @@ namespace Fives.Runtime.Tests
         public void Cleanup_RemovesBoardHistoryAndSelectionWithoutAView()
         {
             Build(3, 3, true);
+            RequestRun();
             _board.Systems.Run();
             _boards.GetEntity(0).Get<TileSelectionComponent>();
             _board.World.NewEntity().Get<GameEndEvent>();
@@ -106,19 +124,31 @@ namespace Fives.Runtime.Tests
 
             Assert.That(_boards.GetEntitiesCount(), Is.Zero);
             Assert.That(_board.World.Count<TileSelectionComponent>(), Is.Zero);
-            Assert.That(_board.Session.IsRunning, Is.False);
+        }
+
+        [Test]
+        public void Exit_DropsARequestThatWasNotPlayedYet()
+        {
+            Build(3, 3, true);
+            RequestRun();
+            _board.World.NewEntity().Get<GameEndEvent>();
+            _board.Systems.Tick(2);
+
+            Assert.That(_board.World.Count<StartRunRequest>(), Is.Zero);
+            Assert.That(_boards.GetEntitiesCount(), Is.Zero);
         }
 
         [Test]
         public void EndedRun_CannotRecreateABoard_UntilTheNextRun()
         {
             Build(3, 3, true);
+            RequestRun();
             _board.Systems.Run();
             _board.World.NewEntity().Get<GameEndEvent>();
             _board.Systems.Tick(2);
             Assert.That(_boards.GetEntitiesCount(), Is.Zero, "the Playing state may still be waiting for navigation");
 
-            _board.Session.BeginRun();
+            RequestRun();
             _board.Systems.Run();
             Assert.That(_boards.GetEntitiesCount(), Is.EqualTo(1));
             Assert.That(_boards.Get2(0).Moves, Is.Empty);
@@ -152,7 +182,7 @@ namespace Fives.Runtime.Tests
             _board.Swipe(SolvingTile, -1, 0);
 
             Assert.That(_board.Tiles[SolvingTile].Has<MoveComponent>(), Is.True);
-            Assert.That(_board.Session.IsCompleted, Is.False, "the last move is still animating");
+            Assert.That(_board.Board.Has<BoardSolvedTag>(), Is.False, "the last move is still animating");
 
             _board.Swipe(SolvingTile, -1, 0);
             Assert.That(_board.Tiles[SolvingTile].Get<TileComponent>().Cell, Is.EqualTo(SolvingTile), "a second swipe during movement is ignored");
@@ -164,7 +194,7 @@ namespace Fives.Runtime.Tests
             SolveAndSettle();
 
             Assert.That(_board.Tiles[SolvingTile].Has<MoveComponent>(), Is.False);
-            Assert.That(_board.Session.IsCompleted, Is.True);
+            Assert.That(_board.Board.Has<BoardSolvedTag>(), Is.True);
             Assert.That(_board.Session.LastGameResult.TurnCount, Is.EqualTo(1));
             Assert.That(_board.Session.LastGameResult.GameTime, Is.EqualTo(TimeSpan.FromSeconds(83)));
         }
@@ -199,16 +229,13 @@ namespace Fives.Runtime.Tests
         }
 
         [Test]
-        public void NextRun_ResetsCompletion()
+        public void NextRun_StartsWithAFreshResult()
         {
             SolveAndSettle();
-            _board.State.Get<GameStateComponent>().CurrentState = GameStateType.MainMenu;
-            _board.Systems.Run();
-            _board.Session.EndRun();
             _board.Session.BeginRun();
 
-            Assert.That(_board.Session.IsCompleted, Is.False);
-            Assert.That(_board.Session.IsRunning, Is.True);
+            Assert.That(_board.Session.LastGameResult.TurnCount, Is.Zero);
+            Assert.That(_board.Session.LastGameResult.GameTime, Is.EqualTo(TimeSpan.Zero));
         }
 
         [Test]

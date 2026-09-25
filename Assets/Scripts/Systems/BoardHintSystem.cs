@@ -14,14 +14,13 @@ namespace Scripts.Systems
     /// </summary>
     public class BoardHintSystem : IEcsRunSystem
     {
-        private readonly EcsWorld _world;
-        private readonly GameSession _session;
-        private readonly GlobalConfig _config;
-        private readonly EcsFilter<BoardComponent> _boards;
-        private readonly EcsFilter<BoardControlEvent> _controls;
-        private readonly EcsFilter<BoardChangedEvent> _changes;
-        private readonly EcsFilter<TileComponent, MoveComponent> _moves;
-        private readonly EcsFilter<GameEndEvent> _ends;
+        private readonly EcsWorld _world = null;
+        private readonly GlobalConfig _config = null;
+        private readonly EcsFilter<BoardComponent>.Exclude<BoardSolvedTag> _boards = null;
+        private readonly EcsFilter<BoardControlEvent> _controls = null;
+        private readonly EcsFilter<BoardChangedEvent> _changes = null;
+        private readonly EcsFilter<TileComponent, MoveComponent> _moves = null;
+        private readonly EcsFilter<GameEndEvent> _ends = null;
         private readonly StarService _stars;
 
         public BoardHintSystem(StarService stars)
@@ -31,7 +30,7 @@ namespace Scripts.Systems
 
         public void Run()
         {
-            if (_boards.GetEntitiesCount() != 1)
+            if (_boards.IsEmpty())
                 return;
 
             var entity = _boards.GetEntity(0);
@@ -47,9 +46,11 @@ namespace Scripts.Systems
 
         private void TryBuy(EcsEntity entity, BoardState board)
         {
+            if (!_moves.IsEmpty() || !_ends.IsEmpty() || entity.Has<BoardHintComponent>())
+                return;
+
             var candidates = BoardHint.ClosestMisplaced(board);
-            if (!_session.IsRunning || _session.IsCompleted || _moves.GetEntitiesCount() > 0 || _ends.GetEntitiesCount() > 0
-                || entity.Has<BoardHintComponent>() || candidates.Count == 0)
+            if (candidates.Count == 0)
                 return;
 
             if (!_stars.Spend(_config.HintPrice))

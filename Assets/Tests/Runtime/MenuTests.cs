@@ -7,6 +7,7 @@ using Scripts.Configs;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services;
+using Scripts.Systems;
 using Scripts.UI.Presenters;
 
 namespace Fives.Runtime.Tests
@@ -52,6 +53,16 @@ namespace Fives.Runtime.Tests
             _objects.Dispose();
         }
 
+        // The run ends the way the game ends it: GameEndEvent through BoardDestroySystem.
+        private void EndRun()
+        {
+            var systems = new EcsSystems(_world).Add(new BoardDestroySystem()).OneFrame<GameEndEvent>();
+            systems.Init();
+            _world.Send<GameEndEvent>();
+            systems.Run();
+            systems.Destroy();
+        }
+
         private void StartFromBothMenus()
         {
             _selectView.OnClick("cities");       // Theme card → puzzle list.
@@ -66,7 +77,7 @@ namespace Fives.Runtime.Tests
             StartFromBothMenus();
 
             Assert.That(_energy.GetBalance(), Is.EqualTo(4));
-            Assert.That(_session.IsRunning, Is.True);
+            Assert.That(_world.Count<StartRunRequest>(), Is.EqualTo(1), "one board is requested");
         }
 
         [Test]
@@ -83,14 +94,14 @@ namespace Fives.Runtime.Tests
         public void NextRun_CanStart_ButNotWithoutEnergy()
         {
             StartFromBothMenus();
-            _session.EndRun();
+            EndRun();
             Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]).GetAwaiter().GetResult(), Is.True);
             Assert.That(_energy.GetBalance(), Is.EqualTo(3));
 
-            _session.EndRun();
+            EndRun();
             _energy.Spend(_energy.GetBalance());
             Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]).GetAwaiter().GetResult(), Is.False);
-            Assert.That(_session.IsRunning, Is.False);
+            Assert.That(_world.Count<StartRunRequest>(), Is.Zero);
         }
     }
 
@@ -167,7 +178,7 @@ namespace Fives.Runtime.Tests
             _menu.OnNextTheme();
             _menu.OnStartGame();
 
-            Assert.That(_session.IsRunning, Is.False);
+            Assert.That(_world.Count<StartRunRequest>(), Is.Zero, "a locked theme does not start");
             Assert.That(_session.SelectedTheme, Is.EqualTo(_config.Themes[0]));
             Assert.That(_world.Count<ChangeStateEvent>(), Is.EqualTo(1));
         }

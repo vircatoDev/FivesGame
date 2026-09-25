@@ -7,7 +7,7 @@ using Scripts.UI.Views;
 
 namespace Scripts.UI.Presenters
 {
-    public class GamePlayPresenter : Presenter<IGamePlayView>
+    public class GamePlayPresenter : Presenter<IGamePlayView>, IBoardHud
     {
         private readonly GameSession _gameSession;
         private readonly IHeaderPanelView _header;
@@ -34,7 +34,7 @@ namespace Scripts.UI.Presenters
         public void RequestControl(BoardControl control) =>
             _world.Send(new BoardControlEvent { Control = control });
 
-        public void ShowHud(in BoardHud hud)
+        public void Show(in BoardHud hud)
         {
             View.UpdateControls(_texts.Get(TextKeys.Moves, hud.Moves), hud.HintPrice.ToString(), hud.CanUndo, hud.CanHint);
         }

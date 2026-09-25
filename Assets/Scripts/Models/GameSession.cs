@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace Scripts.Models
 {
+    /// <summary>
+    /// What the player picked and how the last run went, for the screens and the board setup.
+    /// Whether a run is in progress is not stored here: the board entity in the ECS world is the run.
+    /// </summary>
     public class GameSession
     {
         private readonly RewardClaim _rewardClaim = new RewardClaim();
@@ -16,8 +20,6 @@ namespace Scripts.Models
         public Sprite PuzzleImage { get; private set; }
         public GameSettings SelectedGameMode { get; private set; }
         public GameResult LastGameResult { get; private set; }
-        public bool IsRunning { get; private set; }
-        public bool IsCompleted { get; private set; }
 
         public GameSession(GlobalConfig config)
         {
@@ -30,24 +32,17 @@ namespace Scripts.Models
             PuzzleImage = image;
         }
 
+        /// <summary>A new result to fill and a new reward to claim.</summary>
         public void BeginRun()
         {
-            IsRunning = true;
-            IsCompleted = false;
             _rewardClaim.Reset();
             LastGameResult = new GameResult { StarCount = _rewardStars };
         }
 
         public void CompleteRun(int turnCount, TimeSpan gameTime)
         {
-            IsCompleted = true;
             LastGameResult.TurnCount = turnCount;
             LastGameResult.GameTime = gameTime;
-        }
-
-        public void EndRun()
-        {
-            IsRunning = false;
         }
 
         public bool TryClaimReward(bool doubleReward, out int grantedAmount)
