@@ -45,7 +45,10 @@ namespace Scripts.UI.Views
                 initialTextPosition.y + Screen.height
             );
 
-            CreateUpdateSequence(false);
+            // Off screen right away: a zero-length tween would apply only on DOTween's next update, and the first
+            // frame would show the prefab as authored, with its placeholder English title.
+            scrollView.anchoredPosition = scrollViewOffScreenPosition;
+            textContainer.anchoredPosition = textOffScreenPosition;
         }
 
 
