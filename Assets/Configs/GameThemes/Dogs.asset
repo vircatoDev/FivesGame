@@ -16,13 +16,33 @@ MonoBehaviour:
   ThemeName: Dogs
   Puzzles:
   - Id: dogs.corgi
-    Image: {fileID: 21300000, guid: e7e238a9ed33f7343b30c6190c52ee8a, type: 3}
+    Image:
+      m_AssetGUID: e7e238a9ed33f7343b30c6190c52ee8a
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
     Name: Corgi
   - Id: dogs.pug
-    Image: {fileID: 21300000, guid: 473ee4e95179d4e4f89fb4038ba07e1d, type: 3}
+    Image:
+      m_AssetGUID: 473ee4e95179d4e4f89fb4038ba07e1d
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
     Name: Pug
   - Id: dogs.shepherd
-    Image: {fileID: 21300000, guid: e87be115a26bb294f82445b98f153229, type: 3}
+    Image:
+      m_AssetGUID: e87be115a26bb294f82445b98f153229
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
     Name: Shepherd
-  ThemeLogo: {fileID: 21300000, guid: e7e238a9ed33f7343b30c6190c52ee8a, type: 3}
+  Preview:
+    m_AssetGUID: 0d78c57077242426cb22c923876c3812
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
   UnlockCost: 0

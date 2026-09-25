@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: fb3a8396a04b746a5970041f27ff0db3
+guid: 42fbe666dcbcd4fb69b6ed7aa6fd28e2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8381197529127179115
-    second: Siamese_0
+      213: 562187067565225365
+    second: Ginger_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,11 +109,24 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Siamese_0
+      name: Ginger_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b63d10c4fbeff4470800000000000000
-      internalID: 8381197529127179115
+      spriteID: 5953b8bc82a4dc700800000000000000
+      internalID: 562187067565225365
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Siamese_0: 8381197529127179115
+      Ginger_0: 562187067565225365
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

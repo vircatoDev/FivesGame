@@ -12,7 +12,8 @@
         "UnityEngine.UI",
         "SimpleScrollSnap",
         "Unity.Localization",
-        "Unity.ResourceManager"
+        "Unity.ResourceManager",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

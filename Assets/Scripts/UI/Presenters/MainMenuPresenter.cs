@@ -19,11 +19,12 @@ namespace Scripts.UI.Presenters
         private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
         private readonly ITexts _texts;
+        private readonly ThemePreviews _previews;
         private ThemeConfig[] _themes;
         private int _themeIndex;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world, ITexts texts)
+            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world, ITexts texts, ThemePreviews previews)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
@@ -32,6 +33,7 @@ namespace Scripts.UI.Presenters
             _header = header;
             _world = world;
             _texts = texts;
+            _previews = previews;
         }
 
         public override void OnActivateView()
@@ -39,11 +41,9 @@ namespace Scripts.UI.Presenters
             // Every theme with puzzles, locked ones included: Play on a locked theme leads to its purchase.
             _themes = _themeConfig.Themes.Where(theme => theme.Puzzles.Length > 0).ToArray();
             _themeIndex = Array.IndexOf(_themes, GetLastActiveTheme());
-
+            _header.ShowButton(HeaderBtnType.Settings, OnSettings);
             View.PlayShowAnimation().Forget();
             ShowThemes(0);
-
-            _header.ShowButton(HeaderBtnType.Settings, OnSettings);
         }
 
         public async void OnStartGame()
@@ -58,7 +58,7 @@ namespace Scripts.UI.Presenters
                 return;
             }
 
-            if (!_gameStartService.TryStart(theme, FindNextUncompletedPuzzle(theme)))
+            if (!await _gameStartService.TryStart(theme, FindNextUncompletedPuzzle(theme)))
                 return;
             
             await View.PlayHideAnimation();
@@ -84,8 +84,7 @@ namespace Scripts.UI.Presenters
             View.ShowThemes(Card(_themes[Wrap(_themeIndex - 1)]), Card(_themes[_themeIndex]),
                 Card(_themes[Wrap(_themeIndex + 1)]), direction, _themes.Length > 1);
 
-        // A theme card shows the puzzle Play would start: the first uncompleted one, or the last when all are done.
-        private ThemeCard Card(ThemeConfig theme) => new ThemeCard(FindNextUncompletedPuzzle(theme).Image,
+        private ThemeCard Card(ThemeConfig theme) => new ThemeCard(_previews.Of(theme),
             _texts.Get(TextKeys.Name(theme)), _playerProgressService.GetThemeProgress(theme).ToString());
 
         private int Wrap(int index) => (index % _themes.Length + _themes.Length) % _themes.Length;
