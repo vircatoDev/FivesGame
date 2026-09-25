@@ -4,24 +4,24 @@ namespace Fives.Domain
 {
     public static class BoardMath
     {
-        public static int CellCount(int boardSize)
+        public static int CellCount(int columns, int rows)
         {
-            if (boardSize < 2)
+            if (columns < 2 || rows < 2)
             {
-                throw new ArgumentOutOfRangeException(nameof(boardSize));
+                throw new ArgumentOutOfRangeException(columns < 2 ? nameof(columns) : nameof(rows));
             }
 
-            return checked(boardSize * boardSize);
+            return checked(columns * rows);
         }
 
-        public static int TileIdAt(int column, int row, int boardSize)
+        public static int TileIdAt(int column, int row, int columns, int rows)
         {
-            if (boardSize < 2 || column < 0 || column >= boardSize || row < 0 || row >= boardSize)
+            if (columns < 2 || rows < 2 || column < 0 || column >= columns || row < 0 || row >= rows)
             {
                 throw new ArgumentOutOfRangeException();
             }
 
-            return checked(row * boardSize + column);
+            return checked(row * columns + column);
         }
     }
 }

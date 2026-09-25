@@ -23,7 +23,7 @@ namespace Scripts.Systems
 
             var seed = Random.Range(1, int.MaxValue);
             var entity = _world.NewEntity();
-            entity.Replace(new BoardComponent { State = SeededShuffle.Create(_session.SelectedGameMode.BoardSize, seed) });
+            entity.Replace(new BoardComponent { State = SeededShuffle.Create(_session.SelectedGameMode.Columns, _session.SelectedGameMode.Rows, seed) });
             entity.Replace(new BoardHistoryComponent
             {
                 Seed = seed,

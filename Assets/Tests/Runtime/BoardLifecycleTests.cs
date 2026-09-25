@@ -70,9 +70,9 @@ namespace Fives.Runtime.Tests
         [TearDown]
         public void TearDown() => _board.Dispose();
 
-        private void Build(int size, bool withCleanup)
+        private void Build(int columns, int rows, bool withCleanup)
         {
-            _board = new BoardFixture(size);
+            _board = new BoardFixture(columns, rows);
             _board.Systems = new EcsSystems(_board.World).Add(new BoardSetupSystem());
             if (withCleanup)
                 _board.Systems.Add(new BoardDestroySystem(_board.Objects.Rect("Board parent"))).OneFrame<GameEndEvent>();
@@ -84,21 +84,21 @@ namespace Fives.Runtime.Tests
         [Test]
         public void Setup_CreatesOneReproducibleBoard()
         {
-            Build(6, false);
+            Build(4, 3, false);
             _board.Systems.Tick(2);
 
             Assert.That(_boards.GetEntitiesCount(), Is.EqualTo(1));
             var layout = _boards.Get1(0).State;
-            var expected = SeededShuffle.Create(6, _boards.Get2(0).Seed);
-            Assert.That(layout.CellCount, Is.EqualTo(36));
+            var expected = SeededShuffle.Create(4, 3, _boards.Get2(0).Seed);
+            Assert.That((layout.Columns, layout.Rows), Is.EqualTo((4, 3)));
             Assert.That(layout.IsSolved, Is.False);
-            Assert.That(Enumerable.Range(0, 36).All(cell => layout[cell] == expected[cell]), Is.True, "the seed recreates the layout");
+            Assert.That(Enumerable.Range(0, 12).All(cell => layout[cell] == expected[cell]), Is.True, "the seed recreates the layout");
         }
 
         [Test]
         public void Cleanup_RemovesBoardHistoryAndSelectionWithoutAView()
         {
-            Build(3, true);
+            Build(3, 3, true);
             _board.Systems.Run();
             _boards.GetEntity(0).Get<TileSelectionComponent>();
             _boards.Get2(0).Undone.Add(new Swap(0, 1));
@@ -113,7 +113,7 @@ namespace Fives.Runtime.Tests
         [Test]
         public void EndedRun_CannotRecreateABoard_UntilTheNextRun()
         {
-            Build(3, true);
+            Build(3, 3, true);
             _board.Systems.Run();
             _board.World.NewEntity().Get<GameEndEvent>();
             _board.Systems.Tick(2);
@@ -135,7 +135,7 @@ namespace Fives.Runtime.Tests
 
         [SetUp]
         public void SetUp() => _board = new BoardFixture()
-            .WithBoard(new BoardState(3, new[] { 0, 1, 2, 3, 4, 5, 6, 8, 7 }))
+            .WithBoard(new BoardState(3, 3, new[] { 0, 1, 2, 3, 4, 5, 6, 8, 7 }))
             .WithGameplaySystems();
 
         [TearDown]
@@ -169,6 +169,15 @@ namespace Fives.Runtime.Tests
             Assert.That(_board.Session.IsCompleted, Is.True);
             Assert.That(_board.Session.LastGameResult.TurnCount, Is.EqualTo(1));
             Assert.That(_board.Session.LastGameResult.GameTime, Is.EqualTo(TimeSpan.FromSeconds(83)));
+        }
+
+        [Test]
+        public void Win_AnnouncesTheSolvedBoardOnce()
+        {
+            SolveAndSettle();
+            _board.Systems.Tick(30); // The fixture keeps events, so this counts every send.
+
+            Assert.That(_board.World.Count<BoardSolvedEvent>(), Is.EqualTo(1));
         }
 
         [Test]

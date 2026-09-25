@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54dbb830c6db460398e7b32876b8c62d, type: 3}
   m_Name: 6x6Mode
   m_EditorClassIdentifier: 
-  BoardSize: 6
+  Columns: 6
+  Rows: 6
   TileSize: 125
   TileSpacing: 5
-  StartPosition: {x: -270, y: 270}
   TileSprites:
   - {fileID: 21300000, guid: da44abe32d882db46a50341c1b2ef401, type: 3}
   - {fileID: -1189701383, guid: 07a98fbdc77f26942b01312ac87a625b, type: 3}

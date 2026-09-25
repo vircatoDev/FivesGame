@@ -44,6 +44,7 @@ namespace Scripts.Systems
                 _gameSession.CompleteRun(history.Moves.Count,
                     TimeSpan.FromSeconds(_time.RealtimeSinceStartup - history.StartTime));
                 _world.PlaySound(AudioKeyCollection.Win);
+                _world.Send<BoardSolvedEvent>();
             }
 
             if (_elapsedSinceWin >= ResultStateDelay)

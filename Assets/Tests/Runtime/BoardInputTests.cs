@@ -159,6 +159,20 @@ namespace Fives.Runtime.Tests
         }
 
         [Test]
+        public void RectangularBoard_SwipesStayInsideTheirRow()
+        {
+            using var wide = new BoardFixture(4, 3).WithSeededBoard(42).WithGameplaySystems();
+
+            wide.Swipe(wide.Layout[3], 1, 0);  // right from the end of the first row: not the next row's start
+            wide.Swipe(wide.Layout[11], 0, 1); // down from the bottom row
+            Assert.That(wide.Moves, Is.Empty);
+
+            wide.Swipe(wide.Layout[3], 0, 1);
+            wide.Settle();
+            Assert.That(wide.Moves, Is.EqualTo(new[] { new Swap(3, 7) }));
+        }
+
+        [Test]
         public void Exit_TakesPrecedenceOverBoardCommands()
         {
             _board.Swipe(_board.Layout[0], 1, 0);

@@ -89,10 +89,11 @@ namespace Fives.Runtime.Tests
             return puzzles;
         }
 
-        public GameSettings Mode(int size)
+        public GameSettings Mode(int columns, int rows)
         {
             var mode = Asset<GameSettings>();
-            mode.BoardSize = size;
+            mode.Columns = columns;
+            mode.Rows = rows;
             mode.TileSize = 1;
             mode.TileSpacing = 0;
             return mode;

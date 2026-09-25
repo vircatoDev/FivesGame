@@ -51,11 +51,13 @@ namespace Fives.Domain.Tests
         }
 
         [Test]
-        public void BoardMath_UsesConfiguredBoardSize()
+        public void BoardMath_UsesConfiguredDimensions()
         {
-            Assert.That(BoardMath.CellCount(3), Is.EqualTo(9));
-            Assert.That(BoardMath.CellCount(6), Is.EqualTo(36));
-            Assert.That(BoardMath.TileIdAt(5, 5, 6), Is.EqualTo(35));
+            Assert.That(BoardMath.CellCount(3, 3), Is.EqualTo(9));
+            Assert.That(BoardMath.CellCount(4, 3), Is.EqualTo(12));
+            Assert.That(BoardMath.TileIdAt(5, 5, 6, 6), Is.EqualTo(35));
+            Assert.That(BoardMath.TileIdAt(3, 2, 4, 3), Is.EqualTo(11));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => BoardMath.TileIdAt(0, 3, 4, 3));
         }
 
         [Test]

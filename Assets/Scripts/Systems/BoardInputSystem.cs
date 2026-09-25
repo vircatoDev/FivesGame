@@ -80,11 +80,11 @@ namespace Scripts.Systems
         {
             var board = _boards.Get1(0).State;
             var cell = board.CellOf(tileId);
-            var column = cell % board.Size + dx;
-            var row = cell / board.Size + dy;
-            var inside = cell >= 0 && column >= 0 && column < board.Size && row >= 0 && row < board.Size;
+            var column = cell % board.Columns + dx;
+            var row = cell / board.Columns + dy;
+            var inside = cell >= 0 && column >= 0 && column < board.Columns && row >= 0 && row < board.Rows;
 
-            if (!inside || !TrySwap(new Swap(cell, row * board.Size + column)))
+            if (!inside || !TrySwap(new Swap(cell, row * board.Columns + column)))
                 _world.PlaySound(AudioKeyCollection.WrongClick);
         }
 

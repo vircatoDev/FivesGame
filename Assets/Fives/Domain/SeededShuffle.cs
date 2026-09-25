@@ -6,9 +6,9 @@ namespace Fives.Domain
     {
         // Version 2: xorshift32 driving Sattolo's algorithm. The result is a single cycle,
         // so no tile starts in its own cell. Changing this algorithm changes the layout of every seed.
-        public static BoardState Create(int size, int seed)
+        public static BoardState Create(int columns, int rows, int seed)
         {
-            var tiles = new int[BoardMath.CellCount(size)];
+            var tiles = new int[BoardMath.CellCount(columns, rows)];
             for (var i = 0; i < tiles.Length; i++)
                 tiles[i] = i;
 
@@ -25,7 +25,7 @@ namespace Fives.Domain
                 (tiles[i], tiles[j]) = (tiles[j], tiles[i]);
             }
 
-            return new BoardState(size, tiles);
+            return new BoardState(columns, rows, tiles);
         }
     }
 }
