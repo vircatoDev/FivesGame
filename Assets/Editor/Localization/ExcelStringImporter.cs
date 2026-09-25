@@ -10,7 +10,8 @@ namespace Fives.Editor.Localization
 {
     /// <summary>
     /// Localization/Strings.xlsx is the source of the "UI" string table: columns Key, Comment and one per locale code.
-    /// Import replaces every value and removes keys that are no longer in the sheet.
+    /// Import replaces every value, removes keys that are no longer in the sheet and marks every table for preloading:
+    /// code reads texts synchronously, which WebGL cannot do while a table is still loading.
     /// </summary>
     public static class ExcelStringImporter
     {
@@ -65,6 +66,7 @@ namespace Fives.Editor.Localization
                         throw new InvalidDataException($"{path}: no column for locale {code}.");
                     table.AddEntry(key, text);
                 }
+                LocalizationEditorSettings.SetPreloadTableFlag(table, true);
                 EditorUtility.SetDirty(table);
             }
 

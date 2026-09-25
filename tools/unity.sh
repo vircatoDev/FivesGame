@@ -43,7 +43,8 @@ case "${1:-}" in
     touch "$site/.nojekyll"
     # One orphan commit per deploy: the branch holds only the current build, not a history of binaries.
     git -C "$site" init -q -b gh-pages
-    git -C "$site" add -A
+    # --force: a global excludes file (for example the Unity template ignoring Build/) must not drop site files.
+    git -C "$site" add --all --force
     git -C "$site" commit -q -m "Deploy WebGL build from $commit"
     git -C "$site" push -q -f "$remote" gh-pages
     rm -rf "$site"

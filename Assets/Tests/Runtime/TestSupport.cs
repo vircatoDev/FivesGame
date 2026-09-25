@@ -188,6 +188,7 @@ namespace Fives.Runtime.Tests
     /// <summary>Returns the key, with arguments after a colon, so tests do not depend on a language.</summary>
     internal sealed class FakeTexts : ITexts
     {
+        public UniTask Ready() => UniTask.CompletedTask;
         public string Get(string key, params object[] args) => args.Length == 0 ? key : key + ":" + string.Join(",", args);
     }
 

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 ﻿using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Models;
@@ -10,10 +11,13 @@ namespace Scripts.UI.Presenters
     {
         private readonly SoundService _soundService;
         private readonly LanguageService _language;
+        private readonly ITexts _texts;
+        private bool _languageChanged;
         private readonly EcsWorld _world;
 
-        public SettingsPresenter(SoundService soundService, LanguageService language, EcsWorld world)
+        public SettingsPresenter(SoundService soundService, LanguageService language, ITexts texts, EcsWorld world)
         {
+            _texts = texts;
             _soundService = soundService;
             _language = language;
             _world = world;
@@ -58,13 +62,22 @@ namespace Scripts.UI.Presenters
             if (!_language.TrySet(code))
                 return;
 
+            _languageChanged = true;
             View.ShowLanguage(code);
             _world.PlaySound(AudioKeyCollection.MenuClick);
         }
 
-        public void OnClose()
+        public void OnClose() => CloseAsync().Forget();
+
+        // The main menu stays open under this popup. After a language change it is rebuilt, once the new
+        // tables are loaded, so the texts it builds in code are read again.
+        private async UniTaskVoid CloseAsync()
         {
             _world.Send<SaveDataEvent>();
+            await _texts.Ready();
+            if (_languageChanged)
+                _world.Send(new CloseScreenEvent { State = GameStateType.MainMenu });
+            _languageChanged = false;
             _world.ChangeState(GameStateType.MainMenu);
         }
     }

@@ -84,6 +84,13 @@ namespace Fives.UI.Tests
         }
 
         [Test]
+        public void EveryTable_IsPreloaded()
+        {
+            foreach (var table in LocalizationEditorSettings.GetStringTableCollection(ExcelStringImporter.TableName).StringTables)
+                Assert.That(LocalizationEditorSettings.GetPreloadTableFlag(table), Is.True, table.LocaleIdentifier.Code);
+        }
+
+        [Test]
         public void SelectedLocale_SwitchesTheText()
         {
             var previous = LocalizationSettings.SelectedLocale;
