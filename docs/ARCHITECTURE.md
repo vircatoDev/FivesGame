@@ -93,6 +93,18 @@ format details, verification results and remaining manual checks.
 These should use the same ECS command flow where they affect gameplay. Storage,
 platform APIs and content loading can remain services behind the relevant systems.
 
+## Screen sizes
+
+The game is landscape and designed at 1920x1080. The canvas scaler uses `Expand`, so the
+canvas is never smaller than the design: wide phones (19.5:9, 21:9) get extra width, 4:3
+tablets extra height, and nothing is clipped. Screen content is anchored to the centre, so
+it stays one group with the background visible around it. The gameplay screen is the exception:
+the board is centred and its side panels are pinned to the safe-area edges, so wide phones move
+them apart instead of leaving empty meadow between them. Backgrounds cover the screen with
+an `AspectRatioFitter` in `EnvelopeParent` mode. The header sits in `SafeAreaFitter`, which
+keeps its buttons away from notches and the Dynamic Island. `AdaptiveLayoutTests` check the
+scaler, the backgrounds and the safe area.
+
 ## Decisions
 
 - [ADR 0001: Keep GameStartup as the single ECS composition point](adr/0001-keep-gamestartup-composition.md)
