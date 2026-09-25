@@ -23,4 +23,10 @@ namespace Scripts.Models
         public bool Equals(BoardHud other) =>
             Seed == other.Seed && Moves == other.Moves && CanUndo == other.CanUndo && CanHint == other.CanHint && HintPrice == other.HintPrice;
     }
+
+    /// <summary>Where BoardHudSystem sends the HUD; the gameplay presenter shows it.</summary>
+    public interface IBoardHud
+    {
+        void Show(in BoardHud hud);
+    }
 }

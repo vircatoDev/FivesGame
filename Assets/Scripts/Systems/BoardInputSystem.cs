@@ -11,20 +11,18 @@ namespace Scripts.Systems
     /// </summary>
     public class BoardInputSystem : IEcsRunSystem
     {
-        private readonly EcsWorld _world;
-        private readonly GameSession _session;
-        private readonly EcsFilter<BoardComponent, BoardHistoryComponent> _boards;
-        private readonly EcsFilter<TileClickEvent> _clicks;
-        private readonly EcsFilter<TileSwipeEvent> _swipes;
-        private readonly EcsFilter<BoardControlEvent> _controls;
-        private readonly EcsFilter<TileComponent, MoveComponent> _moves;
-        private readonly EcsFilter<GameEndEvent> _ends;
-        private readonly EcsFilter<BoardInitializedEvent> _initialized;
+        private readonly EcsWorld _world = null;
+        private readonly EcsFilter<BoardComponent, BoardHistoryComponent>.Exclude<BoardSolvedTag> _boards = null;
+        private readonly EcsFilter<TileClickEvent> _clicks = null;
+        private readonly EcsFilter<TileSwipeEvent> _swipes = null;
+        private readonly EcsFilter<BoardControlEvent> _controls = null;
+        private readonly EcsFilter<TileComponent, MoveComponent> _moves = null;
+        private readonly EcsFilter<GameEndEvent> _ends = null;
+        private readonly EcsFilter<BoardInitializedEvent> _initialized = null;
 
         public void Run()
         {
-            if (!_session.IsRunning || _session.IsCompleted || _boards.GetEntitiesCount() != 1
-                || _ends.GetEntitiesCount() > 0 || _initialized.GetEntitiesCount() > 0 || _moves.GetEntitiesCount() > 0)
+            if (_boards.IsEmpty() || !_moves.IsEmpty() || !_initialized.IsEmpty() || !_ends.IsEmpty())
                 return;
 
             foreach (var i in _controls)

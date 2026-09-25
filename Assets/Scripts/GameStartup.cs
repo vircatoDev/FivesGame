@@ -10,7 +10,6 @@ using Scripts.Services;
 using Scripts.Services.Interfaces;
 using Scripts.Systems;
 using Scripts.UI;
-using Scripts.UI.Presenters;
 using Scripts.UI.Views;
 using UnityEngine;
 using VContainer;
@@ -36,7 +35,7 @@ namespace Scripts
         private PlayerDataSaveHelper _playerDataSaveHelper;
         private GameStateMachine _stateMachine;
         private GameSession _gameSession;
-        private GamePlayPresenter _gamePlayPresenter;
+        private IBoardHud _boardHud;
         private PlayerProgressService _progressService;
         private IHeaderPanelView _header;
         private ScreenCatalog _screens;
@@ -52,7 +51,7 @@ namespace Scripts
             StarService starService,
             GameStateMachine stateMachine, GameSession gameSession,
             PlayerDataSaveHelper playerDataSaveHelper,
-            GamePlayPresenter gamePlayPresenter,
+            IBoardHud boardHud,
             PlayerProgressService progressService,
             IHeaderPanelView header,
             ScreenCatalog screens)
@@ -67,7 +66,7 @@ namespace Scripts
             _stateMachine = stateMachine;
             _gameSession = gameSession;
             _playerDataSaveHelper = playerDataSaveHelper;
-            _gamePlayPresenter = gamePlayPresenter;
+            _boardHud = boardHud;
             _progressService = progressService;
             _header = header;
             _screens = screens;
@@ -124,7 +123,7 @@ namespace Scripts
                 .Add(AddGamePlaySystems())
                 .Add(new WinCheckSystem())
                 .Add(new BoardRevealSystem())
-                .Add(new BoardDestroySystem(_gameLayer))
+                .Add(new BoardDestroySystem())
                 .Add(new GameStateSystem(_stateMachine))
                 .Add(new EnergyRecoverySystem(_energyService))
                 .Add(new UISystem(_rootLayer, _popUpLayer, _screens))
@@ -144,7 +143,7 @@ namespace Scripts
                 .Add(new BoardProjectionSystem())
                 .Add(new TileHighlightSystem())
                 .Add(new TileMoveSystem())
-                .Add(new BoardHudSystem(_gamePlayPresenter));
+                .Add(new BoardHudSystem(_boardHud));
             return gamePlaySystems;
         }
 

@@ -2,7 +2,6 @@ using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
-using Scripts.UI.Presenters;
 
 namespace Scripts.Systems
 {
@@ -12,15 +11,14 @@ namespace Scripts.Systems
     /// </summary>
     public class BoardHudSystem : IEcsRunSystem
     {
-        private readonly GameSession _session = null;
         private readonly GlobalConfig _config = null;
         private readonly EcsFilter<BoardHistoryComponent> _boards = null;
-        private readonly GamePlayPresenter _presenter;
+        private readonly IBoardHud _hud;
         private BoardHud _shown;
 
-        public BoardHudSystem(GamePlayPresenter presenter)
+        public BoardHudSystem(IBoardHud hud)
         {
-            _presenter = presenter;
+            _hud = hud;
         }
 
         public void Run()
@@ -29,15 +27,16 @@ namespace Scripts.Systems
                 return;
 
             ref var history = ref _boards.Get1(0);
-            var ready = _session.IsRunning && !_session.IsCompleted;
+            var board = _boards.GetEntity(0);
+            var ready = !board.Has<BoardSolvedTag>();
             var hud = new BoardHud(history.Seed, history.Moves.Count, ready && history.Moves.Count > 0,
-                ready && !_boards.GetEntity(0).Has<BoardHintComponent>(), _config.HintPrice);
+                ready && !board.Has<BoardHintComponent>(), _config.HintPrice);
 
             if (hud.Equals(_shown))
                 return;
 
             _shown = hud;
-            _presenter.ShowHud(hud);
+            _hud.Show(hud);
         }
     }
 }

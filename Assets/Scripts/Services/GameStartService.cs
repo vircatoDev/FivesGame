@@ -12,6 +12,9 @@ namespace Scripts.Services
         private readonly EnergyService _energy;
         private readonly EcsWorld _world;
         private readonly ISpriteLoader _sprites;
+        private readonly EcsFilter<StartRunRequest> _requests;
+        private readonly EcsFilter<BoardComponent> _boards;
+        private bool _loading;
 
         public GameStartService(GameSession session, EnergyService energy, EcsWorld world, ISpriteLoader sprites)
         {
@@ -19,15 +22,17 @@ namespace Scripts.Services
             _session = session;
             _energy = energy;
             _world = world;
+            _requests = (EcsFilter<StartRunRequest>)world.GetFilter(typeof(EcsFilter<StartRunRequest>));
+            _boards = (EcsFilter<BoardComponent>)world.GetFilter(typeof(EcsFilter<BoardComponent>));
         }
 
         /// <summary>
-        /// Spends energy, starts the run and loads the puzzle picture, which the board and the screen read synchronously.
-        /// The run starts before the load, so a second tap meanwhile is refused; the board appears only on the gameplay state.
+        /// Spends energy, loads the puzzle picture, which the board and the screen read synchronously, and asks the
+        /// world for a board. Refused while a start is loading, waiting for the Playing state, or a board is in play.
         /// </summary>
         public async UniTask<bool> TryStart(ThemeConfig theme, PuzzleData puzzle)
         {
-            if (_session.IsRunning || theme == null || puzzle == null)
+            if (_loading || !_requests.IsEmpty() || !_boards.IsEmpty() || theme == null || puzzle == null)
             {
                 return false;
             }
@@ -44,8 +49,18 @@ namespace Scripts.Services
             _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energy.GetBalance(), -1));
             _world.Send<SaveDataEvent>();
 
-            _sprites.Release(this); // the previous run's picture
-            _session.SetSelectedImage(puzzle, await _sprites.Load(puzzle.Image, this));
+            _loading = true;
+            try
+            {
+                _sprites.Release(this); // the previous run's picture
+                _session.SetSelectedImage(puzzle, await _sprites.Load(puzzle.Image, this));
+            }
+            finally
+            {
+                _loading = false;
+            }
+
+            _world.NewEntity().Get<StartRunRequest>();
             return true;
         }
     }
