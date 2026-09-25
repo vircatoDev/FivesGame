@@ -30,7 +30,7 @@ namespace Scripts.UI.Views
     public interface IGamePlayView : IView
     {
         void UpdateViewContent(PuzzleData selectedPuzzle);
-        void UpdateControls(string moves, bool canUndo, bool canRedo);
+        void UpdateControls(string moves, string hintPrice, bool canUndo, bool canHint);
     }
 
     public interface IGameResultView : IView

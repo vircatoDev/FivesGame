@@ -29,8 +29,10 @@ Runtime behaviour (ECS systems, services, presenters, saves) is covered by the
 
 - Five fixed shuffle vectors (four square, one 4×3) protect algorithm stability, including zero and negative seeds.
 - 5,005 seed/dimension combinations are deterministic permutations with no tile in its own cell.
+- Hint routes: closest misplaced tiles, shortest routes that avoid placed tiles, and following
+  a route places its tile while moving others by one cell at most (300 seeds per size).
 
-There are currently 68 standalone NUnit cases.
+There are currently 75 standalone NUnit cases.
 
 The fixtures also remain available in Unity's EditMode Test Runner through the
 existing asmdef. Passing standalone tests does not imply they have run in Editor.

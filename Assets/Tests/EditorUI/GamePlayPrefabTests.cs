@@ -30,19 +30,19 @@ namespace Fives.UI.Tests
                     var controls = screen.transform.Find("Panel/BoardControls");
                     Assert.That(controls, Is.Not.Null);
                     var undo = controls.Find("Undo").GetComponent<Button>();
-                    var redo = controls.Find("Redo").GetComponent<Button>();
+                    var hint = controls.Find("Hint").GetComponent<Button>();
                     var moves = controls.Find("Moves/Label").GetComponent<TextMeshProUGUI>();
                     Assert.That(undo.interactable, Is.False);
-                    Assert.That(redo.interactable, Is.False);
+                    Assert.That(hint.interactable, Is.False);
 
-                    view.UpdateControls("Moves: 2", true, false);
+                    view.UpdateControls("Moves: 2", "5", true, false);
                     Assert.That(moves.text, Is.EqualTo("Moves: 2"));
                     Assert.That(undo.interactable, Is.True);
-                    Assert.That(redo.interactable, Is.False);
+                    Assert.That(hint.interactable, Is.False);
 
-                    view.UpdateControls("Moves: 1", true, true);
+                    view.UpdateControls("Moves: 1", "5", true, true);
                     Assert.That(moves.text, Is.EqualTo("Moves: 1"));
-                    Assert.That(undo.interactable && redo.interactable, Is.True);
+                    Assert.That(undo.interactable && hint.interactable, Is.True);
                     screen.SetActive(false);
                     screen.SetActive(true);
                     UnityEngine.Object.Destroy(screen);
@@ -64,7 +64,8 @@ namespace Fives.UI.Tests
         }
 
         [TestCase("undoButton", typeof(Button))]
-        [TestCase("redoButton", typeof(Button))]
+        [TestCase("hintButton", typeof(Button))]
+        [TestCase("hintPriceLabel", typeof(TextMeshProUGUI))]
         [TestCase("movesLabel", typeof(TextMeshProUGUI))]
         public void ImportedPrefabHasControlReference(string field, Type expectedType)
         {

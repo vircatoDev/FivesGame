@@ -32,7 +32,7 @@ namespace Scripts.UI.Presenters
 
         public void ShowHud(in BoardHud hud)
         {
-            View.UpdateControls($"Moves: {hud.Moves}", hud.CanUndo, hud.CanRedo);
+            View.UpdateControls($"Moves: {hud.Moves}", hud.HintPrice.ToString(), hud.CanUndo, hud.CanHint);
         }
 
         private void BackToMainMenu()

@@ -29,8 +29,8 @@ namespace Scripts.UI.Views
             _initialInfoPosition = infoRectTransform.anchoredPosition;
         }
 
-        public void UpdateControls(string moves, bool canUndo, bool canRedo) =>
-            controls?.Refresh(moves, canUndo, canRedo);
+        public void UpdateControls(string moves, string hintPrice, bool canUndo, bool canHint) =>
+            controls?.Refresh(moves, hintPrice, canUndo, canHint);
 
         public void OnEnable()
         {

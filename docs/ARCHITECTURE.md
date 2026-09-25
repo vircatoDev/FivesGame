@@ -27,8 +27,8 @@ Exit: GameEndEvent → BoardDestroySystem
 
 - `BoardComponent.State` is the authoritative live board.
 - `BoardHistoryComponent` contains the seed, the accepted swaps and the start time.
-  Undo re-applies the last swap and moves it to `Undone`; Redo moves it back; a new
-  move clears `Undone`. `TileSelectionComponent` marks a tapped tile.
+  Undo re-applies the last swap and forgets it. `TileSelectionComponent` marks a tapped
+  tile; `BoardHintComponent` marks the tile whose route a bought hint shows until the next move.
 - `TileComponent.Cell` is a display destination; `GameSettings.CellToAnchored`
   converts it to a UI position. It cannot determine a legal move or victory.
   `MoveComponent` tracks animation progress only.
@@ -45,17 +45,19 @@ The `gamePlay` group runs:
 
 1. `BoardSetupSystem`: create one seeded board entity for an active run.
 2. `BoardInitSystem`: create the existing board/tile visuals.
-3. `BoardInputSystem`: accept at most one Undo/Redo, swipe or tap per tick, in that
+3. `BoardInputSystem`: accept at most one Undo, swipe or tap per tick, in that
    order; animation blocks all input.
+   `BoardHintSystem`: sell a hint for stars and drop it on the next move.
+   `BoardHintViewSystem`: show or hide the hint route.
 4. `BoardProjectionSystem`: synchronize tile destinations with the board. The
    initial layout appears in place; later changes animate.
 5. `TileHighlightSystem`: raise the selected tile.
 6. `TileMoveSystem`: animate destinations without changing logical board state.
-7. `BoardHudSystem`: push the move count and Undo/Redo availability when they change.
+7. `BoardHudSystem`: push the move count and Undo/Hint availability when they change.
 
 `WinCheckSystem` runs after that group. It reads the board,
-waits for movement to finish, freezes input, then retains the existing two-second
-result display. `BoardDestroySystem` handles exit and releases the board entity
+waits for movement to finish, freezes input, sends `BoardSolvedEvent` (`BoardRevealSystem`
+fades the tiles into the whole picture), then retains the existing two-second result display. `BoardDestroySystem` handles exit and releases the board entity
 and visuals. The one-frame events are cleared after consumers run.
 
 ## Boundaries
@@ -78,7 +80,7 @@ Assemblies, each referencing only what it declares:
 More assemblies will be added only when they enforce a useful dependency boundary. ECS is not
 being replaced with an object-oriented application-service layer.
 
-See [the board, shuffle and Undo/Redo contracts](BOARD_STATE.md) for invariants,
+See [the board, shuffle, Undo and hint contracts](BOARD_STATE.md) for invariants,
 format details, verification results and remaining manual checks.
 
 ## Future work, not implemented here

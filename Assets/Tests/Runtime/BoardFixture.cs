@@ -32,7 +32,6 @@ namespace Fives.Runtime.Tests
         }
 
         public List<Swap> Moves => Board.Get<BoardHistoryComponent>().Moves;
-        public List<Swap> Undone => Board.Get<BoardHistoryComponent>().Undone;
         public int MovingTiles => World.Count<MoveComponent>();
 
         public BoardFixture WithSeededBoard(int seed) => WithBoard(SeededShuffle.Create(Session.SelectedGameMode.Columns, Session.SelectedGameMode.Rows, seed), seed);
@@ -42,7 +41,7 @@ namespace Fives.Runtime.Tests
             Layout = layout;
             Board = World.NewEntity();
             Board.Replace(new BoardComponent { State = layout });
-            Board.Replace(new BoardHistoryComponent { Seed = seed, Moves = new List<Swap>(), Undone = new List<Swap>() });
+            Board.Replace(new BoardHistoryComponent { Seed = seed, Moves = new List<Swap>() });
             Tiles = new EcsEntity[layout.CellCount];
             for (var cell = 0; cell < layout.CellCount; cell++)
             {

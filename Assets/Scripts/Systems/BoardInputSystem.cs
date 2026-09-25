@@ -7,7 +7,7 @@ namespace Scripts.Systems
 {
     /// <summary>
     /// Swaps neighboring tiles: tap one tile and then a neighbor, or swipe from a tile toward a neighbor.
-    /// Also applies Undo and Redo. One input is accepted per frame, and none while tiles are moving.
+    /// Also applies Undo (hints belong to BoardHintSystem). One input is accepted per frame, and none while tiles are moving.
     /// </summary>
     public class BoardInputSystem : IEcsRunSystem
     {
@@ -96,25 +96,21 @@ namespace Scripts.Systems
 
             ref var history = ref _boards.Get2(0);
             history.Moves.Add(swap);
-            history.Undone.Clear();
             _boards.GetEntity(0).Del<TileSelectionComponent>();
             _world.Send<BoardChangedEvent>();
             _world.PlaySound(AudioKeyCollection.RightTap);
             return true;
         }
 
-        // A swap is its own inverse: Undo re-applies the last move, Redo re-applies the last undone one.
+        // A swap is its own inverse: Undo re-applies the last move and forgets it.
         private void ApplyControl(BoardControl control)
         {
-            ref var history = ref _boards.Get2(0);
-            var (from, to) = control == BoardControl.Undo ? (history.Moves, history.Undone) : (history.Undone, history.Moves);
-            if (from.Count == 0)
+            var moves = _boards.Get2(0).Moves;
+            if (control != BoardControl.Undo || moves.Count == 0)
                 return;
 
-            var swap = from[from.Count - 1];
-            _boards.Get1(0).State.TrySwap(swap);
-            from.RemoveAt(from.Count - 1);
-            to.Add(swap);
+            _boards.Get1(0).State.TrySwap(moves[moves.Count - 1]);
+            moves.RemoveAt(moves.Count - 1);
             _boards.GetEntity(0).Del<TileSelectionComponent>();
             _world.Send<BoardChangedEvent>();
         }

@@ -116,6 +116,16 @@ namespace Fives.Runtime.Tests
         public static int Count<T>(this EcsWorld world) where T : struct =>
             world.GetFilter(typeof(EcsFilter<T>)).GetEntitiesCount();
 
+        public static T[] All<T>(this EcsWorld world) where T : struct
+        {
+            var filter = (EcsFilter<T>)world.GetFilter(typeof(EcsFilter<T>));
+            var items = new T[filter.GetEntitiesCount()];
+            var n = 0;
+            foreach (var i in filter)
+                items[n++] = filter.Get1(i);
+            return items;
+        }
+
         public static void Tick(this EcsSystems systems, int frames = 1)
         {
             for (var i = 0; i < frames; i++)
@@ -162,9 +172,10 @@ namespace Fives.Runtime.Tests
     {
         public int Updates;
         public string Moves = "";
-        public bool CanUndo, CanRedo;
+        public bool CanUndo, CanHint;
+        public string HintPrice = "";
         public void UpdateViewContent(PuzzleData selectedPuzzle) { }
-        public void UpdateControls(string moves, bool canUndo, bool canRedo) { Updates++; Moves = moves; CanUndo = canUndo; CanRedo = canRedo; }
+        public void UpdateControls(string moves, string hintPrice, bool canUndo, bool canHint) { Updates++; Moves = moves; HintPrice = hintPrice; CanUndo = canUndo; CanHint = canHint; }
     }
 
     internal sealed class FakeGameResultView : FakeView, IGameResultView

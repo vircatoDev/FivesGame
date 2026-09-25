@@ -8,17 +8,19 @@ namespace Scripts.Models
         public readonly int Seed;
         public readonly int Moves;
         public readonly bool CanUndo;
-        public readonly bool CanRedo;
+        public readonly bool CanHint;
+        public readonly int HintPrice;
 
-        public BoardHud(int seed, int moves, bool canUndo, bool canRedo)
+        public BoardHud(int seed, int moves, bool canUndo, bool canHint, int hintPrice)
         {
             Seed = seed;
             Moves = moves;
             CanUndo = canUndo;
-            CanRedo = canRedo;
+            CanHint = canHint;
+            HintPrice = hintPrice;
         }
 
         public bool Equals(BoardHud other) =>
-            Seed == other.Seed && Moves == other.Moves && CanUndo == other.CanUndo && CanRedo == other.CanRedo;
+            Seed == other.Seed && Moves == other.Moves && CanUndo == other.CanUndo && CanHint == other.CanHint && HintPrice == other.HintPrice;
     }
 }

@@ -10,8 +10,9 @@ namespace Scripts.UI.Views
     public sealed class BoardControlsView : MonoBehaviour
     {
         [SerializeField] private UnityEngine.UI.Button undoButton;
-        [FormerlySerializedAs("replayButton")]
-        [SerializeField] private UnityEngine.UI.Button redoButton;
+        [FormerlySerializedAs("redoButton")]
+        [SerializeField] private UnityEngine.UI.Button hintButton;
+        [SerializeField] private TextMeshProUGUI hintPriceLabel;
         [SerializeField] private TextMeshProUGUI movesLabel;
 
         private Action<BoardControl> _onControl;
@@ -21,24 +22,25 @@ namespace Scripts.UI.Views
         private void Awake()
         {
             undoButton.onClick.AddListener(Undo);
-            redoButton.onClick.AddListener(Redo);
-            Refresh("", false, false);
+            hintButton.onClick.AddListener(Hint);
+            Refresh("", "", false, false);
         }
 
         private void OnDestroy()
         {
             undoButton.onClick.RemoveListener(Undo);
-            redoButton.onClick.RemoveListener(Redo);
+            hintButton.onClick.RemoveListener(Hint);
         }
 
-        public void Refresh(string moves, bool canUndo, bool canRedo)
+        public void Refresh(string moves, string hintPrice, bool canUndo, bool canHint)
         {
             movesLabel.text = moves;
+            hintPriceLabel.text = hintPrice;
             undoButton.interactable = canUndo;
-            redoButton.interactable = canRedo;
+            hintButton.interactable = canHint;
         }
 
         private void Undo() => _onControl?.Invoke(BoardControl.Undo);
-        private void Redo() => _onControl?.Invoke(BoardControl.Redo);
+        private void Hint() => _onControl?.Invoke(BoardControl.Hint);
     }
 }

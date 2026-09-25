@@ -24,7 +24,7 @@ It was originally created as a two-week test assignment and is now maintained wi
 Development now focuses on a compact, verifiable architecture:
 
 - ECS gameplay systems with deterministic pure-C# board rules;
-- atomic moves, Undo/Redo, and seeded daily challenges;
+- atomic moves, Undo, star-priced hints, and seeded daily challenges;
 - versioned saves with migrations and corruption recovery;
 - explicit async and resource ownership;
 - Addressables, RU/EN localization, and modern input;
@@ -65,17 +65,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for commit and pull-request rules.
 
 ## Verification status
 
-Gameplay now uses a seeded board owned by an ECS entity. Systems handle input,
-Undo/Redo, projection, animation and completion. The current unfinished attempt
-has touch controls for Undo and Redo; persistence/share codes and daily challenges
+Gameplay now uses a seeded 4×3 board owned by an ECS entity. Systems handle input,
+Undo, hints, projection, animation and completion. A hint (5 stars) shows the route of the
+closest misplaced tile to its cell until the next move; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
-Unity's Test Runner (EditMode) runs **130 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
-68 domain tests (`Fives.Domain.Tests`), 58 runtime tests on the real ECS systems, services and
-presenters (`Fives.Runtime.Tests`) and 4 gameplay prefab tests (`Fives.UI.Editor.Tests`).
+Unity's Test Runner (EditMode) runs **144 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
+75 domain tests (`Fives.Domain.Tests`), 64 runtime tests on the real ECS systems, services and
+presenters (`Fives.Runtime.Tests`) and 5 gameplay prefab tests (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 
-The Kids Puzzle visual redesign replaces Riverside Village. Undo/Redo controls are
+The Kids Puzzle visual redesign replaces Riverside Village. Undo and hint controls are
 serialized in `GamePlayScreen.prefab`; the view no longer builds UI at runtime.
 
 See [the board contract and acceptance steps](docs/BOARD_STATE.md),
