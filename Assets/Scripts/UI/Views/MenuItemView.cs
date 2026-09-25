@@ -24,7 +24,7 @@ namespace Scripts.UI.Views
         public void Initialize(MenuItemData itemData, Action<string> onTileClick, Action<string> onBuyClick)
         {
             _tileId = itemData.Id;
-            itemImage.sprite = itemData.Image;
+            itemImage.SetCover(itemData.Image);
             itemText.text = itemData.TitleText;
 
             // Themes and puzzles share one card: an offer shows the lock and the buy button, otherwise the status text.

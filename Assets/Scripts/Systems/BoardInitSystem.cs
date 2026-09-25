@@ -18,8 +18,6 @@ namespace Scripts.Systems
         private readonly GameSession _gameSession;
         private readonly Transform _boardParent;
 
-        private GameObject _boardObject;
-
         public BoardInitSystem(Transform boardParent)
         {
             _boardParent = boardParent;
@@ -29,51 +27,61 @@ namespace Scripts.Systems
         {
             foreach (var i in _newBoards)
             {
-                _newBoards.GetEntity(i).Get<BoardViewComponent>();
-                CreateBoard();
+                _newBoards.GetEntity(i).Get<BoardViewComponent>().View = CreateBoard();
                 _world.Send<BoardInitializedEvent>();
             }
         }
 
-        private void CreateBoard()
+        private BoardView CreateBoard()
         {
-            _boardObject = InstantiatePrefab(_settings.BoardPrefab, _boardParent);
-            if (_boardObject == null) return;
+            var boardObject = InstantiatePrefab(_settings.BoardPrefab, _boardParent);
+            if (boardObject == null) return null;
 
-            _boardObject.GetComponent<Image>().DOFade(1, 1).SetLink(_boardObject, LinkBehaviour.KillOnDestroy);
+            boardObject.GetComponent<Image>().DOFade(1, 1).SetLink(boardObject, LinkBehaviour.KillOnDestroy);
 
             var layout = _gameSession.SelectedGameMode;
             var source = _gameSession.SelectedPuzzle.Image;
+            var picture = PictureUv(source, (float)layout.Columns / layout.Rows);
 
-            for (int i = 0; i < layout.BoardSize * layout.BoardSize; i++)
+            var view = boardObject.GetComponent<BoardView>();
+            view.SetPicture(source.texture, picture, layout.BoardArea);
+            for (int i = 0; i < layout.Columns * layout.Rows; i++)
             {
-                CreateTile(i, layout, source);
+                CreateTile(i, layout, view.Tiles, source.texture, picture);
             }
+
+            return view;
         }
 
-        private void CreateTile(int id, GameSettings layout, Sprite source)
+        /// <summary>UV rect of the largest centered part of the sprite with the board's aspect ratio.</summary>
+        private static Rect PictureUv(Sprite sprite, float aspect)
+        {
+            var rect = sprite.textureRect;
+            var texture = sprite.texture;
+            var width = Mathf.Min(rect.width, rect.height * aspect);
+            var height = width / aspect;
+            return new Rect((rect.x + (rect.width - width) / 2) / texture.width,
+                (rect.y + (rect.height - height) / 2) / texture.height, width / texture.width, height / texture.height);
+        }
+
+        private void CreateTile(int id, GameSettings layout, Transform parent, Texture texture, Rect picture)
         {
             var tileEntity = _world.NewEntity();
             ref var tileComponent = ref tileEntity.Get<TileComponent>();
             tileComponent.Id = id;
             tileComponent.Cell = id;
 
-            var boardSize = layout.BoardSize;
-            int row = id / boardSize;
-            int column = id % boardSize;
+            int row = id / layout.Columns;
+            int column = id % layout.Columns;
 
-            var tileObject = InstantiatePrefab(_settings.TilePrefab, _boardObject.transform.GetChild(0));
+            var tileObject = InstantiatePrefab(_settings.TilePrefab, parent);
             if (tileObject == null) return;
 
             SetTileProperties(ref tileComponent, tileObject, layout.TileSize, layout.CellToAnchored(id));
-            // The sprite's texture rect, cut into cells; rows count from the top, UVs from the bottom.
-            var texture = source.texture;
-            var rect = source.textureRect;
-            var width = rect.width / boardSize;
-            var height = rect.height / boardSize;
-            var uvRect = new Rect((rect.x + column * width) / texture.width,
-                (rect.y + (boardSize - 1 - row) * height) / texture.height,
-                width / texture.width, height / texture.height);
+            // The picture cut into cells; rows count from the top, UVs from the bottom.
+            var width = picture.width / layout.Columns;
+            var height = picture.height / layout.Rows;
+            var uvRect = new Rect(picture.x + column * width, picture.y + (layout.Rows - 1 - row) * height, width, height);
             var tileUI = tileObject.GetComponent<TileUiProvider>();
             tileUI.Init(_world, id, texture, uvRect);
             tileUI.PlayTileShowAnimation();

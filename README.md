@@ -70,8 +70,8 @@ Undo/Redo, projection, animation and completion. The current unfinished attempt
 has touch controls for Undo and Redo; persistence/share codes and daily challenges
 remain future work. No separate application-session layer was introduced.
 
-Unity's Test Runner (EditMode) runs **120 tests, all passing** in 6000.0.71f1 as of 2026-09-24:
-59 domain tests (`Fives.Domain.Tests`), 57 runtime tests on the real ECS systems, services and
+Unity's Test Runner (EditMode) runs **130 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
+68 domain tests (`Fives.Domain.Tests`), 58 runtime tests on the real ECS systems, services and
 presenters (`Fives.Runtime.Tests`) and 4 gameplay prefab tests (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 

@@ -22,10 +22,10 @@ namespace Fives.Runtime.Tests
         public BoardState Layout;
         public EcsEntity[] Tiles;
 
-        public BoardFixture(int size = 3)
+        public BoardFixture(int columns = 3, int rows = 3)
         {
             Session = new GameSession(Objects.Config());
-            Session.SetGameMode(Objects.Mode(size));
+            Session.SetGameMode(Objects.Mode(columns, rows));
             Session.BeginRun();
             State = World.NewEntity();
             State.Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
@@ -35,7 +35,7 @@ namespace Fives.Runtime.Tests
         public List<Swap> Undone => Board.Get<BoardHistoryComponent>().Undone;
         public int MovingTiles => World.Count<MoveComponent>();
 
-        public BoardFixture WithSeededBoard(int seed) => WithBoard(SeededShuffle.Create(Session.SelectedGameMode.BoardSize, seed), seed);
+        public BoardFixture WithSeededBoard(int seed) => WithBoard(SeededShuffle.Create(Session.SelectedGameMode.Columns, Session.SelectedGameMode.Rows, seed), seed);
 
         public BoardFixture WithBoard(BoardState layout, int seed = 1)
         {

@@ -21,16 +21,16 @@ Runtime behaviour (ECS systems, services, presenters, saves) is covered by the
 
 ## Board coverage
 
-- Sizes 2, 3, 4, and 6 on a fully filled swap board.
+- Square (2×2 to 6×6) and rectangular (4×3, 3×4) fully filled swap boards.
 - Imported permutations are validated and copied, so callers cannot mutate the board.
-- Invalid swaps, row boundaries, four-way adjacency, exact exchanges, and self-inverse swaps.
+- Invalid swaps, row boundaries (including the last column of a 4×3 row), four-way adjacency, exact exchanges, and self-inverse swaps.
 - 8,000 reproducible attempted swaps, checking permutation invariants after each attempt.
 - Exhaustive traversal reaching all 24 arrangements of a 2x2 board.
 
-- Four fixed shuffle vectors protect algorithm stability, including zero and negative seeds.
-- 4,004 seed/size combinations are deterministic permutations with no tile in its own cell.
+- Five fixed shuffle vectors (four square, one 4×3) protect algorithm stability, including zero and negative seeds.
+- 5,005 seed/dimension combinations are deterministic permutations with no tile in its own cell.
 
-There are currently 59 standalone NUnit cases.
+There are currently 68 standalone NUnit cases.
 
 The fixtures also remain available in Unity's EditMode Test Runner through the
 existing asmdef. Passing standalone tests does not imply they have run in Editor.

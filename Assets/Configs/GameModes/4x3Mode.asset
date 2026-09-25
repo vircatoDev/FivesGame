@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54dbb830c6db460398e7b32876b8c62d, type: 3}
-  m_Name: 3x3Mode
+  m_Name: 4x3Mode
   m_EditorClassIdentifier: 
-  BoardSize: 3
-  TileSize: 255
-  TileSpacing: 10
+  Columns: 4
+  Rows: 3
+  TileSize: 220
+  TileSpacing: 8
   TileSprites:
   - {fileID: 21300000, guid: da44abe32d882db46a50341c1b2ef401, type: 3}
   - {fileID: -1189701383, guid: 07a98fbdc77f26942b01312ac87a625b, type: 3}

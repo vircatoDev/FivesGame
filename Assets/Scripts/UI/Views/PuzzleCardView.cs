@@ -16,7 +16,7 @@ namespace Scripts.UI.Views
 
         public void Show(in ThemeCard card)
         {
-            preview.sprite = card.Image;
+            preview.SetCover(card.Image);
             title.text = card.Title;
             progress.text = card.Progress;
         }

@@ -19,14 +19,14 @@ namespace Scripts.UI.Views
 
         [SerializeField] private BoardControlsView controls;
     
-        private Vector2 _initialLeftBlockPosition;
-        private Vector2 _initialRightBlockPosition;
+        private Vector2 _initialPreviewPosition;
+        private Vector2 _initialInfoPosition;
 
         private void Awake()
         {
             controls?.Initialize(control => Presenter?.RequestControl(control));
-            _initialLeftBlockPosition = previewRectTransform.anchoredPosition;
-            _initialRightBlockPosition = infoRectTransform.anchoredPosition;
+            _initialPreviewPosition = previewRectTransform.anchoredPosition;
+            _initialInfoPosition = infoRectTransform.anchoredPosition;
         }
 
         public void UpdateControls(string moves, bool canUndo, bool canRedo) =>
@@ -39,22 +39,17 @@ namespace Scripts.UI.Views
             Presenter?.OnActivateView();
         }
 
-        public override async UniTask PlayShowAnimation()
+        public override UniTask PlayShowAnimation() =>
+            UniTask.WhenAll(SlideInFromRight(previewRectTransform), SlideInFromRight(infoRectTransform));
+
+        private static UniTask SlideInFromRight(RectTransform block)
         {
-            int offset = 500;
-            float duration = 0.5f;
+            const float offset = 500f;
+            const float duration = 0.5f;
 
-            var leftTargetPos = previewRectTransform.anchoredPosition.x;
-            var rightTargetPos = infoRectTransform.anchoredPosition.x;
-
-            previewRectTransform.anchoredPosition = new Vector2(-offset, previewRectTransform.anchoredPosition.y);
-            infoRectTransform.anchoredPosition = new Vector2(offset, infoRectTransform.anchoredPosition.y);
-
-            var leftTween = previewRectTransform.DOAnchorPosX(leftTargetPos, duration).SetEase(Ease.OutBack);
-            var rightTween = infoRectTransform.DOAnchorPosX(rightTargetPos, duration).SetEase(Ease.OutBack);
-
-            await UniTask.WhenAll(leftTween.AsyncWaitForCompletion().AsUniTask(),
-                rightTween.AsyncWaitForCompletion().AsUniTask());
+            var target = block.anchoredPosition.x;
+            block.anchoredPosition += Vector2.right * offset;
+            return block.DOAnchorPosX(target, duration).SetEase(Ease.OutBack).AsyncWaitForCompletion().AsUniTask();
         }
 
         public override UniTask PlayHideAnimation()
@@ -64,15 +59,15 @@ namespace Scripts.UI.Views
 
         public void UpdateViewContent(PuzzleData selectedPuzzle)
         {
-            puzzlePreviewImg.sprite = selectedPuzzle.Image;
+            puzzlePreviewImg.SetCover(selectedPuzzle.Image);
             titleText.text = selectedPuzzle.Name;
             mainText.text = selectedPuzzle.Description;
         }
 
         public void ResetPositions()
         {
-            previewRectTransform.anchoredPosition = _initialLeftBlockPosition;
-            infoRectTransform.anchoredPosition = _initialRightBlockPosition;
+            previewRectTransform.anchoredPosition = _initialPreviewPosition;
+            infoRectTransform.anchoredPosition = _initialInfoPosition;
         }
     }
 }

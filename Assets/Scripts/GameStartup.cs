@@ -104,6 +104,7 @@ namespace Scripts
                 .OneFrame<PlaySoundEffectEvent>()
                 .OneFrame<SaveDataEvent>()
                 .OneFrame<BoardInitializedEvent>()
+                .OneFrame<BoardSolvedEvent>()
                 .OneFrame<GameEndEvent>();
         }
 
@@ -113,6 +114,7 @@ namespace Scripts
                 .Add(new GamePlayManagementSystem(_mainSystems))
                 .Add(AddGamePlaySystems())
                 .Add(new WinCheckSystem())
+                .Add(new BoardRevealSystem())
                 .Add(new BoardDestroySystem(_gameLayer))
                 .Add(new GameStateSystem(_stateMachine))
                 .Add(new EnergyRecoverySystem(_energyService))

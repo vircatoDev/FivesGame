@@ -16,8 +16,8 @@ With the project closed in Editor, the equivalent CLI command is:
 unity test . --mode EditMode --filter Fives.UI.Tests.GamePlayPrefabTests --output /tmp/fives-ui-tests.xml --timeout 300
 ```
 
-Status on 2026-09-24: the tests are typed against `Fives.Runtime` and pass in the regular
-Editor together with the domain and runtime EditMode suites (117 tests).
+Status on 2026-09-25: the tests are typed against `Fives.Runtime` and pass in the regular
+Editor together with the domain and runtime EditMode suites (130 tests).
 
 ## Fast CI format guard
 
