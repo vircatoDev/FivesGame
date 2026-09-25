@@ -598,11 +598,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentReference:
-    TypeName: 
+    TypeName: Scripts.Installers.AppLifetimeScope
   autoRun: 1
   autoInjectGameObjects:
   - {fileID: 1972332509}
-  globalConfig: {fileID: 11400000, guid: 7b3e3828c5392cb4d96c9f1d0a8a5348, type: 2}
 --- !u!4 &1569984173
 Transform:
   m_ObjectHideFlags: 0
