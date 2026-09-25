@@ -7,7 +7,8 @@ Needs Pillow (pip install pillow).
 """
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
-OUT = "Assets/Content/Sprites/KidsPuzzle/"
+OUT = "Assets/Content/Sprites/UI/Common/"   # packed into the UI-Common atlas
+MASKS = "Assets/Content/Sprites/UI/Masks/"  # SoftMask sources stay out of the atlases
 SIZE = 256          # sprite size; tiles scale it down
 RADIUS = 26         # corner radius
 RIM = 7             # width of the lit and shaded rims
@@ -79,8 +80,8 @@ bevel = Image.alpha_composite(bevel, layer(OUTLINE_RGB, edge, OUTLINE))
 bevel.putalpha(ImageChops.multiply(bevel.getchannel("A"), shape))
 
 bevel.save(OUT + "tile-bevel.png")
-Image.merge("RGBA", [Image.new("L", (SIZE, SIZE), 255)] * 3 + [shape]).save(OUT + "tile-shape.png")
+Image.merge("RGBA", [Image.new("L", (SIZE, SIZE), 255)] * 3 + [shape]).save(MASKS + "tile-shape.png")
 hint_frame().save(OUT + "hint-frame.png")
 hint_dot().save(OUT + "hint-dot.png")
 hint_arrow().save(OUT + "hint-arrow.png")
-print("Wrote tile-bevel, tile-shape, hint-frame, hint-dot and hint-arrow to", OUT)
+print("Wrote tile-bevel, hint-frame, hint-dot and hint-arrow to", OUT, "and tile-shape to", MASKS)

@@ -17,7 +17,7 @@ namespace Fives.UI.Tests
 {
     public sealed class LocalizationTests
     {
-        private const string FontPath = "Assets/Content/Fonts/Ru/Lilita One SDF.asset";
+        private const string FontPath = "Assets/Content/Fonts/Lilita One SDF.asset";
         private static Dictionary<string, Dictionary<string, string>> Sheet => ExcelStringImporter.Read(ExcelStringImporter.SheetPath);
         private static GlobalConfig Config => AssetDatabase.LoadAssetAtPath<GlobalConfig>("Assets/Configs/GameConfig.asset");
 
