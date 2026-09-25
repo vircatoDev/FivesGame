@@ -25,7 +25,7 @@ namespace Scripts.UI.Presenters
         public override void OnActivateView()
         {
             var puzzle = _gameSession.SelectedPuzzle;
-            View.UpdateViewContent(puzzle.Image, _texts.Get(TextKeys.Name(puzzle)), _texts.Get(TextKeys.About(puzzle)));
+            View.UpdateViewContent(_gameSession.PuzzleImage, _texts.Get(TextKeys.Name(puzzle)), _texts.Get(TextKeys.About(puzzle)));
             View.PlayShowAnimation().Forget();
 
             _header.ShowButton(HeaderBtnType.Back, BackToMainMenu);

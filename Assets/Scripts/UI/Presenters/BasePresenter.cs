@@ -6,6 +6,11 @@ namespace Scripts.UI.Presenters
     {
         public abstract void Initialize(IView view);
         public abstract void OnActivateView();
+
+        /// <summary>The screen was destroyed: release what it loaded.</summary>
+        public virtual void OnDeactivateView()
+        {
+        }
     }
 
     public abstract class Presenter<TView> : BasePresenter where TView : class, IView

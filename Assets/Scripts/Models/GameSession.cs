@@ -1,6 +1,7 @@
 using System;
 using Fives.Domain;
 using Scripts.Configs;
+using UnityEngine;
 
 namespace Scripts.Models
 {
@@ -11,6 +12,8 @@ namespace Scripts.Models
 
         public ThemeConfig SelectedTheme { get; private set; }
         public PuzzleData SelectedPuzzle { get; private set; }
+        /// <summary>The loaded picture of <see cref="SelectedPuzzle"/>.</summary>
+        public Sprite PuzzleImage { get; private set; }
         public GameSettings SelectedGameMode { get; private set; }
         public GameResult LastGameResult { get; private set; }
         public bool IsRunning { get; private set; }
@@ -21,9 +24,10 @@ namespace Scripts.Models
             _rewardStars = config.RewardStars;
         }
 
-        public void SetSelectedImage(PuzzleData puzzle)
+        public void SetSelectedImage(PuzzleData puzzle, Sprite image)
         {
             SelectedPuzzle = puzzle;
+            PuzzleImage = image;
         }
 
         public void BeginRun()

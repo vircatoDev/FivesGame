@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
@@ -20,6 +21,10 @@ namespace Scripts.UI.Presenters
         private readonly IHeaderPanelView _header;
         private readonly EcsWorld _world;
         private readonly ITexts _texts;
+        private readonly ISpriteLoader _sprites;
+        private readonly ThemePreviews _previews;
+        // Owner of the open theme's puzzle pictures: its bundle is released when the theme list comes back.
+        private readonly object _themePictures = new object();
 
         private string _selectedTheme;
 
@@ -31,7 +36,9 @@ namespace Scripts.UI.Presenters
             GameSession session,
             IHeaderPanelView header,
             EcsWorld world,
-            ITexts texts)
+            ITexts texts,
+            ISpriteLoader sprites,
+            ThemePreviews previews)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
@@ -41,20 +48,24 @@ namespace Scripts.UI.Presenters
             _header = header;
             _world = world;
             _texts = texts;
+            _sprites = sprites;
+            _previews = previews;
         }
 
         public override void OnActivateView()
         {
             UpdateHeaderButton();
-            UpdateThemeSelectionView(false);
+            ShowThemes(false);
         }
+
+        public override void OnDeactivateView() => _sprites.Release(_themePictures);
 
         public async void OnStartGame(string selectedImg)
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
             var imageData = GetPuzzleData(selectedImg);
-            if (!_gameStartService.TryStart(GetSelectedTheme(), imageData))
+            if (!await _gameStartService.TryStart(GetSelectedTheme(), imageData))
                 return;
 
             await View.PlayHideAnimation();
@@ -71,7 +82,7 @@ namespace Scripts.UI.Presenters
             }
             else
             {
-                UpdateThemeSelectionView(true);
+                ShowThemes(true);
             }
         }
 
@@ -82,8 +93,10 @@ namespace Scripts.UI.Presenters
 
         private void ChangeGameState(GameStateType newState) => _world.ChangeState(newState);
 
-        private void UpdateThemeSelectionView(bool playAnimation)
+        private void ShowThemes(bool playAnimation)
         {
+            _sprites.Release(_themePictures);
+
             // Center the theme just left, or the one the main menu asked for.
             var focus = GetSelectedTheme() ?? _session.SelectedTheme;
             var tiles = GetThemeItemData();
@@ -102,7 +115,7 @@ namespace Scripts.UI.Presenters
             return new MenuItemData
             {
                 Id = theme.Id,
-                Image = theme.ThemeLogo,
+                Image = _previews.Of(theme),
                 TitleText = _texts.Get(TextKeys.Name(theme)),
                 BottomText = unlocked ? GetProgressText(theme) : _texts.Get(TextKeys.Open, theme.UnlockCost),
                 Offer = !unlocked
@@ -115,17 +128,21 @@ namespace Scripts.UI.Presenters
             return progress.IsComplete ? _texts.Get(TextKeys.ThemeCompleted) : progress.ToString();
         }
 
-        private void OnThemeSelected(string themeId)
+        private void OnThemeSelected(string themeId) => ShowPuzzles(themeId).Forget();
+
+        // Loads the theme bundle: its full-size pictures fill the puzzle cards and start the game.
+        private async UniTaskVoid ShowPuzzles(string themeId)
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
             _selectedTheme = themeId;
 
             var puzzles = GetTheme(themeId)?.Puzzles ?? Array.Empty<PuzzleData>();
-            var tiles = puzzles.Select(puzzle => new MenuItemData
+            var pictures = await UniTask.WhenAll(puzzles.Select(puzzle => _sprites.Load(puzzle.Image, _themePictures)));
+            var tiles = puzzles.Select((puzzle, i) => new MenuItemData
             {
                 Id = puzzle.Id,
-                Image = puzzle.Image,
+                Image = pictures[i],
                 TitleText = _texts.Get(TextKeys.Name(puzzle)),
                 BottomText = _texts.Get(_playerProgressService.IsCompleted(puzzle) ? TextKeys.PuzzleCompleted : TextKeys.Play)
             }).ToArray();

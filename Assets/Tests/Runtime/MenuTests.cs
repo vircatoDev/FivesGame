@@ -36,11 +36,12 @@ namespace Fives.Runtime.Tests
             var progress = new PlayerProgressService(save);
             _session = new GameSession(config);
             _energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
-            _start = new GameStartService(_session, _energy, _world);
+            _start = new GameStartService(_session, _energy, _world, new FakeSpriteLoader(_objects));
             _selectView = new FakeSelectMenuView();
-            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), progress, _world), progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts());
+            var loader = new FakeSpriteLoader(_objects);
+            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), progress, _world), progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), loader, loader.Previews(config));
             _select.Initialize(_selectView);
-            _main = new MainMenuPresenter(config, progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts());
+            _main = new MainMenuPresenter(config, progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), loader.Previews(config));
             _main.Initialize(new FakeMainMenuView());
         }
 
@@ -83,12 +84,12 @@ namespace Fives.Runtime.Tests
         {
             StartFromBothMenus();
             _session.EndRun();
-            Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]), Is.True);
+            Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]).GetAwaiter().GetResult(), Is.True);
             Assert.That(_energy.GetBalance(), Is.EqualTo(3));
 
             _session.EndRun();
             _energy.Spend(_energy.GetBalance());
-            Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]), Is.False);
+            Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]).GetAwaiter().GetResult(), Is.False);
             Assert.That(_session.IsRunning, Is.False);
         }
     }
@@ -101,6 +102,7 @@ namespace Fives.Runtime.Tests
         private GlobalConfig _config;
         private FakeMainMenuView _view;
         private FakeHeaderPanelView _header;
+        private FakeSpriteLoader _sprites;
         private MainMenuPresenter _menu;
 
         [SetUp]
@@ -119,7 +121,8 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(_config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             _view = new FakeMainMenuView();
             _header = new FakeHeaderPanelView();
-            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world), _session, _header, _world, new FakeTexts());
+            _sprites = new FakeSpriteLoader(_objects);
+            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world, _sprites), _session, _header, _world, new FakeTexts(), _sprites.Previews(_config));
             _menu.Initialize(_view);
             _view.Hide.TrySetResult();
         }
@@ -141,10 +144,10 @@ namespace Fives.Runtime.Tests
         }
 
         [Test]
-        public void Opens_OnTheLastUnlockedTheme_WithItsNextPuzzle()
+        public void Opens_OnTheLastUnlockedTheme_WithItsPreview()
         {
             Assert.That(_view.Current.Title, Is.EqualTo("theme.cats"));
-            Assert.That(_view.Current.Image, Is.EqualTo(_config.Themes[2].Puzzles[0].Image));
+            Assert.That(_view.Current.Image, Is.EqualTo(_sprites.Of(_config.Themes[2].Preview)));
             Assert.That(_view.CanBrowse, Is.True);
             Assert.That(_view.Direction, Is.Zero);
         }
@@ -155,7 +158,7 @@ namespace Fives.Runtime.Tests
             Assert.That(_view.Previous.Title, Is.EqualTo("theme.dogs"));
             Assert.That(_view.Next.Title, Is.EqualTo("theme.cities"));
             Assert.That(_view.Next.Progress, Is.EqualTo("0/1"));
-            Assert.That(_view.Next.Image, Is.EqualTo(_config.Themes[0].Puzzles[0].Image));
+            Assert.That(_view.Next.Image, Is.EqualTo(_sprites.Of(_config.Themes[0].Preview)));
         }
 
         [Test]
@@ -177,7 +180,7 @@ namespace Fives.Runtime.Tests
 
             var dogs = _config.Themes[1];
             Assert.That(_view.Current.Title, Is.EqualTo("theme.dogs"));
-            Assert.That(_view.Current.Image, Is.EqualTo(dogs.Puzzles[1].Image), "Corgi is solved, so Pug is next");
+            Assert.That(_view.Current.Image, Is.EqualTo(_sprites.Of(dogs.Preview)));
             Assert.That(_view.Current.Progress, Is.EqualTo("1/3"));
             Assert.That(_view.Direction, Is.EqualTo(1));
 

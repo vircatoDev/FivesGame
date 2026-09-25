@@ -1,3 +1,4 @@
+using UnityEngine.AddressableAssets;
 using Scripts.Services;
 using System;
 using System.Collections.Generic;
@@ -78,6 +79,7 @@ namespace Fives.Runtime.Tests
             theme.Id = id;
             theme.ThemeName = name;
             theme.UnlockCost = cost;
+            theme.Preview = new AssetReferenceSprite(id + ".preview");
             theme.Puzzles = puzzles;
             return theme;
         }
@@ -86,7 +88,7 @@ namespace Fives.Runtime.Tests
         {
             var puzzles = new PuzzleData[names.Length];
             for (var i = 0; i < names.Length; i++)
-                puzzles[i] = new PuzzleData { Id = $"{themeId}.{names[i].ToLowerInvariant()}", Name = names[i], Image = Sprite(names[i]) };
+                puzzles[i] = new PuzzleData { Id = $"{themeId}.{names[i].ToLowerInvariant()}", Name = names[i], Image = new AssetReferenceSprite(names[i]) };
             return puzzles;
         }
 
@@ -190,6 +192,39 @@ namespace Fives.Runtime.Tests
     {
         public UniTask Ready() => UniTask.CompletedTask;
         public string Get(string key, params object[] args) => args.Length == 0 ? key : key + ":" + string.Join(",", args);
+    }
+
+    /// <summary>Hands back one sprite per reference at once and remembers what each owner still holds.</summary>
+    internal sealed class FakeSpriteLoader : ISpriteLoader
+    {
+        private readonly TestObjects _objects;
+        private readonly Dictionary<string, Sprite> _sprites = new Dictionary<string, Sprite>();
+        public readonly Dictionary<object, int> Held = new Dictionary<object, int>();
+
+        public FakeSpriteLoader(TestObjects objects) => _objects = objects;
+
+        public Sprite Of(AssetReferenceSprite reference)
+        {
+            if (!_sprites.TryGetValue(reference.AssetGUID, out var sprite))
+                _sprites[reference.AssetGUID] = sprite = _objects.Sprite(reference.AssetGUID);
+            return sprite;
+        }
+
+        public UniTask<Sprite> Load(AssetReferenceSprite sprite, object owner)
+        {
+            Held[owner] = Held.TryGetValue(owner, out var count) ? count + 1 : 1;
+            return UniTask.FromResult(Of(sprite));
+        }
+
+        public void Release(object owner) => Held.Remove(owner);
+
+        /// <summary>Previews as the loading screen leaves them: loaded for every theme.</summary>
+        public ThemePreviews Previews(GlobalConfig config)
+        {
+            var previews = new ThemePreviews(config, this);
+            previews.Load().GetAwaiter().GetResult();
+            return previews;
+        }
     }
 
     internal sealed class FakeHeaderPanelView : IHeaderPanelView

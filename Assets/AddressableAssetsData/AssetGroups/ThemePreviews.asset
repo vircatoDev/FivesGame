@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: ThemePreviews
+  m_EditorClassIdentifier: 
+  m_GroupName: ThemePreviews
+  m_GUID: 31ebadb1dc02843c3befa471a3b1aed6
+  m_SerializeEntries:
+  - m_GUID: 0d78c57077242426cb22c923876c3812
+    m_Address: preview/dogs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7dbc5dca0edea4f58ba9c0f388f1f0d0
+    m_Address: preview/pets
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd02024327e1c4f9d86045cb54aa342a
+    m_Address: preview/cats
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d0f4f138fb87a44509798bfb5f5d530b, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 4aed5063840714c65b0bebad6f4550f1, type: 2}
+    - {fileID: 11400000, guid: 8dbd127b24c504b8bbccc8ff4afcdcf4, type: 2}

@@ -19,7 +19,7 @@ namespace Fives.Runtime.Tests
         public void SetUp()
         {
             _board = new BoardFixture().WithSeededBoard(42);
-            _board.Session.SetSelectedImage(new PuzzleData { Id = "dogs.corgi" });
+            _board.Session.SetSelectedImage(new PuzzleData { Id = "dogs.corgi" }, null);
             var presenter = new GamePlayPresenter(_board.Session, new FakeHeaderPanelView(), _board.World, new FakeTexts());
             _view = new FakeGamePlayView();
             presenter.Initialize(_view);

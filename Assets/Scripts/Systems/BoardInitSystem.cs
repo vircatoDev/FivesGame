@@ -40,7 +40,7 @@ namespace Scripts.Systems
             boardObject.GetComponent<Image>().DOFade(1, 1).SetLink(boardObject, LinkBehaviour.KillOnDestroy);
 
             var layout = _gameSession.SelectedGameMode;
-            var source = _gameSession.SelectedPuzzle.Image;
+            var source = _gameSession.PuzzleImage;
             var picture = PictureUv(source, (float)layout.Columns / layout.Rows);
 
             var view = boardObject.GetComponent<BoardView>();

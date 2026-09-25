@@ -1,5 +1,6 @@
 ﻿using Scripts.Models;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Scripts.Configs
 {
@@ -10,7 +11,8 @@ namespace Scripts.Configs
         public string Id;
         public string ThemeName;
         public PuzzleData[] Puzzles;
-        public Sprite ThemeLogo;
+        [Tooltip("Small picture for the menus, in the ThemePreviews group so menus do not load the theme bundle.")]
+        public AssetReferenceSprite Preview;
         public int UnlockCost;
     }
 }

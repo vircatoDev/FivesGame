@@ -26,5 +26,7 @@ namespace Scripts.UI.Views
         protected virtual void OnInitialized()
         {
         }
+
+        protected virtual void OnDestroy() => Presenter?.OnDeactivateView();
     }
 }

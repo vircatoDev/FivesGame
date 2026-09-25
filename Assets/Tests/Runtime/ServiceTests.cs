@@ -59,8 +59,9 @@ namespace Fives.Runtime.Tests
             var session = new GameSession(config);
             var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             var progress = new PlayerProgressService(save);
-            var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world),
-                new ThemeShop(stars, progress, _world), progress, session, new FakeHeaderPanelView(), _world, new FakeTexts());
+            var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world, new FakeSpriteLoader(_objects)),
+                new ThemeShop(stars, progress, _world), progress, session, new FakeHeaderPanelView(), _world, new FakeTexts(),
+                new FakeSpriteLoader(_objects), new FakeSpriteLoader(_objects).Previews(config));
             select.Initialize(new FakeSelectMenuView());
 
             select.OnThemeBuy("cities");
@@ -120,7 +121,7 @@ namespace Fives.Runtime.Tests
             var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
             var session = new GameSession(config);
             session.SetSelectedTheme(theme);
-            session.SetSelectedImage(theme.Puzzles[2]);
+            session.SetSelectedImage(theme.Puzzles[2], null);
             session.BeginRun();
             var view = new FakeGameResultView();
 
