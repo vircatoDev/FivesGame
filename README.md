@@ -74,9 +74,9 @@ Settings hold sound and music volume and the language (EN, RU, FR, IT, DE, ES), 
 flags and saved with the player data (`LanguageService`). All texts come from `Localization/Strings.xlsx`
 through Unity Localization; see [localization](docs/LOCALIZATION.md).
 
-Unity's Test Runner (EditMode) runs **158 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
+Unity's Test Runner (EditMode) runs **161 tests, all passing** in 6000.0.71f1 as of 2026-09-25:
 75 domain tests (`Fives.Domain.Tests`), 70 runtime tests on the real ECS systems, services and
-presenters (`Fives.Runtime.Tests`) and 13 editor tests for the gameplay prefab and localization (`Fives.UI.Editor.Tests`).
+presenters (`Fives.Runtime.Tests`) and 16 editor tests for prefabs, localization and screen sizes (`Fives.UI.Editor.Tests`).
 Android builds and device profiling remain unverified.
 
 The Kids Puzzle visual redesign replaces Riverside Village. Undo and hint controls are
