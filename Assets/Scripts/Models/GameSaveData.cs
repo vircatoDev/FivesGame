@@ -17,5 +17,8 @@ namespace Scripts.Models
         public PlayerProgressData PlayerProgress;
         [SerializeField]
         public SoundSettingsData SoundSettings;
+        /// <summary>Language code; empty in saves made before languages existed.</summary>
+        [SerializeField]
+        public string Language;
     }
 }

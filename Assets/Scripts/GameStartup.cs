@@ -27,6 +27,7 @@ namespace Scripts
 
         private GlobalConfig _config;
         private SoundService _soundService;
+        private LanguageService _languageService;
         private EnergyService _energyService;
         private StarService _starService;
         private PlayerDataSaveHelper _playerDataSaveHelper;
@@ -42,6 +43,7 @@ namespace Scripts
         public void InjectDependencies(EcsWorld world, 
             GlobalConfig config,
             SoundService soundService,
+            LanguageService languageService,
             EnergyService energyService,
             StarService starService,
             GameStateMachine stateMachine, GameSession gameSession,
@@ -54,6 +56,7 @@ namespace Scripts
             _world = world;
             _config = config;
             _soundService = soundService;
+            _languageService = languageService;
             _energyService = energyService;
             _starService = starService;
             _stateMachine = stateMachine;
@@ -155,7 +158,7 @@ namespace Scripts
 
         private void SaveAll() => _playerDataSaveHelper.SaveAll(Storables);
 
-        private IStorable[] Storables => new IStorable[] { _soundService, _energyService, _starService, _progressService };
+        private IStorable[] Storables => new IStorable[] { _soundService, _languageService, _energyService, _starService, _progressService };
 
         private void OnDestroy()
         {

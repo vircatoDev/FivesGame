@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Scripts.UI.Presenters;
@@ -14,6 +15,16 @@ namespace Scripts.UI.Views
         [SerializeField] private Slider soundEffectVolumeSlider;
         [SerializeField] private ToggleButtonComponent musicToggle;
         [SerializeField] private ToggleButtonComponent soundEffectToggle;
+        [SerializeField] private LanguageOption[] languages;
+        [Tooltip("Frame moved onto the selected flag.")]
+        [SerializeField] private RectTransform languageMark;
+
+        [Serializable]
+        private struct LanguageOption
+        {
+            public string Code;
+            public Button Button;
+        }
 
         protected override void OnInitialized()
         {
@@ -24,6 +35,26 @@ namespace Scripts.UI.Views
 
             musicToggle.Initialize(Presenter.GetMusicState(), Presenter.OnToggleMusic);
             soundEffectToggle.Initialize(Presenter.GetSoundEffectState(), Presenter.OnToggleSFX);
+
+            foreach (var language in languages)
+            {
+                var code = language.Code;
+                language.Button.onClick.AddListener(() => Presenter.OnSelectLanguage(code));
+            }
+        }
+
+        public void ShowLanguage(string code)
+        {
+            foreach (var language in languages)
+            {
+                if (language.Code != code)
+                    continue;
+
+                languageMark.SetParent(language.Button.transform, false);
+                languageMark.anchoredPosition = Vector2.zero;
+                languageMark.localScale = Vector3.one * 0.8f;
+                languageMark.DOScale(1f, 0.2f).SetEase(Ease.OutBack).SetLink(languageMark.gameObject);
+            }
         }
 
         public void UpdateUI(float musicVolume, float sfxVolume)

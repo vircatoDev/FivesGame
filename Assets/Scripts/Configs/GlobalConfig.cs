@@ -26,6 +26,10 @@ namespace Scripts.Configs
         public int RewardStars = 10;
         public int HintPrice = 5;
 
+        [Header("Languages")]
+        [Tooltip("Language codes in the order of the settings flags; the first one is the fallback.")]
+        public string[] Languages = { "en", "ru", "fr", "it", "de", "es" };
+
         [Header("Player Progress Settings")] 
         public string[] DefaultUnlockedThemes;
 

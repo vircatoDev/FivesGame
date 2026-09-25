@@ -9,15 +9,21 @@ namespace Scripts.UI.Presenters
     public class SettingsPresenter : Presenter<SettingsView>
     {
         private readonly SoundService _soundService;
+        private readonly LanguageService _language;
         private readonly EcsWorld _world;
 
-        public SettingsPresenter(SoundService soundService, EcsWorld world)
+        public SettingsPresenter(SoundService soundService, LanguageService language, EcsWorld world)
         {
             _soundService = soundService;
+            _language = language;
             _world = world;
         }
 
-        public override void OnActivateView() => View.UpdateUI(_soundService.GetMusicVolume(), _soundService.GetSoundEffectVolume());
+        public override void OnActivateView()
+        {
+            View.UpdateUI(_soundService.GetMusicVolume(), _soundService.GetSoundEffectVolume());
+            View.ShowLanguage(_language.Current);
+        }
         public bool GetMusicState() => _soundService.GetMusicVolume() > 0;
         public bool GetSoundEffectState() => _soundService.GetSoundEffectVolume() > 0;
 
@@ -45,6 +51,15 @@ namespace Scripts.UI.Presenters
             float newVolume = isEnabled ? 1f : 0f;
             _soundService.SetSoundEffectVolume(newVolume);
             View.SetSFXVolumeSlider(newVolume);
+        }
+
+        public void OnSelectLanguage(string code)
+        {
+            if (!_language.TrySet(code))
+                return;
+
+            View.ShowLanguage(code);
+            _world.PlaySound(AudioKeyCollection.MenuClick);
         }
 
         public void OnClose()
