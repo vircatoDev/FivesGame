@@ -63,7 +63,7 @@ namespace Fives.Runtime.Tests
             var progress = new PlayerProgressService(save);
             var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world, new FakeSpriteLoader(_objects)),
                 new ThemeShop(stars, progress, _world, new GameBalance(config)), progress, session, new FakeHeaderPanelView(), _world, new FakeTexts(),
-                new FakeSpriteLoader(_objects), new FakeSpriteLoader(_objects).Previews(config));
+                new FakeSpriteLoader(_objects), new FakeSpriteLoader(_objects).Previews(config), FakeThemeDownloads.Ready());
             select.Initialize(new FakeSelectMenuView());
 
             select.OnThemeBuy("cities");

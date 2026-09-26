@@ -11,6 +11,7 @@ using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services;
 using Scripts.Systems;
+using Scripts.UI;
 using Scripts.UI.Presenters;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -32,6 +33,8 @@ namespace Fives.Runtime.Tests
         private SelectMenuPresenter _select;
         private FakeMainMenuView _mainView;
         private MainMenuPresenter _main;
+        private FakeThemeDownloads _downloads;
+        private FakeDownloadScreen _downloadScreen;
 
         [SetUp]
         public void SetUp()
@@ -50,11 +53,14 @@ namespace Fives.Runtime.Tests
             _energy = new EnergyService(new GameBalance(config), save, new FakeClock { UtcNow = DateTime.UtcNow });
             _loader = new FakeSpriteLoader(_objects);
             _start = new GameStartService(_session, _energy, _world, _loader);
+            _downloads = new FakeThemeDownloads { Everything = true };
+            _downloadScreen = new FakeDownloadScreen();
+            var gate = new ThemeDownloadGate(_downloads, _downloadScreen);
             _selectView = new FakeSelectMenuView();
-            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), _progress, _world, new GameBalance(config)), _progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), _loader, _loader.Previews(config));
+            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), _progress, _world, new GameBalance(config)), _progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), _loader, _loader.Previews(config), gate);
             _select.Initialize(_selectView);
             _mainView = new FakeMainMenuView();
-            _main = new MainMenuPresenter(config, _progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), _loader.Previews(config));
+            _main = new MainMenuPresenter(config, _progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), _loader.Previews(config), gate);
             _main.Initialize(_mainView);
         }
 
@@ -213,6 +219,34 @@ namespace Fives.Runtime.Tests
 
             Assert.That(_loader.Held.Keys.All(owner => owner is ThemePreviews), Is.True, "only the menu previews stay loaded");
         }
+
+        [Test]
+        public void AThemeNotOnTheDevice_DownloadsBeforeItsPuzzlesShow()
+        {
+            _downloads.Everything = false;
+            _selectView.OnClick("cities");
+
+            Assert.That(_downloads.Downloads, Is.EqualTo(1));
+            Assert.That(_downloadScreen.Shown, Is.False, "the loading screen hides after the download");
+            Assert.That(_selectView.Items.Select(item => item.Id), Is.EqualTo(new[] { "cities.one" }));
+        }
+
+        [Test]
+        public void GivingUpADownload_KeepsTheThemeList_AndStartsNothing()
+        {
+            _downloads.Everything = false;
+            _downloads.Failures = 2;
+            _downloadScreen.Answers.Enqueue(false); // Back, on the theme screen
+            _downloadScreen.Answers.Enqueue(false); // Back, on the main menu
+            _selectView.OnClick("cities");
+            _main.OnStartGame();
+
+            Assert.That(_downloadScreen.Asked, Is.EqualTo(2));
+
+            Assert.That(_selectView.Items.Select(item => item.Id), Does.Contain("cities").And.Not.Contain("cities.one"));
+            Assert.That(_energy.GetBalance(), Is.EqualTo(5));
+            Assert.That(Requests, Is.Zero);
+        }
     }
 
     public sealed class ThemeCarouselTests
@@ -243,7 +277,7 @@ namespace Fives.Runtime.Tests
             _view = new FakeMainMenuView();
             _header = new FakeHeaderPanelView();
             _sprites = new FakeSpriteLoader(_objects);
-            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world, _sprites), _session, _header, _world, new FakeTexts(), _sprites.Previews(_config));
+            _menu = new MainMenuPresenter(_config, new PlayerProgressService(save), new GameStartService(_session, energy, _world, _sprites), _session, _header, _world, new FakeTexts(), _sprites.Previews(_config), FakeThemeDownloads.Ready());
             _menu.Initialize(_view);
             _view.Hide.TrySetResult();
         }

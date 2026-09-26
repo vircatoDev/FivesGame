@@ -4,6 +4,9 @@ using NUnit.Framework;
 using Scripts.UI.Views;
 using TMPro;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Build.DataBuilders;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.TestTools;
@@ -13,10 +16,21 @@ namespace Fives.UI.Tests
     public class GamePlayPrefabTests
     {
         private const string PrefabPath = "Assets/Content/Prefabs/UI/Screens/GamePlayScreen.prefab";
+        // Entering play mode reloads the domain and recreates this fixture, so what is restored after the test is kept
+        // in SessionState rather than in fields.
+        private const string StartSceneKey = "Fives.Tests.PlayModeStartScene";
+        private const string PlayModeKey = "Fives.Tests.AddressablesPlayMode";
 
         [UnityTest]
         public IEnumerator ScreenCanOpenRefreshAndReopenWithoutExceptions()
         {
+            // The screen is tested on its own: play mode must not boot the game, and its texts come from the asset
+            // database whatever Addressables play mode this machine uses, so nothing loads from bundles or the network.
+            SessionState.SetString(StartSceneKey, AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
+            EditorSceneManager.playModeStartScene = null;
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            SessionState.SetInt(PlayModeKey, settings.ActivePlayModeDataBuilderIndex);
+            settings.ActivePlayModeDataBuilderIndex = settings.DataBuilders.FindIndex(builder => builder is BuildScriptFastMode);
             yield return new EnterPlayMode();
             var canvas = new GameObject("Gameplay UI smoke test", typeof(Canvas));
             try
@@ -61,6 +75,14 @@ namespace Fives.UI.Tests
         {
             if (Application.isPlaying)
                 yield return new ExitPlayMode();
+            var startScene = SessionState.GetString(StartSceneKey, "");
+            if (startScene.Length > 0)
+                EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(startScene);
+            var playMode = SessionState.GetInt(PlayModeKey, -1);
+            if (playMode >= 0)
+                AddressableAssetSettingsDefaultObject.Settings.ActivePlayModeDataBuilderIndex = playMode;
+            SessionState.EraseString(StartSceneKey);
+            SessionState.EraseInt(PlayModeKey);
         }
 
         [TestCase("undoButton", typeof(Button))]

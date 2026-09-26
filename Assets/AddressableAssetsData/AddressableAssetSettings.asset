@@ -17,8 +17,8 @@ MonoBehaviour:
     serializedVersion: 2
     Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
-  m_BuildRemoteCatalog: 0
-  m_CatalogRequestsTimeout: 0
+  m_BuildRemoteCatalog: 1
+  m_CatalogRequestsTimeout: 5
   m_DisableCatalogUpdateOnStart: 0
   m_InternalIdNamingMode: 0
   m_InternalBundleIdMode: 1
@@ -52,13 +52,13 @@ MonoBehaviour:
   m_CheckForContentUpdateRestrictionsOption: 0
   m_MonoScriptBundleCustomNaming: 
   m_RemoteCatalogBuildPath:
-    m_Id: 
+    m_Id: 53f99e514e7ff4288a2c4b195df61fa6
   m_RemoteCatalogLoadPath:
-    m_Id: 
+    m_Id: 4cdb944885e264fffb73230fb2e76d72
   m_ContentStateBuildPathProfileVariableName: 
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
-  m_BuildAddressablesWithPlayerBuild: 0
+  m_BuildAddressablesWithPlayerBuild: 1
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
   - {fileID: 11400000, guid: 0ca80773b90854bbc8c5b4e9020ec64c, type: 2}
@@ -84,7 +84,7 @@ MonoBehaviour:
       m_ProfileName: Default
       m_Values:
       - m_Id: 4cdb944885e264fffb73230fb2e76d72
-        m_Value: <undefined>
+        m_Value: 'https://vircatodev.github.io/FivesGame/content/[BuildTarget]'
       - m_Id: 4d82e53a0149243a7ad116bb209a54dd
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
       - m_Id: 53f99e514e7ff4288a2c4b195df61fa6

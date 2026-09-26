@@ -166,7 +166,7 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(new GameBalance(config), save, new FakeClock { UtcNow = DateTime.UtcNow });
             var view = new FakeMainMenuView();
 
-            new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world, new FakeSpriteLoader(_objects)), session, new FakeHeaderPanelView(), world, new FakeTexts(), new FakeSpriteLoader(_objects).Previews(config))
+            new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world, new FakeSpriteLoader(_objects)), session, new FakeHeaderPanelView(), world, new FakeTexts(), new FakeSpriteLoader(_objects).Previews(config), FakeThemeDownloads.Ready())
                 .Initialize(view);
 
             Assert.That(save.GetPlayerData().Energy.LastRecoveryTime, Is.Not.EqualTo(default(DateTime)));

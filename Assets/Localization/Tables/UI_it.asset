@@ -209,6 +209,15 @@ MonoBehaviour:
     m_Localized: Scegli<br>il tuo<br>tema!
     m_Metadata:
       m_Items: []
+  - m_Id: 277477011218432
+    m_Localized: Nessuna connessione a Internet. Connettiti per scaricare questo
+      tema.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 277477036384256
+    m_Localized: Riprova
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Scripts.Configs;
 using Scripts.Services;
 using Scripts.UI;
 using UnityEngine;
@@ -22,14 +23,19 @@ namespace Scripts.Boot
         private readonly RemoteBalance _balance;
         private readonly Func<LocalizedTexts> _texts;
         private readonly ThemePreviews _previews;
+        private readonly IThemeDownloads _downloads;
+        private readonly GlobalConfig _config;
         private readonly LoadingScreen _screen;
 
         /// <param name="texts">Created only after the balance is loaded: the texts read the save, and a new save takes its starting values from the balance.</param>
-        public BootFlow(RemoteBalance balance, Func<LocalizedTexts> texts, ThemePreviews previews, LoadingScreen screen)
+        public BootFlow(RemoteBalance balance, Func<LocalizedTexts> texts, ThemePreviews previews, IThemeDownloads downloads,
+            GlobalConfig config, LoadingScreen screen)
         {
             _balance = balance;
             _texts = texts;
             _previews = previews;
+            _downloads = downloads;
+            _config = config;
             _screen = screen;
         }
 
@@ -41,9 +47,24 @@ namespace Scripts.Boot
                 (1, _ => _balance.Load(cancellation)),
                 (1, _ => _texts().Initialize()),
                 (1, _ => _previews.Load()),
+                (3, progress => DownloadThemes(progress, cancellation)),
                 (0, _ => minimum),
                 (2, progress => SceneManager.LoadSceneAsync(GameScene).ToUniTask(progress, cancellationToken: cancellation)))
                 .SuppressCancellationThrow();
+        }
+
+        // Every theme downloads here, so the menus open themes without waiting. Offline, the game starts anyway: the
+        // themes already on the device work, and ThemeDownloadGate retries the others when a menu opens one.
+        private async UniTask DownloadThemes(IProgress<float> progress, CancellationToken cancellation)
+        {
+            try
+            {
+                await _downloads.Download(_config.Themes, progress, cancellation);
+            }
+            catch (Exception exception) when (!(exception is OperationCanceledException))
+            {
+                Debug.LogWarning($"The themes did not download at start; the menus will retry. {exception.Message}");
+            }
         }
 
         // Runs the steps in order and fills the bar by each step's weight, including progress inside a step.

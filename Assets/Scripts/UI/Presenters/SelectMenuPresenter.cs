@@ -24,6 +24,7 @@ namespace Scripts.UI.Presenters
         private readonly ITexts _texts;
         private readonly ISpriteLoader _sprites;
         private readonly ThemePreviews _previews;
+        private readonly ThemeDownloadGate _downloads;
         // Owner of the open theme's puzzle pictures: its bundle is released when the theme list comes back.
         private readonly object _themePictures = new object();
         // The puzzle list being loaded: a newer tap, the way back to the themes or closing the screen cancels it.
@@ -41,7 +42,8 @@ namespace Scripts.UI.Presenters
             EcsWorld world,
             ITexts texts,
             ISpriteLoader sprites,
-            ThemePreviews previews)
+            ThemePreviews previews,
+            ThemeDownloadGate downloads)
         {
             _themeConfig = gameConfig.Themes;
             _gameStartService = gameStartService;
@@ -53,6 +55,7 @@ namespace Scripts.UI.Presenters
             _texts = texts;
             _sprites = sprites;
             _previews = previews;
+            _downloads = downloads;
         }
 
         public override void OnActivateView()
@@ -154,11 +157,15 @@ namespace Scripts.UI.Presenters
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
-            _selectedTheme = themeId;
             CancelPuzzlesLoad();
             _puzzlesLoad = CancellationTokenSource.CreateLinkedTokenSource(View.Lifetime);
+            var theme = GetTheme(themeId);
+            // A theme not yet on the device downloads first; if the player gives up, the theme list stays.
+            if (theme != null && !await _downloads.Ensure(theme, _puzzlesLoad.Token))
+                return;
 
-            var puzzles = GetTheme(themeId)?.Puzzles ?? Array.Empty<PuzzleData>();
+            _selectedTheme = themeId;
+            var puzzles = theme?.Puzzles ?? Array.Empty<PuzzleData>();
             var pictures = await UniTask.WhenAll(puzzles.Select(puzzle => _sprites.Load(puzzle.Image, _themePictures)))
                 .AttachExternalCancellation(_puzzlesLoad.Token);
             var tiles = puzzles.Select((puzzle, i) => new MenuItemData
