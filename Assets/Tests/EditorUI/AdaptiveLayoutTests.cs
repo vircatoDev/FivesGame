@@ -35,20 +35,20 @@ namespace Fives.UI.Tests
         [Test]
         public void GameplayBackground_CoversTheScreen()
         {
-            var screen = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Prefabs/UI/Screens/GamePlayScreen.prefab");
+            var screen = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Content/Prefabs/UI/Screens/GamePlayScreen.prefab");
             AssertCovers(screen.transform.Find("Background"));
         }
 
         [Test]
         public void Gameplay_SidePanelsHugTheSafeEdges_AndTheBoardIsCentred()
         {
-            var panel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Prefabs/UI/Screens/GamePlayScreen.prefab").transform.Find("Panel");
+            var panel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Content/Prefabs/UI/Screens/GamePlayScreen.prefab").transform.Find("Panel");
             Assert.That(panel.GetComponent<SafeAreaFitter>(), Is.Not.Null);
             Assert.That(((RectTransform)panel.Find("BoardControls")).anchorMin.x, Is.EqualTo(0f));
             Assert.That(((RectTransform)panel.Find("Preview")).anchorMin.x, Is.EqualTo(1f));
             Assert.That(((RectTransform)panel.Find("Information")).anchorMin.x, Is.EqualTo(1f));
 
-            var board = (RectTransform)AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Prefabs/GamePlayElements/Board.prefab").transform;
+            var board = (RectTransform)AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Content/Prefabs/GamePlayElements/Board.prefab").transform;
             Assert.That(board.anchoredPosition.x + board.sizeDelta.x / 2, Is.EqualTo(0f).Within(0.5f), "board centre (pivot is top-left)");
         }
 

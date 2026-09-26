@@ -10,7 +10,6 @@ namespace Scripts.Configs
         public int Rows = 3;
         public float TileSize;
         public float TileSpacing;
-        public Sprite[] TileSprites;
 
         /// <summary>Size of the tile grid, without the frame.</summary>
         public Vector2 BoardArea => new Vector2(Columns * TileSize + (Columns - 1) * TileSpacing,

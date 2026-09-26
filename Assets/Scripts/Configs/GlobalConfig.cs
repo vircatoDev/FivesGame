@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Scripts.Models;
+using Scripts.UI;
 using UnityEngine;
 
 namespace Scripts.Configs
@@ -36,7 +37,8 @@ namespace Scripts.Configs
         [Header("Sound Settings")] 
         public List<GameSoundCollection> AudioClipsCollection;
 
-        public string BoardPrefab;
-        public string TilePrefab;
+        [Header("Board")]
+        public BoardView BoardPrefab;
+        public TileUiProvider TilePrefab;
     }
 }

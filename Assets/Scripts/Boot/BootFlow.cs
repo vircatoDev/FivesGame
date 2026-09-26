@@ -33,11 +33,13 @@ namespace Scripts.Boot
         public async UniTask StartAsync(CancellationToken cancellation)
         {
             var minimum = UniTask.Delay(TimeSpan.FromSeconds(MinimumSeconds), cancellationToken: cancellation); // no flash when loading is instant
+            // Leaving play mode or quitting mid-load cancels the boot. That is not an error, and VContainer would log it as one.
             await Load(
                 (1, _ => _texts.Initialize()),
                 (1, _ => _previews.Load()),
                 (0, _ => minimum),
-                (2, progress => SceneManager.LoadSceneAsync(GameScene).ToUniTask(progress, cancellationToken: cancellation)));
+                (2, progress => SceneManager.LoadSceneAsync(GameScene).ToUniTask(progress, cancellationToken: cancellation)))
+                .SuppressCancellationThrow();
         }
 
         // Runs the steps in order and fills the bar by each step's weight, including progress inside a step.

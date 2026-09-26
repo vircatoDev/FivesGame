@@ -13,6 +13,8 @@ namespace Scripts.Services
         private readonly Dictionary<string, AudioClip> _clips = new Dictionary<string, AudioClip>();
 
         private AudioSource _backgroundMusicGo;
+        // One source plays every effect: PlayOneShot mixes overlapping clips, where PlayClipAtPoint made an object per sound.
+        private AudioSource _effects;
         private SoundSettingsData _soundSettings;
 
         public SoundService(GlobalConfig gameSettings, PlayerDataSaveHelper saveHelper)
@@ -28,7 +30,13 @@ namespace Scripts.Services
             if (effectVolume <= 0f || !TryGetClip(key, out var clip))
                 return;
 
-            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, effectVolume);
+            if (_effects == null) // first effect, or the scene that held the source was unloaded
+            {
+                _effects = new GameObject("SoundEffects").AddComponent<AudioSource>();
+                _effects.playOnAwake = false;
+            }
+
+            _effects.PlayOneShot(clip, effectVolume);
         }
 
         public void PlayBackgroundMusic(string key)

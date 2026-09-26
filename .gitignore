@@ -90,3 +90,9 @@ mono_crash.*.json
 /Assets/AddressableAssetsData/Android.meta
 /Assets/AddressableAssetsData/link.xml
 /Assets/AddressableAssetsData/link.xml.meta
+
+# Written and deleted by the Performance Testing package on every test run
+/Assets/Resources/PerformanceTestRunInfo.json
+/Assets/Resources/PerformanceTestRunInfo.json.meta
+/Assets/Resources/PerformanceTestRunSettings.json
+/Assets/Resources/PerformanceTestRunSettings.json.meta

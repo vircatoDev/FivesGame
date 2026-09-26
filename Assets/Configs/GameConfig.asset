@@ -53,5 +53,5 @@ MonoBehaviour:
     Key: RightTap
   - AudioClip: {fileID: 8300000, guid: 7bd6b897eb5ca4b7d88a205c4a51640c, type: 3}
     Key: PopUp
-  BoardPrefab: Prefabs/GamePlayElements/Board
-  TilePrefab: Prefabs/GamePlayElements/Tile
+  BoardPrefab: {fileID: 2104180016901900003, guid: 61c9bfbdcc2d910449ce2bad014fc419, type: 3}
+  TilePrefab: {fileID: 1440813493514574326, guid: 955e606e2cd96064faba81fe49c46a6b, type: 3}
