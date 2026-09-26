@@ -210,6 +210,14 @@ MonoBehaviour:
     m_Localized: "W\xE4hle<br>dein<br>Thema!"
     m_Metadata:
       m_Items: []
+  - m_Id: 277477011218432
+    m_Localized: Keine Internetverbindung. Verbinde dich, um dieses Thema herunterzuladen.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 277477036384256
+    m_Localized: Nochmal
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -208,6 +208,15 @@ MonoBehaviour:
     m_Localized: "Choisis<br>ton<br>th\xE8me !"
     m_Metadata:
       m_Items: []
+  - m_Id: 277477011218432
+    m_Localized: "Pas de connexion Internet. Connecte-toi pour t\xE9l\xE9charger
+      ce th\xE8me."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 277477036384256
+    m_Localized: "R\xE9essayer"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

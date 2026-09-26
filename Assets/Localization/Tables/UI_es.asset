@@ -208,6 +208,14 @@ MonoBehaviour:
     m_Localized: "\xA1Elige<br>tu<br>tema!"
     m_Metadata:
       m_Items: []
+  - m_Id: 277477011218432
+    m_Localized: "Sin conexi\xF3n a Internet. Con\xE9ctate para descargar este tema."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 277477036384256
+    m_Localized: Reintentar
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

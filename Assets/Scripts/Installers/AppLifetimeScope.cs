@@ -31,7 +31,7 @@ namespace Scripts.Installers
             builder.RegisterInstance(globalConfig);
             builder.Register<GameBalance>(Lifetime.Singleton);
             builder.Register<RemoteBalance>(Lifetime.Singleton);
-            builder.RegisterComponent(loadingScreen);
+            builder.RegisterComponent(loadingScreen).AsSelf().As<IDownloadScreen>();
 
             builder.Register<IStorageService, StorageService>(Lifetime.Singleton);
             builder.Register<PlayerDataSaveHelper>(Lifetime.Singleton);
@@ -44,6 +44,8 @@ namespace Scripts.Installers
             builder.RegisterFactory<LocalizedTexts>(resolver => () => resolver.Resolve<LocalizedTexts>(), Lifetime.Singleton);
             builder.Register<AddressableSpriteLoader>(Lifetime.Singleton).As<ISpriteLoader>();
             builder.Register<ThemePreviews>(Lifetime.Singleton);
+            builder.Register<AddressableThemeDownloads>(Lifetime.Singleton).As<IThemeDownloads>();
+            builder.Register<ThemeDownloadGate>(Lifetime.Singleton);
             builder.Register<EnergyService>(Lifetime.Singleton);
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);

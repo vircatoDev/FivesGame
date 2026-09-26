@@ -10,6 +10,7 @@ using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services.Interfaces;
+using Scripts.UI;
 using Scripts.UI.Presenters;
 using Scripts.UI.Views;
 using UnityEngine;
@@ -260,6 +261,60 @@ namespace Fives.Runtime.Tests
             var previews = new ThemePreviews(config, this);
             previews.Load().GetAwaiter().GetResult();
             return previews;
+        }
+    }
+
+    /// <summary>Theme downloads without a server: themes are on the device or not, and the next downloads can fail.</summary>
+    internal sealed class FakeThemeDownloads : IThemeDownloads
+    {
+        public bool Everything;
+        public readonly HashSet<string> OnDevice = new HashSet<string>();
+        /// <summary>How many of the next downloads fail, as without a network.</summary>
+        public int Failures;
+        public int Downloads;
+
+        public UniTask<bool> IsDownloaded(ThemeConfig theme) => UniTask.FromResult(Everything || OnDevice.Contains(theme.Id));
+
+        public UniTask Download(IReadOnlyList<ThemeConfig> themes, IProgress<float> progress, CancellationToken cancellation)
+        {
+            Downloads++;
+            if (Failures > 0)
+            {
+                Failures--;
+                return UniTask.FromException(new InvalidOperationException("No network."));
+            }
+
+            progress?.Report(1f);
+            foreach (var theme in themes)
+                OnDevice.Add(theme.Id);
+            return UniTask.CompletedTask;
+        }
+
+        /// <summary>A gate for menus whose themes are all downloaded.</summary>
+        public static ThemeDownloadGate Ready() => new ThemeDownloadGate(new FakeThemeDownloads { Everything = true }, new FakeDownloadScreen());
+    }
+
+    internal sealed class FakeDownloadScreen : IDownloadScreen
+    {
+        public bool Shown;
+        public float Progress;
+        public int Asked;
+        /// <summary>The player's answers to the retry question, in order.</summary>
+        public readonly Queue<bool> Answers = new Queue<bool>();
+
+        public void Show() => Shown = true;
+        public void SetProgress(float value) => Progress = value;
+
+        public UniTask<bool> AskRetry(CancellationToken cancellation)
+        {
+            Asked++;
+            return UniTask.FromResult(Answers.Dequeue());
+        }
+
+        public UniTask Hide()
+        {
+            Shown = false;
+            return UniTask.CompletedTask;
         }
     }
 

@@ -20,11 +20,13 @@ namespace Scripts.UI.Presenters
         private readonly EcsWorld _world;
         private readonly ITexts _texts;
         private readonly ThemePreviews _previews;
+        private readonly ThemeDownloadGate _downloads;
         private ThemeConfig[] _themes;
         private int _themeIndex;
 
         public MainMenuPresenter(GlobalConfig themeConfig, PlayerProgressService playerProgressService,
-            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world, ITexts texts, ThemePreviews previews)
+            GameStartService gameStartService, GameSession session, IHeaderPanelView header, EcsWorld world, ITexts texts, ThemePreviews previews,
+            ThemeDownloadGate downloads)
         {
             _themeConfig = themeConfig;
             _playerProgressService = playerProgressService;
@@ -34,6 +36,7 @@ namespace Scripts.UI.Presenters
             _world = world;
             _texts = texts;
             _previews = previews;
+            _downloads = downloads;
         }
 
         public override void OnActivateView()
@@ -61,6 +64,8 @@ namespace Scripts.UI.Presenters
                 return;
             }
 
+            if (!await _downloads.Ensure(theme, View.Lifetime))
+                return;
             if (!await _gameStartService.Prepare(theme, FindNextUncompletedPuzzle(theme), View.Lifetime))
                 return;
 
