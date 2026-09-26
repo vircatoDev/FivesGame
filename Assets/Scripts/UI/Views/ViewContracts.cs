@@ -44,6 +44,9 @@ namespace Scripts.UI.Views
     public interface IGameResultView : IView
     {
         void UpdateViewContent(string stars, string stats, string themeName, ThemeProgress progress);
+
+        /// <summary>The x2 button: hidden where there are no ads, enabled while an ad is loaded.</summary>
+        void ShowDoubleReward(bool offered, bool ready);
     }
 
     public interface IHeaderPanelView

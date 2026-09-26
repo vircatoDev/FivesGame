@@ -12,6 +12,7 @@
     "com.unity.render-pipelines.universal": "17.0.4",
     "com.unity.services.authentication": "3.8.0",
     "com.unity.services.core": "1.18.0",
+    "com.unity.services.levelplay": "9.5.1",
     "com.unity.test-framework": "1.6.0",
     "com.unity.ugui": "2.0.0",
     "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#5e6f5cc14b6dc8b94251bf6c0d6c37025a6ecf77",

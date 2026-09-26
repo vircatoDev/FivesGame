@@ -14,19 +14,22 @@ namespace Scripts.UI.Presenters
         private readonly PlayerProgressService _playerProgressService;
         private readonly EcsWorld _world;
         private readonly ITexts _texts;
+        private readonly IRewardedAds _ads;
 
         public GameResultPresenter(
             GameSession gameSession,
             StarService starService,
             PlayerProgressService playerProgressService,
             EcsWorld world,
-            ITexts texts)
+            ITexts texts,
+            IRewardedAds ads)
         {
             _gameSession = gameSession;
             _starService = starService;
             _playerProgressService = playerProgressService;
             _world = world;
             _texts = texts;
+            _ads = ads;
         }
 
         public override void OnActivateView()
@@ -39,19 +42,35 @@ namespace Scripts.UI.Presenters
             View.UpdateViewContent(_texts.Get(TextKeys.RewardStars, result.StarCount),
                 _texts.Get(TextKeys.ResultStats, result.TurnCount, result.GameTime.ToString(@"mm\:ss")),
                 _texts.Get(TextKeys.Name(theme)), _playerProgressService.GetThemeProgress(theme));
+            ShowDoubleReward();
+            _ads.ReadyChanged += ShowDoubleReward;
             View.PlayShowAnimation().Forget();
         }
 
-        public void GetReward(bool doubleReward)
+        protected override void OnDeactivateView() => _ads.ReadyChanged -= ShowDoubleReward;
+
+        public void GetReward() => Claim(false);
+
+        public void GetDoubleReward() => GetDoubleRewardAsync().Forget();
+
+        // The stars double only after the ad was watched to its reward. A skipped or failed ad grants nothing, and the
+        // plain reward stays available.
+        private async UniTaskVoid GetDoubleRewardAsync()
+        {
+            if (await _ads.Show(View.Lifetime))
+                Claim(true);
+        }
+
+        private void Claim(bool doubleReward)
         {
             if (!_gameSession.TryClaimReward(doubleReward, out var rewardAmount))
-            {
                 return;
-            }
 
             _starService.Add(rewardAmount);
             BackToMainMenu();
         }
+
+        private void ShowDoubleReward() => View.ShowDoubleReward(_ads.IsSupported, _ads.IsReady);
 
   
         private void UpdateProgress() => _playerProgressService.MarkCompleted(_gameSession.SelectedPuzzle);
