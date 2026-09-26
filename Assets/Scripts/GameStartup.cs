@@ -162,12 +162,22 @@ namespace Scripts
 
         private void OnApplicationQuit() => SaveAll();
 
-        private void SaveAll() => _playerDataSaveHelper.SaveAll(Storables);
+        // Leaving while the scene is still loading ends before Start, even before injection: nothing ran, nothing to save.
+        private bool Started => _mainSystems != null;
+
+        private void SaveAll()
+        {
+            if (Started)
+                _playerDataSaveHelper.SaveAll(Storables);
+        }
 
         private IStorable[] Storables => new IStorable[] { _soundService, _languageService, _energyService, _starService, _progressService };
 
         private void OnDestroy()
         {
+            if (!Started)
+                return;
+
             _mainSystems.Destroy();
             _world.Destroy();
         }

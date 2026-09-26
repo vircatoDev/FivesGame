@@ -12,7 +12,7 @@ namespace Fives.UI.Tests
 {
     public class GamePlayPrefabTests
     {
-        private const string PrefabPath = "Assets/Resources/Prefabs/UI/Screens/GamePlayScreen.prefab";
+        private const string PrefabPath = "Assets/Content/Prefabs/UI/Screens/GamePlayScreen.prefab";
 
         [UnityTest]
         public IEnumerator ScreenCanOpenRefreshAndReopenWithoutExceptions()
@@ -24,7 +24,7 @@ namespace Fives.UI.Tests
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var screen = UnityEngine.Object.Instantiate(
-                        Resources.Load<GameObject>("Prefabs/UI/Screens/GamePlayScreen"), canvas.transform);
+                        AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath), canvas.transform);
                     yield return null; // Run Awake, OnEnable and the first frame on real Unity objects.
                     var view = screen.GetComponent<GamePlayView>();
                     var controls = screen.transform.Find("Panel/BoardControls");

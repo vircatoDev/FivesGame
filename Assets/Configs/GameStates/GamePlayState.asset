@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: GamePlayState
   m_EditorClassIdentifier: 
   StateName: 0
-  ScreenPrefab: Prefabs/UI/Screens/GamePlayScreen
+  ScreenPrefab: {fileID: 4276028952100898877, guid: 7aa673a3fbdbfcc4faa3e5a7bdaaa44d, type: 3}
   AllowedTransitions:
   - {fileID: 11400000, guid: 4f64e2a33e8c17a499bcb7af80d68044, type: 2}

@@ -92,18 +92,20 @@ namespace Scripts.UI.Views
             card.DOScale(pose.scale, SlideDuration).SetEase(Ease.OutBack).SetLink(card.gameObject);
         }
 
-        public override async UniTask PlayShowAnimation()
+        public override UniTask PlayShowAnimation()
         {
             canvasGroup.alpha = 0;
-            canvasGroup.DOFade(1, 0.5f).SetLink(gameObject);
-            await MoveScreenAnimation(0f, -1000f);
-            await MoveScreenAnimation(0.5f, 1000f);
+            return UniTask.WhenAll(Play(canvasGroup.DOFade(1, 0.5f)), SlideIn());
         }
 
-        public override UniTask PlayHideAnimation()
+        public override UniTask PlayHideAnimation() =>
+            UniTask.WhenAll(Play(canvasGroup.DOFade(0, 0.5f)), MoveScreenAnimation(0.5f, 1000f));
+
+        // From the left edge back to the authored position.
+        private async UniTask SlideIn()
         {
-            canvasGroup.DOFade(0, 0.5f).SetLink(gameObject);
-            return MoveScreenAnimation(0.5f, 1000f);
+            await MoveScreenAnimation(0f, -1000f);
+            await MoveScreenAnimation(0.5f, 1000f);
         }
 
         private void ResetPosition() => _menuContainer.anchoredPosition = _initialPosition;

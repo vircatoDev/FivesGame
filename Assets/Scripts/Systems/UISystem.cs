@@ -52,17 +52,10 @@ namespace Scripts.Systems
             if (_screens.ContainsKey(config.StateName))
                 return;
 
-            var prefab = Resources.Load<GameObject>(config.ScreenPrefab);
-            if (prefab == null)
-            {
-                Debug.LogError($"Screen prefab {config.ScreenPrefab} not found!");
-                return;
-            }
-
-            var screen = Object.Instantiate(prefab, config.IsPopup ? _popupLayer : _uiRoot);
-            _screens[config.StateName] = screen;
-            screen.GetComponent<BaseView>().Initialize(_catalog.Presenter(evt.State));
-            screen.SetActive(true);
+            var screen = Object.Instantiate(config.ScreenPrefab, config.IsPopup ? _popupLayer : _uiRoot);
+            _screens[config.StateName] = screen.gameObject;
+            screen.Initialize(_catalog.Presenter(evt.State));
+            screen.gameObject.SetActive(true);
         }
     }
 }

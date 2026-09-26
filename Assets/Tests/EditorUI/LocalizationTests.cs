@@ -43,7 +43,7 @@ namespace Fives.UI.Tests
         public void PrefabTexts_ReferenceExistingKeys()
         {
             var used = new List<string>();
-            foreach (var path in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Resources/Prefabs" }).Select(AssetDatabase.GUIDToAssetPath))
+            foreach (var path in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Content/Prefabs" }).Select(AssetDatabase.GUIDToAssetPath))
             foreach (var text in AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(path).GetComponentsInChildren<LocalizeStringEvent>(true))
                 used.Add(text.StringReference.TableEntryReference.Key);
 
@@ -54,7 +54,7 @@ namespace Fives.UI.Tests
         [Test]
         public void HeaderButtonSkins_UseExistingKeys()
         {
-            var header = AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>("Assets/Resources/Prefabs/UI/Common/Controls.prefab")
+            var header = AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>("Assets/Content/Prefabs/UI/Common/Controls.prefab")
                 .GetComponentInChildren<Scripts.UI.Views.HeaderPanelView>(true);
             var skins = new SerializedObject(header).FindProperty("commonBtnSkins");
             var keys = Enumerable.Range(0, skins.arraySize).Select(i => skins.GetArrayElementAtIndex(i).FindPropertyRelative("TextKey").stringValue).ToList();

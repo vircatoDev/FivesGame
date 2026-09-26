@@ -29,8 +29,7 @@ namespace Scripts.UI.Views
 
         public override UniTask PlayShowAnimation()
         {
-            backgroundImage.DOFade(1, 0.5f).SetLink(gameObject);
-            return Play(contentContainer.DOScaleY(1, 0.5f).SetEase(Ease.OutBack));
+            return UniTask.WhenAll(Play(backgroundImage.DOFade(1, 0.5f)), Play(contentContainer.DOScaleY(1, 0.5f).SetEase(Ease.OutBack)));
         }
 
         public override UniTask PlayHideAnimation()

@@ -1,4 +1,5 @@
 ﻿using Scripts.Models;
+using Scripts.UI.Views;
 using UnityEngine;
 
 namespace Scripts.Configs
@@ -7,7 +8,7 @@ namespace Scripts.Configs
     public class StateConfig : ScriptableObject
     {
         public GameStateType StateName;
-        public string ScreenPrefab;
+        public BaseView ScreenPrefab;
         public bool IsPopup;
     }
 }
