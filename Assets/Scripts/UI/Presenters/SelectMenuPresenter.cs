@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Leopotam.Ecs;
 using Scripts.Components;
@@ -25,6 +26,8 @@ namespace Scripts.UI.Presenters
         private readonly ThemePreviews _previews;
         // Owner of the open theme's puzzle pictures: its bundle is released when the theme list comes back.
         private readonly object _themePictures = new object();
+        // The puzzle list being loaded: a newer tap, the way back to the themes or closing the screen cancels it.
+        private CancellationTokenSource _puzzlesLoad;
 
         private string _selectedTheme;
 
@@ -58,18 +61,24 @@ namespace Scripts.UI.Presenters
             ShowThemes(false);
         }
 
-        public override void OnDeactivateView() => _sprites.Release(_themePictures);
+        protected override void OnDeactivateView()
+        {
+            CancelPuzzlesLoad();
+            _sprites.Release(_themePictures);
+        }
 
-        public async void OnStartGame(string selectedImg)
+        public void OnStartGame(string puzzleId) => StartGameAsync(puzzleId).Forget();
+
+        // A closed screen cancels the load or the animation, and the run is then never begun.
+        private async UniTaskVoid StartGameAsync(string puzzleId)
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
-            var imageData = GetPuzzleData(selectedImg);
-            if (!await _gameStartService.TryStart(GetSelectedTheme(), imageData))
+            if (!await _gameStartService.Prepare(GetSelectedTheme(), GetPuzzleData(puzzleId), View.Lifetime))
                 return;
 
             await View.PlayHideAnimation();
-            ChangeGameState(GameStateType.Playing);
+            _gameStartService.Begin();
         }
 
         public void OnExit()
@@ -93,8 +102,16 @@ namespace Scripts.UI.Presenters
 
         private void ChangeGameState(GameStateType newState) => _world.ChangeState(newState);
 
+        private void CancelPuzzlesLoad()
+        {
+            _puzzlesLoad?.Cancel();
+            _puzzlesLoad?.Dispose();
+            _puzzlesLoad = null;
+        }
+
         private void ShowThemes(bool playAnimation)
         {
+            CancelPuzzlesLoad();
             _sprites.Release(_themePictures);
 
             // Center the theme just left, or the one the main menu asked for.
@@ -131,14 +148,19 @@ namespace Scripts.UI.Presenters
         private void OnThemeSelected(string themeId) => ShowPuzzles(themeId).Forget();
 
         // Loads the theme bundle: its full-size pictures fill the puzzle cards and start the game.
+        // The latest tap wins: an earlier load that finishes later is cancelled and shows nothing. Pictures it did load
+        // stay with _themePictures and are released with the rest.
         private async UniTaskVoid ShowPuzzles(string themeId)
         {
             PlaySoundEffect(AudioKeyCollection.MenuClick);
 
             _selectedTheme = themeId;
+            CancelPuzzlesLoad();
+            _puzzlesLoad = CancellationTokenSource.CreateLinkedTokenSource(View.Lifetime);
 
             var puzzles = GetTheme(themeId)?.Puzzles ?? Array.Empty<PuzzleData>();
-            var pictures = await UniTask.WhenAll(puzzles.Select(puzzle => _sprites.Load(puzzle.Image, _themePictures)));
+            var pictures = await UniTask.WhenAll(puzzles.Select(puzzle => _sprites.Load(puzzle.Image, _themePictures)))
+                .AttachExternalCancellation(_puzzlesLoad.Token);
             var tiles = puzzles.Select((puzzle, i) => new MenuItemData
             {
                 Id = puzzle.Id,

@@ -1,6 +1,7 @@
 using UnityEngine.AddressableAssets;
 using Scripts.Services;
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Fives.Domain;
@@ -9,6 +10,7 @@ using Scripts.Components;
 using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Services.Interfaces;
+using Scripts.UI.Presenters;
 using Scripts.UI.Views;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -138,9 +140,20 @@ namespace Fives.Runtime.Tests
 
     internal class FakeView : IView
     {
+        private readonly CancellationTokenSource _screen = new CancellationTokenSource();
+
         public UniTaskCompletionSource Hide = new UniTaskCompletionSource();
+        public CancellationToken Lifetime => _screen.Token;
         public UniTask PlayShowAnimation() => UniTask.CompletedTask;
-        public UniTask PlayHideAnimation() => Hide.Task;
+        // Like a real screen: destroying it cancels the animation instead of completing it.
+        public UniTask PlayHideAnimation() => Hide.Task.AttachExternalCancellation(Lifetime);
+
+        /// <summary>What destroying the screen does: its lifetime ends, then the presenter lets it go.</summary>
+        public void Destroy(BasePresenter presenter)
+        {
+            _screen.Cancel();
+            presenter.Deactivate();
+        }
     }
 
     internal sealed class FakeMainMenuView : FakeView, IMainMenuView
@@ -210,10 +223,33 @@ namespace Fives.Runtime.Tests
             return sprite;
         }
 
+        /// <summary>While set, loads wait for <see cref="FinishLoads"/>, as over a slow network.</summary>
+        public bool Slow;
+        /// <summary>While set, loads fail, as with a missing bundle.</summary>
+        public bool Failing;
+        private readonly List<(UniTaskCompletionSource<Sprite> Load, Sprite Sprite)> _pending =
+            new List<(UniTaskCompletionSource<Sprite>, Sprite)>();
+
         public UniTask<Sprite> Load(AssetReferenceSprite sprite, object owner)
         {
             Held[owner] = Held.TryGetValue(owner, out var count) ? count + 1 : 1;
-            return UniTask.FromResult(Of(sprite));
+            if (Failing)
+                return UniTask.FromException<Sprite>(new InvalidOperationException("The bundle is missing."));
+            if (!Slow)
+                return UniTask.FromResult(Of(sprite));
+
+            var load = new UniTaskCompletionSource<Sprite>();
+            _pending.Add((load, Of(sprite)));
+            return load.Task;
+        }
+
+        /// <summary>Completes the waiting loads in the order they started.</summary>
+        public void FinishLoads()
+        {
+            var pending = _pending.ToArray();
+            _pending.Clear();
+            foreach (var (load, sprite) in pending)
+                load.TrySetResult(sprite);
         }
 
         public void Release(object owner) => Held.Remove(owner);

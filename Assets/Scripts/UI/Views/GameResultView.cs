@@ -27,10 +27,10 @@ namespace Scripts.UI.Views
             doubleRewardButton.onClick.AddListener(OnGetDoubleRewardClicked);
         }
 
-        public override async UniTask PlayShowAnimation()
+        public override UniTask PlayShowAnimation()
         {
-            backgroundImage.DOFade(1, 0.5f);
-            await contentContainer.DOScaleY(1, 0.5f).SetEase(Ease.OutBack).AsyncWaitForCompletion();
+            backgroundImage.DOFade(1, 0.5f).SetLink(gameObject);
+            return Play(contentContainer.DOScaleY(1, 0.5f).SetEase(Ease.OutBack));
         }
 
         public override UniTask PlayHideAnimation()

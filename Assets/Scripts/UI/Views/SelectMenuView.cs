@@ -52,17 +52,9 @@ namespace Scripts.UI.Views
         }
 
 
-        public override async UniTask PlayShowAnimation()
-        {
-            Sequence sequence = CreateShowSequence();
-            await sequence.Play().AsyncWaitForCompletion();
-        }
+        public override UniTask PlayShowAnimation() => Play(CreateShowSequence());
 
-        public override async UniTask PlayHideAnimation()
-        {
-            Sequence sequence = CreateHideSequence();
-            await sequence.Play().AsyncWaitForCompletion();
-        }
+        public override UniTask PlayHideAnimation() => Play(CreateHideSequence());
 
         public void UpdateViewContent(MenuItemData[] newContent, string titleText, Action<string> onClick,
             bool playAnimation, int centeredItem = 0)

@@ -46,7 +46,10 @@ namespace Scripts.UI.Presenters
             ShowThemes(0);
         }
 
-        public async void OnStartGame()
+        public void OnStartGame() => StartGameAsync().Forget();
+
+        // A closed screen cancels the load or the animation, and the run is then never begun.
+        private async UniTaskVoid StartGameAsync()
         {
             _world.PlaySound(AudioKeyCollection.MenuClick);
 
@@ -58,12 +61,11 @@ namespace Scripts.UI.Presenters
                 return;
             }
 
-            if (!await _gameStartService.TryStart(theme, FindNextUncompletedPuzzle(theme)))
+            if (!await _gameStartService.Prepare(theme, FindNextUncompletedPuzzle(theme), View.Lifetime))
                 return;
-            
+
             await View.PlayHideAnimation();
-            
-            _world.ChangeState(GameStateType.Playing);
+            _gameStartService.Begin();
         }
 
         public void OnPreviousTheme() => BrowseThemes(-1);
@@ -95,10 +97,10 @@ namespace Scripts.UI.Presenters
             _world.ChangeState(GameStateType.Settings);
         }
 
-        public async void OnSelectMenu()
+        public void OnSelectMenu()
         {
             _world.PlaySound(AudioKeyCollection.MenuClick);
-            await OpenThemeScreen(_themes[_themeIndex]);
+            OpenThemeScreen(_themes[_themeIndex]).Forget();
         }
 
         private async UniTask OpenThemeScreen(ThemeConfig focus)

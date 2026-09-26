@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Scripts.Models;
 using Scripts.UI.Presenters;
@@ -95,24 +94,21 @@ namespace Scripts.UI.Views
 
         public override async UniTask PlayShowAnimation()
         {
-            canvasGroup.DOFade(0, 0f);
-            canvasGroup.DOFade(1, 0.5f);
+            canvasGroup.alpha = 0;
+            canvasGroup.DOFade(1, 0.5f).SetLink(gameObject);
             await MoveScreenAnimation(0f, -1000f);
             await MoveScreenAnimation(0.5f, 1000f);
         }
-        public override async UniTask PlayHideAnimation()
-        {  
-            canvasGroup.DOFade(0, 0.5f);
-            await MoveScreenAnimation(0.5f, 1000f);
+
+        public override UniTask PlayHideAnimation()
+        {
+            canvasGroup.DOFade(0, 0.5f).SetLink(gameObject);
+            return MoveScreenAnimation(0.5f, 1000f);
         }
 
         private void ResetPosition() => _menuContainer.anchoredPosition = _initialPosition;
-        private async Task MoveScreenAnimation(float duration, float offset)
-        {
-            await _menuContainer
-                .DOAnchorPosX(_menuContainer.anchoredPosition.x + offset, duration)
-                .SetEase(Ease.InBack)
-                .AsyncWaitForCompletion();
-        }
+
+        private UniTask MoveScreenAnimation(float duration, float offset) =>
+            Play(_menuContainer.DOAnchorPosX(_menuContainer.anchoredPosition.x + offset, duration).SetEase(Ease.InBack));
     }
 }

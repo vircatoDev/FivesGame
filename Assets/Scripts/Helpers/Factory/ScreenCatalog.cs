@@ -7,13 +7,12 @@ using VContainer;
 namespace Scripts.Helpers.Factory
 {
     /// <summary>
-    /// Screen data per game state: its StateConfig and the one presenter for its screen. ECS events name a state;
-    /// the presentation layer looks the screen up here, so events never carry UI objects.
+    /// Screen data per game state: its StateConfig and a presenter for each opening of its screen. ECS events name a
+    /// state; the presentation layer looks the screen up here, so events never carry UI objects.
     /// </summary>
     public class ScreenCatalog
     {
         private readonly Dictionary<GameStateType, StateConfig> _configs;
-        private readonly Dictionary<GameStateType, BasePresenter> _presenters = new();
         private readonly IObjectResolver _container;
 
         public ScreenCatalog(Dictionary<GameStateType, StateConfig> configs, IObjectResolver container)
@@ -24,14 +23,11 @@ namespace Scripts.Helpers.Factory
 
         public StateConfig Config(GameStateType state) => _configs[state];
 
-        public BasePresenter Presenter(GameStateType state)
-        {
-            if (!_presenters.TryGetValue(state, out var presenter))
-                _presenters[state] = presenter = Resolve(state);
-            return presenter;
-        }
-
-        private BasePresenter Resolve(GameStateType state) => state switch
+        /// <summary>
+        /// A presenter for a screen being opened. Menu presenters are transient and live as long as their screen,
+        /// so nothing async outlives it; the gameplay presenter is the one singleton, as the HUD system holds it.
+        /// </summary>
+        public BasePresenter Presenter(GameStateType state) => state switch
         {
             GameStateType.MainMenu => _container.Resolve<MainMenuPresenter>(),
             GameStateType.SelectMenu => _container.Resolve<SelectMenuPresenter>(),

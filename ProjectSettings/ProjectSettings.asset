@@ -682,7 +682,7 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   scriptingDefineSymbols:
-    Android: DOTWEEN
+    Android: DOTWEEN;UNITASK_DOTWEEN_SUPPORT
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
@@ -693,7 +693,7 @@ PlayerSettings:
     PS5: DOTWEEN
     Stadia: DOTWEEN
     Standalone: DOTWEEN;UNITASK_DOTWEEN_SUPPORT
-    WebGL: DOTWEEN
+    WebGL: DOTWEEN;UNITASK_DOTWEEN_SUPPORT
     Windows Store Apps: DOTWEEN
     XboxOne: DOTWEEN
     iPhone: DOTWEEN
