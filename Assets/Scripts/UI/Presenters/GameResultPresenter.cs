@@ -49,21 +49,13 @@ namespace Scripts.UI.Presenters
                 return;
             }
 
-            GiveReward(rewardAmount);
-            SaveReward();
-            BackToMainMenu();
-        }
-
-        private void GiveReward(int rewardAmount)
-        {
             _starService.Add(rewardAmount);
-            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _starService.GetBalance(), rewardAmount));
+            BackToMainMenu();
         }
 
   
         private void UpdateProgress() => _playerProgressService.MarkCompleted(_gameSession.SelectedPuzzle);
         private void SavePlayerProgress() => _world.Send<SaveDataEvent>();
-        private void SaveReward() => _world.Send<SaveDataEvent>();
         private void PlayOpenPopUpAudioEffects() => _world.PlaySound(AudioKeyCollection.OpenPopUp);
         private void BackToMainMenu() => _world.ChangeState(GameStateType.MainMenu);
     }

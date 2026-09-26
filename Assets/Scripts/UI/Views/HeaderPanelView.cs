@@ -63,15 +63,26 @@ namespace Scripts.UI.Views
 
         private void PlayNotEnoughCurrencyAnimation(TextMeshProUGUI textMeshProUGUI)
         {
-            textMeshProUGUI.transform.DOPunchScale(Vector3.one, 0.3f);
+            Punch(textMeshProUGUI);
+            // Restart the red flash from white; completing the old one would start its fade back and fight the new one.
+            textMeshProUGUI.DOKill();
+            textMeshProUGUI.color = Color.white;
             textMeshProUGUI.DOColor(Color.red, 0.5f).OnComplete(() => { textMeshProUGUI.DOColor(Color.white, 0.5f); });
         }
 
         private void PlayChangeCurrencyAnimation(TextMeshProUGUI textMeshProUGUI, int delta)
         {
-            textMeshProUGUI.transform.DOPunchScale(Vector3.one, 0.3f);
+            Punch(textMeshProUGUI);
             var animationPrefab = Instantiate(currencyAnimationComponentPrefab, textMeshProUGUI.transform);
             animationPrefab.PlayAnimation(delta);
+        }
+
+        // A punch returns to the scale it started from, so one started mid-punch would leave the text enlarged:
+        // the previous punch is completed first.
+        private static void Punch(TextMeshProUGUI text)
+        {
+            text.transform.DOKill(complete: true);
+            text.transform.DOPunchScale(Vector3.one, 0.3f);
         }
     }
 

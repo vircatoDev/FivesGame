@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Leopotam.Ecs;
 using NUnit.Framework;
 using Scripts.Components;
@@ -131,6 +132,72 @@ namespace Fives.Runtime.Tests
         }
     }
 
+    public sealed class CurrencySyncTests
+    {
+        private TestObjects _objects;
+        private EcsWorld _world;
+        private StarService _stars;
+        private EnergyService _energy;
+        private EcsSystems _systems;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _objects = new TestObjects();
+            _world = new EcsWorld();
+            var config = _objects.Config();
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            _stars = new StarService(save);
+            _energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
+            _systems = new EcsSystems(_world).Add(new CurrencySyncSystem(_stars, _energy)); // events are kept to be counted
+            _systems.Init();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _systems.Destroy();
+            _world.Destroy();
+            _objects.Dispose();
+        }
+
+        private CurrencyChangedEvent[] Events => _world.All<CurrencyChangedEvent>();
+
+        [Test]
+        public void ChangesMadeOutsideTheWorld_ReachTheHeader_AndOneSave()
+        {
+            _stars.Add(10);   // a menu reward
+            _energy.Spend(1); // a run start
+            _systems.Run();
+
+            Assert.That(Events.Select(e => (e.Currency, e.Balance, e.Delta)),
+                Is.EqualTo(new[] { (Currency.Stars, 210, 10), (Currency.Energy, 4, -1) }));
+            Assert.That(_world.Count<SaveDataEvent>(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SeveralChangesInAFrame_ArriveAsTheirTotal()
+        {
+            _stars.Spend(5);
+            _stars.Add(10);
+            _systems.Run();
+
+            Assert.That(Events.Single().Delta, Is.EqualTo(5));
+            Assert.That(Events.Single().Balance, Is.EqualTo(205));
+        }
+
+        [Test]
+        public void UnchangedBalances_SendNothing()
+        {
+            _energy.Spend(99); // refused
+            _systems.Run();
+            _systems.Run();
+
+            Assert.That(Events, Is.Empty);
+            Assert.That(_world.Count<SaveDataEvent>(), Is.Zero);
+        }
+    }
+
     public sealed class EnergyRecoveryTests
     {
         private static readonly DateTime Now = new DateTime(2026, 9, 21, 12, 0, 0, DateTimeKind.Utc);
@@ -160,7 +227,10 @@ namespace Fives.Runtime.Tests
             var energy = new EnergyService(_objects.Config(), new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config()), clock);
             energy.SetDataFromSave(new EnergyData { CurrentEnergy = 0, LastRecoveryTime = Now.AddHours(-2.5) });
             var counter = new EnergyEventCounter();
-            _systems = new EcsSystems(_world).Add(new EnergyRecoverySystem(energy)).Add(counter).Inject(new FakeFrameTime());
+            var stars = new StarService(new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config()));
+            _systems = new EcsSystems(_world)
+                .Add(new EnergyRecoverySystem(energy)).Add(new CurrencySyncSystem(stars, energy)).Add(counter)
+                .Inject(new FakeFrameTime());
             _systems.Init();
             _systems.Run();
 
@@ -178,9 +248,11 @@ namespace Fives.Runtime.Tests
             save.GetPlayerData().Energy = new EnergyData { CurrentEnergy = 0, LastRecoveryTime = Now.AddHours(-2.5) };
             var energy = new EnergyService(config, save, new FakeClock { UtcNow = Now });
             var header = new FakeHeaderPanelView();
+            var stars = new StarService(save);
             _systems = new EcsSystems(_world)
                 .Add(new EnergyRecoverySystem(energy))
-                .Add(new CommonUIHeaderPanelSystem(header, energy, new StarService(save)))
+                .Add(new CurrencySyncSystem(stars, energy))
+                .Add(new CommonUIHeaderPanelSystem(header, energy, stars))
                 .Add(new StorageSystem(energy)).OneFrame<SaveDataEvent>().OneFrame<CurrencyChangedEvent>()
                 .Inject(save).Inject(new FakeFrameTime());
             _systems.Init();

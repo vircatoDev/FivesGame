@@ -61,8 +61,6 @@ namespace Scripts.Systems
             }
 
             entity.Replace(new BoardHintComponent { TileId = candidates[Random.Range(0, candidates.Count)] });
-            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _stars.GetBalance(), -_config.HintPrice));
-            _world.Send<SaveDataEvent>();
             _world.PlaySound(AudioKeyCollection.MenuClick);
         }
     }

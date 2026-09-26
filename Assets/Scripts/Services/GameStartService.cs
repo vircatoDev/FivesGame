@@ -46,8 +46,6 @@ namespace Scripts.Services
 
             _session.SetSelectedTheme(theme);
             _session.BeginRun();
-            _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energy.GetBalance(), -1));
-            _world.Send<SaveDataEvent>();
 
             _loading = true;
             try
