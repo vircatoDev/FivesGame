@@ -182,7 +182,7 @@ namespace Fives.Runtime.Tests
             _board.Swipe(SolvingTile, -1, 0);
 
             Assert.That(_board.Tiles[SolvingTile].Has<MoveComponent>(), Is.True);
-            Assert.That(_board.Board.Has<BoardSolvedTag>(), Is.False, "the last move is still animating");
+            Assert.That(_board.Board.Has<BoardSolvedComponent>(), Is.False, "the last move is still animating");
 
             _board.Swipe(SolvingTile, -1, 0);
             Assert.That(_board.Tiles[SolvingTile].Get<TileComponent>().Cell, Is.EqualTo(SolvingTile), "a second swipe during movement is ignored");
@@ -194,7 +194,7 @@ namespace Fives.Runtime.Tests
             SolveAndSettle();
 
             Assert.That(_board.Tiles[SolvingTile].Has<MoveComponent>(), Is.False);
-            Assert.That(_board.Board.Has<BoardSolvedTag>(), Is.True);
+            Assert.That(_board.Board.Has<BoardSolvedComponent>(), Is.True);
             Assert.That(_board.Session.LastGameResult.TurnCount, Is.EqualTo(1));
             Assert.That(_board.Session.LastGameResult.GameTime, Is.EqualTo(TimeSpan.FromSeconds(83)));
         }
@@ -236,6 +236,27 @@ namespace Fives.Runtime.Tests
 
             Assert.That(_board.Session.LastGameResult.TurnCount, Is.Zero);
             Assert.That(_board.Session.LastGameResult.GameTime, Is.EqualTo(TimeSpan.Zero));
+        }
+
+        [Test]
+        public void Win_RecordsThePuzzleCompleted_AndSaves_BeforeTheResultScreen()
+        {
+            SolveAndSettle();
+
+            Assert.That(_board.Progress.IsCompleted(_board.Puzzle), Is.True);
+            Assert.That(_board.World.Count<SaveDataEvent>(), Is.Not.Zero);
+            Assert.That(_board.World.Count<ChangeStateEvent>(), Is.Zero, "the result screen is still two seconds away");
+        }
+
+        [Test]
+        public void ExitDuringTheResultDelay_KeepsThePuzzleCompleted()
+        {
+            SolveAndSettle();
+            _board.World.NewEntity().Get<GameEndEvent>(); // the header's Back, inside the pause
+            _board.Systems.Tick(30);
+
+            Assert.That(_board.World.Count<ChangeStateEvent>(), Is.Zero, "no result screen after the exit");
+            Assert.That(_board.Progress.IsCompleted(_board.Puzzle), Is.True);
         }
 
         [Test]

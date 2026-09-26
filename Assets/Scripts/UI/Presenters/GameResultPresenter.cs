@@ -32,11 +32,10 @@ namespace Scripts.UI.Presenters
             _ads = ads;
         }
 
+        // The puzzle is already recorded as completed by PuzzleCompletionSystem: the screen only shows the result.
         public override void OnActivateView()
         {
             PlayOpenPopUpAudioEffects();
-            UpdateProgress();
-            SavePlayerProgress();
             var theme = _gameSession.SelectedTheme;
             var result = _gameSession.LastGameResult;
             View.UpdateViewContent(_texts.Get(TextKeys.RewardStars, result.StarCount),
@@ -72,9 +71,6 @@ namespace Scripts.UI.Presenters
 
         private void ShowDoubleReward() => View.ShowDoubleReward(_ads.IsSupported, _ads.IsReady);
 
-  
-        private void UpdateProgress() => _playerProgressService.MarkCompleted(_gameSession.SelectedPuzzle);
-        private void SavePlayerProgress() => _world.Send<SaveDataEvent>();
         private void PlayOpenPopUpAudioEffects() => _world.PlaySound(AudioKeyCollection.OpenPopUp);
         private void BackToMainMenu() => _world.ChangeState(GameStateType.MainMenu);
     }

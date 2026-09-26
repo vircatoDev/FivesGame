@@ -130,11 +130,33 @@ namespace Fives.Runtime.Tests
             session.SetSelectedTheme(theme);
             session.SetSelectedImage(theme.Puzzles[2], null);
             session.BeginRun();
+            var progress = new PlayerProgressService(save);
+            progress.MarkCompleted(theme.Puzzles[2]); // PuzzleCompletionSystem, in the frame the board was solved
             var view = new FakeGameResultView();
 
-            new GameResultPresenter(session, new StarService(save), new PlayerProgressService(save), _world, new FakeTexts(), new FakeRewardedAds()).Initialize(view);
+            new GameResultPresenter(session, new StarService(save), progress, _world, new FakeTexts(), new FakeRewardedAds()).Initialize(view);
 
             Assert.That(view.Progress, Is.EqualTo("1/3"));
+        }
+
+        [Test]
+        public void ResultScreen_OnlyShows_TheCoreRecordsCompletion()
+        {
+            var config = _objects.Config();
+            var theme = config.Themes[1];
+            theme.Puzzles = _objects.Puzzles("dogs", "A");
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
+            var session = new GameSession(new GameBalance(config));
+            session.SetSelectedTheme(theme);
+            session.SetSelectedImage(theme.Puzzles[0], null);
+            session.BeginRun();
+            var progress = new PlayerProgressService(save);
+
+            new GameResultPresenter(session, new StarService(save), progress, _world, new FakeTexts(), new FakeRewardedAds())
+                .Initialize(new FakeGameResultView());
+
+            Assert.That(progress.IsCompleted(theme.Puzzles[0]), Is.False);
+            Assert.That(_world.Count<SaveDataEvent>(), Is.Zero);
         }
     }
 
