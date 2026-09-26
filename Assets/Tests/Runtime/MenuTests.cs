@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Leopotam.Ecs;
 using NUnit.Framework;
 using Scripts.Components;
@@ -9,6 +12,8 @@ using Scripts.Models;
 using Scripts.Services;
 using Scripts.Systems;
 using Scripts.UI.Presenters;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Fives.Runtime.Tests
 {
@@ -20,8 +25,12 @@ namespace Fives.Runtime.Tests
         private EnergyService _energy;
         private GameStartService _start;
         private ThemeConfig _cities;
+        private ThemeConfig _dogs;
+        private PlayerProgressService _progress;
+        private FakeSpriteLoader _loader;
         private FakeSelectMenuView _selectView;
         private SelectMenuPresenter _select;
+        private FakeMainMenuView _mainView;
         private MainMenuPresenter _main;
 
         [SetUp]
@@ -33,17 +42,20 @@ namespace Fives.Runtime.Tests
             config.DefaultUnlockedThemes = new[] { "cities" };
             _cities = config.Themes[0];
             _cities.Puzzles = _objects.Puzzles("cities", "One");
+            _dogs = config.Themes[1];
+            _dogs.Puzzles = _objects.Puzzles("dogs", "Rex");
             var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
-            var progress = new PlayerProgressService(save);
+            _progress = new PlayerProgressService(save);
             _session = new GameSession(config);
             _energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
-            _start = new GameStartService(_session, _energy, _world, new FakeSpriteLoader(_objects));
+            _loader = new FakeSpriteLoader(_objects);
+            _start = new GameStartService(_session, _energy, _world, _loader);
             _selectView = new FakeSelectMenuView();
-            var loader = new FakeSpriteLoader(_objects);
-            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), progress, _world), progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), loader, loader.Previews(config));
+            _select = new SelectMenuPresenter(config, _start, new ThemeShop(new StarService(save), _progress, _world), _progress, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), _loader, _loader.Previews(config));
             _select.Initialize(_selectView);
-            _main = new MainMenuPresenter(config, progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), loader.Previews(config));
-            _main.Initialize(new FakeMainMenuView());
+            _mainView = new FakeMainMenuView();
+            _main = new MainMenuPresenter(config, _progress, _start, _session, new FakeHeaderPanelView(), _world, new FakeTexts(), _loader.Previews(config));
+            _main.Initialize(_mainView);
         }
 
         [TearDown]
@@ -53,6 +65,8 @@ namespace Fives.Runtime.Tests
             _objects.Dispose();
         }
 
+        private int Requests => _world.Count<StartRunRequest>();
+
         // The run ends the way the game ends it: GameEndEvent through BoardDestroySystem.
         private void EndRun()
         {
@@ -61,6 +75,14 @@ namespace Fives.Runtime.Tests
             _world.Send<GameEndEvent>();
             systems.Run();
             systems.Destroy();
+        }
+
+        private bool StartDirectly()
+        {
+            if (!_start.Prepare(_cities, _cities.Puzzles[0], CancellationToken.None).GetAwaiter().GetResult())
+                return false;
+            _start.Begin();
+            return true;
         }
 
         private void StartFromBothMenus()
@@ -75,33 +97,121 @@ namespace Fives.Runtime.Tests
         public void Start_IsAcceptedOnceAcrossBothMenus()
         {
             StartFromBothMenus();
+            _selectView.Hide.TrySetResult();
+            _mainView.Hide.TrySetResult();
 
             Assert.That(_energy.GetBalance(), Is.EqualTo(4));
-            Assert.That(_world.Count<StartRunRequest>(), Is.EqualTo(1), "one board is requested");
+            Assert.That(Requests, Is.EqualTo(1), "one board is requested");
         }
 
         [Test]
-        public void Start_WaitsForTheHideAnimation_ThenNavigatesOnce()
+        public void Start_WaitsForTheHideAnimation_ThenPaysAndNavigatesOnce()
         {
             StartFromBothMenus();
             Assert.That(_world.Count<ChangeStateEvent>(), Is.Zero, "no navigation before the animation completes");
+            Assert.That(_energy.GetBalance(), Is.EqualTo(5), "nothing is paid before the animation completes");
 
             _selectView.Hide.TrySetResult();
             Assert.That(_world.Count<ChangeStateEvent>(), Is.EqualTo(1));
+            Assert.That(_energy.GetBalance(), Is.EqualTo(4));
         }
 
         [Test]
         public void NextRun_CanStart_ButNotWithoutEnergy()
         {
             StartFromBothMenus();
+            _selectView.Hide.TrySetResult();
             EndRun();
-            Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]).GetAwaiter().GetResult(), Is.True);
+            Assert.That(StartDirectly(), Is.True);
             Assert.That(_energy.GetBalance(), Is.EqualTo(3));
 
             EndRun();
             _energy.Spend(_energy.GetBalance());
-            Assert.That(_start.TryStart(_cities, _cities.Puzzles[0]).GetAwaiter().GetResult(), Is.False);
-            Assert.That(_world.Count<StartRunRequest>(), Is.Zero);
+            Assert.That(StartDirectly(), Is.False);
+            Assert.That(Requests, Is.Zero);
+        }
+
+        [Test]
+        public void Begin_WithoutPrepare_IsAProgrammingError()
+        {
+            Assert.Throws<InvalidOperationException>(() => _start.Begin());
+        }
+
+        [Test]
+        public void MenuClosedWhileThePictureLoads_CostsNothing_AndTheNextStartWorks()
+        {
+            _loader.Slow = true;
+            _main.OnStartGame();
+            _mainView.Destroy(_main);
+            _loader.FinishLoads();
+
+            Assert.That(_energy.GetBalance(), Is.EqualTo(5));
+            Assert.That(Requests, Is.Zero);
+            Assert.That(_world.Count<ChangeStateEvent>(), Is.Zero);
+
+            _loader.Slow = false;
+            Assert.That(StartDirectly(), Is.True, "the cancelled start holds nothing back");
+        }
+
+        [Test]
+        public void MenuClosedDuringItsHideAnimation_CostsNothing_AndTheNextStartWorks()
+        {
+            _selectView.OnClick("cities");
+            _selectView.OnClick("cities.one");
+            _selectView.Destroy(_select);
+
+            Assert.That(_energy.GetBalance(), Is.EqualTo(5));
+            Assert.That(Requests, Is.Zero);
+            Assert.That(StartDirectly(), Is.True, "a preparation from a closed screen holds nothing back");
+        }
+
+        [Test]
+        public void FailedLoad_CostsNothing_AndTheNextStartWorks()
+        {
+            _loader.Failing = true;
+            LogAssert.Expect(LogType.Exception, new Regex("The bundle is missing"));
+            _main.OnStartGame();
+
+            Assert.That(_energy.GetBalance(), Is.EqualTo(5));
+            Assert.That(Requests, Is.Zero);
+
+            _loader.Failing = false;
+            Assert.That(StartDirectly(), Is.True);
+        }
+
+        [Test]
+        public void BackWhileThePuzzlesLoad_KeepsTheThemeList()
+        {
+            _loader.Slow = true;
+            _selectView.OnClick("cities");
+            _select.OnExit(); // the header's Back
+            _loader.FinishLoads();
+
+            Assert.That(_selectView.Items.Select(item => item.Id), Does.Contain("cities").And.Not.Contain("cities.one"));
+        }
+
+        [Test]
+        public void TheLatestThemeTap_Wins()
+        {
+            _progress.Unlock(_dogs);
+            _loader.Slow = true;
+            var themes = _selectView.OnClick;
+            themes("cities");
+            themes("dogs");
+            _loader.FinishLoads();
+
+            Assert.That(_selectView.Items.Select(item => item.Id), Is.EqualTo(new[] { "dogs.rex" }));
+        }
+
+        [Test]
+        public void ClosedScreen_ReleasesThePicturesItLoaded()
+        {
+            _loader.Slow = true;
+            _selectView.OnClick("cities");
+            _selectView.Destroy(_select);
+            _loader.FinishLoads();
+
+            Assert.That(_loader.Held.Keys.All(owner => owner is ThemePreviews), Is.True, "only the menu previews stay loaded");
         }
     }
 

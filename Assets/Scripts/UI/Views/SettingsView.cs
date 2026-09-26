@@ -79,15 +79,12 @@ namespace Scripts.UI.Views
             soundEffectToggle.SetState(isEnabled);
         }
 
-        public override async UniTask PlayShowAnimation()
+        public override UniTask PlayShowAnimation()
         {
             canvasGroup.alpha = 0;
-            await canvasGroup.DOFade(1, 0.5f).AsyncWaitForCompletion();
+            return Play(canvasGroup.DOFade(1, 0.5f));
         }
 
-        public override async UniTask PlayHideAnimation()
-        {
-            await canvasGroup.DOFade(0, 0.5f).AsyncWaitForCompletion();
-        }
+        public override UniTask PlayHideAnimation() => Play(canvasGroup.DOFade(0, 0.5f));
     }
 }

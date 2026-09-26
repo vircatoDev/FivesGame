@@ -42,14 +42,14 @@ namespace Scripts.UI.Views
         public override UniTask PlayShowAnimation() =>
             UniTask.WhenAll(SlideInFromRight(previewRectTransform), SlideInFromRight(infoRectTransform));
 
-        private static UniTask SlideInFromRight(RectTransform block)
+        private UniTask SlideInFromRight(RectTransform block)
         {
             const float offset = 500f;
             const float duration = 0.5f;
 
             var target = block.anchoredPosition.x;
             block.anchoredPosition += Vector2.right * offset;
-            return block.DOAnchorPosX(target, duration).SetEase(Ease.OutBack).AsyncWaitForCompletion().AsUniTask();
+            return Play(block.DOAnchorPosX(target, duration).SetEase(Ease.OutBack));
         }
 
         public override UniTask PlayHideAnimation()

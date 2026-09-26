@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Fives.Domain;
 using Scripts.Components;
@@ -12,7 +13,13 @@ namespace Scripts.UI.Views
 
     public interface IView
     {
+        /// <summary>Cancelled when the screen is destroyed: presenters tie their loads and waits to it.</summary>
+        CancellationToken Lifetime { get; }
+
+        /// <summary>Cancelled, not completed, if the screen is destroyed while it plays.</summary>
         UniTask PlayShowAnimation();
+
+        /// <summary>Cancelled, not completed, if the screen is destroyed while it plays.</summary>
         UniTask PlayHideAnimation();
     }
 
