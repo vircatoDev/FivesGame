@@ -2,6 +2,7 @@ using Fives.Domain;
 using Leopotam.Ecs;
 using NUnit.Framework;
 using Scripts.Components;
+using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Systems;
 using Scripts.UI.Presenters;
@@ -23,7 +24,7 @@ namespace Fives.Runtime.Tests
             var presenter = new GamePlayPresenter(_board.Session, new FakeHeaderPanelView(), _board.World, new FakeTexts());
             _view = new FakeGamePlayView();
             presenter.Initialize(_view);
-            _board.Systems = new EcsSystems(_board.World).Add(new BoardHudSystem(presenter)).Inject(_board.Session).Inject(_board.Objects.Config());
+            _board.Systems = new EcsSystems(_board.World).Add(new BoardHudSystem(presenter)).Inject(_board.Session).Inject(new GameBalance(_board.Objects.Config()));
             _board.Systems.Init();
         }
 

@@ -16,13 +16,13 @@ namespace Scripts.Helpers
         private readonly IStorageService _storage;
         private GameSaveData _gameSaveData;
 
-        public PlayerDataSaveHelper(IStorageService storage, GlobalConfig gameSettings)
+        public PlayerDataSaveHelper(IStorageService storage, GlobalConfig gameSettings, GameBalance balance)
         {
             _storage = storage;
             _gameSaveData = _storage.Load<GameSaveData>(SAVE_KEY)
-                ?? new GameSaveData { Version = ProgressMigration.CurrentVersion, Stars = gameSettings.InitialStars };
+                ?? new GameSaveData { Version = ProgressMigration.CurrentVersion, Stars = balance.InitialStars };
             Migrate(gameSettings);
-            NormalizePlayerData(gameSettings);
+            NormalizePlayerData(gameSettings, balance);
         }
 
         public GameSaveData GetPlayerData()
@@ -57,18 +57,18 @@ namespace Scripts.Helpers
             _gameSaveData.Version = ProgressMigration.CurrentVersion;
         }
 
-        private void NormalizePlayerData(GlobalConfig gameSettings)
+        private void NormalizePlayerData(GlobalConfig gameSettings, GameBalance balance)
         {
             _gameSaveData.Energy ??= new EnergyData
             {
-                CurrentEnergy = gameSettings.InitialEnergy,
+                CurrentEnergy = balance.InitialEnergy,
                 LastRecoveryTime = DateTime.UtcNow
             };
 
             if (_gameSaveData.Energy.LastRecoveryTime == default)
                 _gameSaveData.Energy.LastRecoveryTime = DateTime.UtcNow;
 
-            _gameSaveData.Energy.CurrentEnergy = Math.Clamp(_gameSaveData.Energy.CurrentEnergy, 0, gameSettings.MaxEnergy);
+            _gameSaveData.Energy.CurrentEnergy = Math.Clamp(_gameSaveData.Energy.CurrentEnergy, 0, balance.MaxEnergy);
             _gameSaveData.Stars = Math.Max(0, _gameSaveData.Stars);
             _gameSaveData.SoundSettings ??= new SoundSettingsData();
             _gameSaveData.PlayerProgress ??= new PlayerProgressData();

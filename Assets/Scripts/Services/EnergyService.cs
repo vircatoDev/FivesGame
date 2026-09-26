@@ -15,10 +15,10 @@ namespace Scripts.Services
         private readonly IClock _clock;
         private EnergyWallet _wallet;
 
-        public EnergyService(GlobalConfig config, PlayerDataSaveHelper saveHelper, IClock clock)
+        public EnergyService(GameBalance balance, PlayerDataSaveHelper saveHelper, IClock clock)
         {
-            _maxEnergy = config.MaxEnergy;
-            _recoveryInterval = TimeSpan.FromHours(config.EnergyRecoveryIntervalHours);
+            _maxEnergy = balance.MaxEnergy;
+            _recoveryInterval = TimeSpan.FromHours(balance.EnergyRecoveryHours);
             _clock = clock;
             SetDataFromSave(saveHelper.GetPlayerData().Energy);
         }

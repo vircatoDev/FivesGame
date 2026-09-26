@@ -21,9 +21,9 @@ namespace Scripts.Models
         public GameSettings SelectedGameMode { get; private set; }
         public GameResult LastGameResult { get; private set; }
 
-        public GameSession(GlobalConfig config)
+        public GameSession(GameBalance balance)
         {
-            _rewardStars = config.RewardStars;
+            _rewardStars = balance.RewardStars;
         }
 
         public void SetSelectedImage(PuzzleData puzzle, Sprite image)

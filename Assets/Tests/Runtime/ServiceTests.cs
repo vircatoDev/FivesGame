@@ -4,6 +4,7 @@ using System.Linq;
 using Leopotam.Ecs;
 using NUnit.Framework;
 using Scripts.Components;
+using Scripts.Configs;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services;
@@ -55,13 +56,13 @@ namespace Fives.Runtime.Tests
         public void ThemePurchase_DebitsOnce()
         {
             var config = _objects.Config();
-            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
             var stars = new StarService(save);
-            var session = new GameSession(config);
-            var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
+            var session = new GameSession(new GameBalance(config));
+            var energy = new EnergyService(new GameBalance(config), save, new FakeClock { UtcNow = DateTime.UtcNow });
             var progress = new PlayerProgressService(save);
             var select = new SelectMenuPresenter(config, new GameStartService(session, energy, _world, new FakeSpriteLoader(_objects)),
-                new ThemeShop(stars, progress, _world), progress, session, new FakeHeaderPanelView(), _world, new FakeTexts(),
+                new ThemeShop(stars, progress, _world, new GameBalance(config)), progress, session, new FakeHeaderPanelView(), _world, new FakeTexts(),
                 new FakeSpriteLoader(_objects), new FakeSpriteLoader(_objects).Previews(config));
             select.Initialize(new FakeSelectMenuView());
 
@@ -75,11 +76,11 @@ namespace Fives.Runtime.Tests
         public void ThemeShop_WithoutEnoughStars_KeepsTheThemeLocked_AndSignalsTheHeader()
         {
             var config = _objects.Config(stars: 10);
-            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
             var stars = new StarService(save);
             var progress = new PlayerProgressService(save);
 
-            var result = new ThemeShop(stars, progress, _world).TryUnlock(config.Themes[0]);
+            var result = new ThemeShop(stars, progress, _world, new GameBalance(config)).TryUnlock(config.Themes[0]);
 
             Assert.That(result, Is.EqualTo(PurchaseResult.NotEnoughStars));
             Assert.That(progress.IsUnlocked(config.Themes[0]), Is.False);
@@ -91,7 +92,7 @@ namespace Fives.Runtime.Tests
         [Test]
         public void NegativeSpend_IsRejected()
         {
-            var stars = new StarService(new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config()));
+            var stars = new StarService(new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config(), new GameBalance(_objects.Config())));
 
             Assert.That(stars.Spend(-10), Is.False);
             Assert.That(stars.GetBalance(), Is.EqualTo(200));
@@ -101,9 +102,9 @@ namespace Fives.Runtime.Tests
         public void RewardClaim_IsIdempotent()
         {
             var config = _objects.Config();
-            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
             var stars = new StarService(save);
-            var session = new GameSession(config);
+            var session = new GameSession(new GameBalance(config));
             session.BeginRun();
             var result = new GameResultPresenter(session, stars, new PlayerProgressService(save), _world, new FakeTexts());
 
@@ -119,8 +120,8 @@ namespace Fives.Runtime.Tests
             var config = _objects.Config();
             var theme = config.Themes[1];
             theme.Puzzles = _objects.Puzzles("dogs", "A", "B", "C");
-            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
-            var session = new GameSession(config);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
+            var session = new GameSession(new GameBalance(config));
             session.SetSelectedTheme(theme);
             session.SetSelectedImage(theme.Puzzles[2], null);
             session.BeginRun();
@@ -146,9 +147,9 @@ namespace Fives.Runtime.Tests
             _objects = new TestObjects();
             _world = new EcsWorld();
             var config = _objects.Config();
-            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
             _stars = new StarService(save);
-            _energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
+            _energy = new EnergyService(new GameBalance(config), save, new FakeClock { UtcNow = DateTime.UtcNow });
             _systems = new EcsSystems(_world).Add(new CurrencySyncSystem(_stars, _energy)); // events are kept to be counted
             _systems.Init();
         }
@@ -224,10 +225,10 @@ namespace Fives.Runtime.Tests
         public void Recovery_EmitsOneUiUpdate_AndKeepsTheRemainder()
         {
             var clock = new FakeClock { UtcNow = Now };
-            var energy = new EnergyService(_objects.Config(), new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config()), clock);
+            var energy = new EnergyService(new GameBalance(_objects.Config()), new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config(), new GameBalance(_objects.Config())), clock);
             energy.SetDataFromSave(new EnergyData { CurrentEnergy = 0, LastRecoveryTime = Now.AddHours(-2.5) });
             var counter = new EnergyEventCounter();
-            var stars = new StarService(new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config()));
+            var stars = new StarService(new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config(), new GameBalance(_objects.Config())));
             _systems = new EcsSystems(_world)
                 .Add(new EnergyRecoverySystem(energy)).Add(new CurrencySyncSystem(stars, energy)).Add(counter)
                 .Inject(new FakeFrameTime());
@@ -244,9 +245,9 @@ namespace Fives.Runtime.Tests
         {
             var config = _objects.Config();
             var store = new MemoryStorage();
-            var save = new PlayerDataSaveHelper(store, config);
+            var save = new PlayerDataSaveHelper(store, config, new GameBalance(config));
             save.GetPlayerData().Energy = new EnergyData { CurrentEnergy = 0, LastRecoveryTime = Now.AddHours(-2.5) };
-            var energy = new EnergyService(config, save, new FakeClock { UtcNow = Now });
+            var energy = new EnergyService(new GameBalance(config), save, new FakeClock { UtcNow = Now });
             var header = new FakeHeaderPanelView();
             var stars = new StarService(save);
             _systems = new EcsSystems(_world)
@@ -281,7 +282,7 @@ namespace Fives.Runtime.Tests
         {
             var config = _objects.Config();
             config.AudioClipsCollection = new List<GameSoundCollection>();
-            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
             save.GetPlayerData().SoundSettings.SoundEffectsVolume = 0.25f;
             var sound = new SoundService(config, save);
 
