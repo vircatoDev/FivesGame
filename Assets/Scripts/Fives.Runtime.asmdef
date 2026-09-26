@@ -16,7 +16,8 @@
         "Unity.Addressables",
         "Unity.Services.Core",
         "Unity.Services.Authentication",
-        "Unity.Services.RemoteConfig"
+        "Unity.Services.RemoteConfig",
+        "Unity.LevelPlay"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

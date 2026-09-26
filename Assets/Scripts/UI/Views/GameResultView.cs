@@ -50,14 +50,20 @@ namespace Scripts.UI.Views
                 .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
     
+        public void ShowDoubleReward(bool offered, bool ready)
+        {
+            doubleRewardButton.gameObject.SetActive(offered);
+            doubleRewardButton.interactable = ready;
+        }
+
         private void OnGetRewardClicked()
         {
-            Presenter.GetReward(false);
+            Presenter.GetReward();
         }
 
         private void OnGetDoubleRewardClicked()
         {
-            Presenter.GetReward(true);
+            Presenter.GetDoubleReward();
         }
     }
 }

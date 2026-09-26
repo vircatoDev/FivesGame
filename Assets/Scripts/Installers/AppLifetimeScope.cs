@@ -46,6 +46,12 @@ namespace Scripts.Installers
             builder.Register<ThemePreviews>(Lifetime.Singleton);
             builder.Register<AddressableThemeDownloads>(Lifetime.Singleton).As<IThemeDownloads>();
             builder.Register<ThemeDownloadGate>(Lifetime.Singleton);
+#if UNITY_ANDROID
+            // Starts LevelPlay with the app, in child-directed mode; the result screen offers x2 once an ad is loaded.
+            builder.RegisterEntryPoint<LevelPlayRewardedAds>().As<IRewardedAds>();
+#else
+            builder.Register<NoRewardedAds>(Lifetime.Singleton).As<IRewardedAds>();
+#endif
             builder.Register<EnergyService>(Lifetime.Singleton);
             builder.Register<StarService>(Lifetime.Singleton);
             builder.Register<PlayerProgressService>(Lifetime.Singleton);

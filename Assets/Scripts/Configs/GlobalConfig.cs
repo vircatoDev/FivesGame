@@ -37,6 +37,12 @@ namespace Scripts.Configs
         [Header("Sound Settings")] 
         public List<GameSoundCollection> AudioClipsCollection;
 
+        [Header("Ads (LevelPlay, Android)")]
+        [Tooltip("App key of the Android app in the LevelPlay dashboard. Empty: no ads, the x2 reward is hidden.")]
+        public string AndroidAdsAppKey;
+        [Tooltip("Rewarded ad unit id from the LevelPlay dashboard.")]
+        public string AndroidRewardedAdUnitId;
+
         [Header("Board")]
         public BoardView BoardPrefab;
         public TileUiProvider TilePrefab;

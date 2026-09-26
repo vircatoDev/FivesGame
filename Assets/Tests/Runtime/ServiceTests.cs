@@ -104,12 +104,17 @@ namespace Fives.Runtime.Tests
             var config = _objects.Config();
             var save = new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config));
             var stars = new StarService(save);
+            var theme = config.Themes[1];
+            theme.Puzzles = _objects.Puzzles("dogs", "A");
             var session = new GameSession(new GameBalance(config));
+            session.SetSelectedTheme(theme);
+            session.SetSelectedImage(theme.Puzzles[0], null);
             session.BeginRun();
-            var result = new GameResultPresenter(session, stars, new PlayerProgressService(save), _world, new FakeTexts());
+            var result = new GameResultPresenter(session, stars, new PlayerProgressService(save), _world, new FakeTexts(), new FakeRewardedAds());
+            result.Initialize(new FakeGameResultView());
 
-            result.GetReward(false);
-            result.GetReward(true);
+            result.GetReward();
+            result.GetDoubleReward();
 
             Assert.That(stars.GetBalance(), Is.EqualTo(210));
         }
@@ -127,7 +132,7 @@ namespace Fives.Runtime.Tests
             session.BeginRun();
             var view = new FakeGameResultView();
 
-            new GameResultPresenter(session, new StarService(save), new PlayerProgressService(save), _world, new FakeTexts()).Initialize(view);
+            new GameResultPresenter(session, new StarService(save), new PlayerProgressService(save), _world, new FakeTexts(), new FakeRewardedAds()).Initialize(view);
 
             Assert.That(view.Progress, Is.EqualTo("1/3"));
         }

@@ -198,7 +198,38 @@ namespace Fives.Runtime.Tests
     internal sealed class FakeGameResultView : FakeView, IGameResultView
     {
         public string Progress;
+        public bool DoubleOffered;
+        public bool DoubleReady;
         public void UpdateViewContent(string stars, string stats, string themeName, ThemeProgress progress) => Progress = progress.ToString();
+
+        public void ShowDoubleReward(bool offered, bool ready)
+        {
+            DoubleOffered = offered;
+            DoubleReady = ready;
+        }
+    }
+
+    /// <summary>Rewarded ads without an ad network: supported or not, ready or not, watched to the reward or not.</summary>
+    internal sealed class FakeRewardedAds : IRewardedAds
+    {
+        public bool IsSupported { get; set; } = true;
+        public bool IsReady { get; private set; } = true;
+        /// <summary>Whether the next ad is watched to its reward.</summary>
+        public bool Watched = true;
+        public int Shown;
+        public event Action ReadyChanged;
+
+        public void SetReady(bool ready)
+        {
+            IsReady = ready;
+            ReadyChanged?.Invoke();
+        }
+
+        public UniTask<bool> Show(CancellationToken cancellation)
+        {
+            Shown++;
+            return UniTask.FromResult(IsReady && Watched);
+        }
     }
 
     /// <summary>Returns the key, with arguments after a colon, so tests do not depend on a language.</summary>
