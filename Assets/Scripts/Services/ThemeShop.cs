@@ -13,20 +13,24 @@ namespace Scripts.Services
         private readonly StarService _stars;
         private readonly PlayerProgressService _progress;
         private readonly EcsWorld _world;
+        private readonly GameBalance _balance;
 
-        public ThemeShop(StarService stars, PlayerProgressService progress, EcsWorld world)
+        public ThemeShop(StarService stars, PlayerProgressService progress, EcsWorld world, GameBalance balance)
         {
             _stars = stars;
             _progress = progress;
             _world = world;
+            _balance = balance;
         }
+
+        public int PriceOf(ThemeConfig theme) => _balance.PriceOf(theme);
 
         public PurchaseResult TryUnlock(ThemeConfig theme)
         {
             if (_progress.IsUnlocked(theme))
                 return PurchaseResult.AlreadyUnlocked;
 
-            if (!Pay(theme.UnlockCost))
+            if (!Pay(PriceOf(theme)))
             {
                 _world.Send(CurrencyChangedEvent.NotEnough(Currency.Stars));
                 return PurchaseResult.NotEnoughStars;

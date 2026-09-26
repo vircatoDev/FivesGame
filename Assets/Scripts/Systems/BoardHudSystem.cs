@@ -11,7 +11,7 @@ namespace Scripts.Systems
     /// </summary>
     public class BoardHudSystem : IEcsRunSystem
     {
-        private readonly GlobalConfig _config = null;
+        private readonly GameBalance _balance = null;
         private readonly EcsFilter<BoardHistoryComponent> _boards = null;
         private readonly IBoardHud _hud;
         private BoardHud _shown;
@@ -30,7 +30,7 @@ namespace Scripts.Systems
             var board = _boards.GetEntity(0);
             var ready = !board.Has<BoardSolvedTag>();
             var hud = new BoardHud(history.Seed, history.Moves.Count, ready && history.Moves.Count > 0,
-                ready && !board.Has<BoardHintComponent>(), _config.HintPrice);
+                ready && !board.Has<BoardHintComponent>(), _balance.HintPrice);
 
             if (hud.Equals(_shown))
                 return;

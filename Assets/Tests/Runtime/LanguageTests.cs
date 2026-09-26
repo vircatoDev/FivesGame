@@ -1,3 +1,4 @@
+using Scripts.Configs;
 using NUnit.Framework;
 using Scripts.Helpers;
 using Scripts.Models;
@@ -14,7 +15,7 @@ namespace Fives.Runtime.Tests
         public void SetUp()
         {
             _objects = new TestObjects();
-            _save = new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config());
+            _save = new PlayerDataSaveHelper(new MemoryStorage(), _objects.Config(), new GameBalance(_objects.Config()));
         }
 
         [TearDown]

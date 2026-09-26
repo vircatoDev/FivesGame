@@ -29,6 +29,8 @@ namespace Scripts.Installers
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(globalConfig);
+            builder.Register<GameBalance>(Lifetime.Singleton);
+            builder.Register<RemoteBalance>(Lifetime.Singleton);
             builder.RegisterComponent(loadingScreen);
 
             builder.Register<IStorageService, StorageService>(Lifetime.Singleton);
@@ -37,6 +39,9 @@ namespace Scripts.Installers
             builder.Register<SoundService>(Lifetime.Singleton);
             builder.Register<LanguageService>(Lifetime.Singleton);
             builder.Register<LocalizedTexts>(Lifetime.Singleton).As<ITexts>().AsSelf();
+            // BootFlow creates the texts only after the balance is loaded: through the language they read the save,
+            // and a new save takes its starting stars and energy from the balance.
+            builder.RegisterFactory<LocalizedTexts>(resolver => () => resolver.Resolve<LocalizedTexts>(), Lifetime.Singleton);
             builder.Register<AddressableSpriteLoader>(Lifetime.Singleton).As<ISpriteLoader>();
             builder.Register<ThemePreviews>(Lifetime.Singleton);
             builder.Register<EnergyService>(Lifetime.Singleton);

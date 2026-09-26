@@ -19,12 +19,15 @@ namespace Scripts.Boot
         private const string GameScene = "MainGame";
         private const float MinimumSeconds = 0.5f;
 
-        private readonly LocalizedTexts _texts;
+        private readonly RemoteBalance _balance;
+        private readonly Func<LocalizedTexts> _texts;
         private readonly ThemePreviews _previews;
         private readonly LoadingScreen _screen;
 
-        public BootFlow(LocalizedTexts texts, ThemePreviews previews, LoadingScreen screen)
+        /// <param name="texts">Created only after the balance is loaded: the texts read the save, and a new save takes its starting values from the balance.</param>
+        public BootFlow(RemoteBalance balance, Func<LocalizedTexts> texts, ThemePreviews previews, LoadingScreen screen)
         {
+            _balance = balance;
             _texts = texts;
             _previews = previews;
             _screen = screen;
@@ -35,7 +38,8 @@ namespace Scripts.Boot
             var minimum = UniTask.Delay(TimeSpan.FromSeconds(MinimumSeconds), cancellationToken: cancellation); // no flash when loading is instant
             // Leaving play mode or quitting mid-load cancels the boot. That is not an error, and VContainer would log it as one.
             await Load(
-                (1, _ => _texts.Initialize()),
+                (1, _ => _balance.Load(cancellation)),
+                (1, _ => _texts().Initialize()),
                 (1, _ => _previews.Load()),
                 (0, _ => minimum),
                 (2, progress => SceneManager.LoadSceneAsync(GameScene).ToUniTask(progress, cancellationToken: cancellation)))

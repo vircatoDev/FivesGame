@@ -13,7 +13,10 @@
         "SimpleScrollSnap",
         "Unity.Localization",
         "Unity.ResourceManager",
-        "Unity.Addressables"
+        "Unity.Addressables",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication",
+        "Unity.Services.RemoteConfig"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -4,6 +4,7 @@ using Fives.Domain;
 using Leopotam.Ecs;
 using NUnit.Framework;
 using Scripts.Components;
+using Scripts.Configs;
 using Scripts.Helpers;
 using Scripts.Models;
 using Scripts.Services;
@@ -53,7 +54,7 @@ namespace Fives.Runtime.Tests
         public void LateSaveRequest_SurvivesUntilTheNextFrame()
         {
             var store = new MemoryStorage();
-            var save = new PlayerDataSaveHelper(store, _objects.Config());
+            var save = new PlayerDataSaveHelper(store, _objects.Config(), new GameBalance(_objects.Config()));
             var world = new EcsWorld();
             var systems = new EcsSystems(world)
                 .Add(new StorageSystem(new StarService(save))).OneFrame<SaveDataEvent>()
@@ -71,7 +72,7 @@ namespace Fives.Runtime.Tests
         public void SeveralSaveRequestsInOneFrame_WriteOnce()
         {
             var store = new MemoryStorage();
-            var save = new PlayerDataSaveHelper(store, _objects.Config());
+            var save = new PlayerDataSaveHelper(store, _objects.Config(), new GameBalance(_objects.Config()));
             var stars = new StarService(save);
             var world = new EcsWorld();
             var systems = new EcsSystems(world).Add(new StorageSystem(stars)).OneFrame<SaveDataEvent>().Inject(save);
@@ -94,14 +95,14 @@ namespace Fives.Runtime.Tests
             PlayerPrefs.SetString(SaveKey,
                 "{\"Stars\":7,\"PlayerProgress\":{\"UnlockedThemes\":[\"Dogs\",\"Flowers\"],\"CompletedPuzzles\":[\"Corgi\"]}}");
 
-            var migrated = new PlayerDataSaveHelper(_storage, config).GetPlayerData();
+            var migrated = new PlayerDataSaveHelper(_storage, config, new GameBalance(config)).GetPlayerData();
             Assert.That(migrated.Version, Is.EqualTo(ProgressMigration.CurrentVersion));
             Assert.That(migrated.Stars, Is.EqualTo(7));
             Assert.That(migrated.PlayerProgress.UnlockedThemes, Is.EqualTo(new[] { "dogs", "Flowers" }));
             Assert.That(migrated.PlayerProgress.CompletedPuzzles, Is.EqualTo(new[] { "dogs.corgi" }));
 
             _storage.Save("GameSaveData", migrated);
-            var reloaded = new PlayerDataSaveHelper(_storage, config).GetPlayerData().PlayerProgress;
+            var reloaded = new PlayerDataSaveHelper(_storage, config, new GameBalance(config)).GetPlayerData().PlayerProgress;
             Assert.That(reloaded.CompletedPuzzles, Is.EqualTo(new[] { "dogs.corgi" }));
             Assert.That(reloaded.UnlockedThemes, Is.EqualTo(new[] { "dogs", "Flowers" }));
         }
@@ -111,7 +112,7 @@ namespace Fives.Runtime.Tests
         {
             var config = ConfigWithCorgi();
             PlayerPrefs.SetString(SaveKey, "{\"PlayerProgress\":{\"UnlockedThemes\":[\"Dogs\"],\"CompletedPuzzles\":[\"Corgi\"]}}");
-            var progress = new PlayerProgressService(new PlayerDataSaveHelper(_storage, config));
+            var progress = new PlayerProgressService(new PlayerDataSaveHelper(_storage, config, new GameBalance(config)));
             var theme = config.Themes[1];
             theme.ThemeName = "Puppies";
             theme.Puzzles[0].Name = "Welsh Corgi";
@@ -128,7 +129,7 @@ namespace Fives.Runtime.Tests
         {
             PlayerPrefs.SetString(SaveKey, invalid);
 
-            var save = new PlayerDataSaveHelper(_storage, _objects.Config());
+            var save = new PlayerDataSaveHelper(_storage, _objects.Config(), new GameBalance(_objects.Config()));
 
             Assert.That(save.GetPlayerData().Stars, Is.EqualTo(200));
             Assert.That(PlayerPrefs.GetString(SaveKey + ".corrupt"), Is.EqualTo(invalid));
@@ -140,7 +141,7 @@ namespace Fives.Runtime.Tests
             PlayerPrefs.SetString(SaveKey + ".corrupt", "{");
             PlayerPrefs.SetString(SaveKey, "{\"Stars\":41,\"PlayerProgress\":{\"CompletedPuzzles\":[\"One\"]}}");
 
-            var partial = new PlayerDataSaveHelper(_storage, _objects.Config()).GetPlayerData();
+            var partial = new PlayerDataSaveHelper(_storage, _objects.Config(), new GameBalance(_objects.Config())).GetPlayerData();
             Assert.That(partial.Stars, Is.EqualTo(41));
             Assert.That(partial.PlayerProgress.CompletedPuzzles, Does.Contain("One"));
             Assert.That(partial.PlayerProgress.UnlockedThemes, Does.Contain("dogs"));
@@ -159,10 +160,10 @@ namespace Fives.Runtime.Tests
         {
             PlayerPrefs.SetString(SaveKey, "{\"Energy\":{},\"PlayerProgress\":{\"UnlockedThemes\":[\"RemovedTheme\",null]}}");
             var config = ConfigWithCorgi();
-            var save = new PlayerDataSaveHelper(_storage, config);
+            var save = new PlayerDataSaveHelper(_storage, config, new GameBalance(config));
             var world = new EcsWorld();
-            var session = new GameSession(config);
-            var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
+            var session = new GameSession(new GameBalance(config));
+            var energy = new EnergyService(new GameBalance(config), save, new FakeClock { UtcNow = DateTime.UtcNow });
             var view = new FakeMainMenuView();
 
             new MainMenuPresenter(config, new PlayerProgressService(save), new GameStartService(session, energy, world, new FakeSpriteLoader(_objects)), session, new FakeHeaderPanelView(), world, new FakeTexts(), new FakeSpriteLoader(_objects).Previews(config))

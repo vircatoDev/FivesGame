@@ -27,6 +27,7 @@ namespace Scripts
         private EcsSystems _mainSystems;
 
         private GlobalConfig _config;
+        private GameBalance _balance;
         private SoundService _soundService;
         private LanguageService _languageService;
         private LoadingScreen _loadingScreen;
@@ -44,6 +45,7 @@ namespace Scripts
         [Inject]
         public void InjectDependencies(EcsWorld world, 
             GlobalConfig config,
+            GameBalance balance,
             SoundService soundService,
             LanguageService languageService,
             LoadingScreen loadingScreen,
@@ -58,6 +60,7 @@ namespace Scripts
         {
             _world = world;
             _config = config;
+            _balance = balance;
             _soundService = soundService;
             _languageService = languageService;
             _loadingScreen = loadingScreen;
@@ -91,6 +94,7 @@ namespace Scripts
         {
             _mainSystems.Inject(_gameSession)
                 .Inject(_config)
+                .Inject(_balance)
                 .Inject(_playerDataSaveHelper)
                 .Inject(new UnityFrameTime());
         }

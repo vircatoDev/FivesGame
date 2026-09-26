@@ -134,7 +134,7 @@ namespace Scripts.UI.Presenters
                 Id = theme.Id,
                 Image = _previews.Of(theme),
                 TitleText = _texts.Get(TextKeys.Name(theme)),
-                BottomText = unlocked ? GetProgressText(theme) : _texts.Get(TextKeys.Open, theme.UnlockCost),
+                BottomText = unlocked ? GetProgressText(theme) : _texts.Get(TextKeys.Open, _shop.PriceOf(theme)),
                 Offer = !unlocked
             };
         }

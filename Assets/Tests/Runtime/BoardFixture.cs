@@ -4,6 +4,7 @@ using System.Linq;
 using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Components;
+using Scripts.Configs;
 using Scripts.Models;
 using Scripts.Systems;
 
@@ -24,7 +25,7 @@ namespace Fives.Runtime.Tests
 
         public BoardFixture(int columns = 3, int rows = 3)
         {
-            Session = new GameSession(Objects.Config());
+            Session = new GameSession(new GameBalance(Objects.Config()));
             Session.SetGameMode(Objects.Mode(columns, rows));
             Session.BeginRun();
             State = World.NewEntity();
