@@ -1,4 +1,5 @@
 using System.Linq;
+using System;
 using Fives.Domain;
 using Leopotam.Ecs;
 using NUnit.Framework;
@@ -23,9 +24,12 @@ namespace Fives.Runtime.Tests
         {
             _board = new BoardFixture(4, 3).WithBoard(new BoardState(4, 3, Layout));
             var config = _board.Objects.Config(stars);
-            _stars = new StarService(new PlayerDataSaveHelper(new MemoryStorage(), config));
+            var save = new PlayerDataSaveHelper(new MemoryStorage(), config);
+            _stars = new StarService(save);
+            var energy = new EnergyService(config, save, new FakeClock { UtcNow = DateTime.UtcNow });
             _board.Systems = new EcsSystems(_board.World)
                 .Add(new BoardInputSystem()).Add(new BoardHintSystem(_stars)).Add(new BoardProjectionSystem()).Add(new TileMoveSystem())
+                .Add(new CurrencySyncSystem(_stars, energy))
                 .OneFrame<TileSwipeEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardChangedEvent>()
                 .Inject(_board.Session).Inject(_board.Time).Inject(config);
             _board.Systems.Init();

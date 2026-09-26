@@ -7,7 +7,7 @@ namespace Scripts.Services
 {
     public enum PurchaseResult { Unlocked, AlreadyUnlocked, NotEnoughStars }
 
-    /// <summary>Unlocks a theme for stars: debit, unlock, header update and saves. Presenters only show the result.</summary>
+    /// <summary>Unlocks a theme for stars and saves the unlock. Presenters only show the result.</summary>
     public sealed class ThemeShop
     {
         private readonly StarService _stars;
@@ -26,16 +26,19 @@ namespace Scripts.Services
             if (_progress.IsUnlocked(theme))
                 return PurchaseResult.AlreadyUnlocked;
 
-            if (theme.UnlockCost < 0 || (theme.UnlockCost > 0 && !_stars.Spend(theme.UnlockCost)))
+            if (!Pay(theme.UnlockCost))
             {
                 _world.Send(CurrencyChangedEvent.NotEnough(Currency.Stars));
                 return PurchaseResult.NotEnoughStars;
             }
 
             _progress.Unlock(theme);
-            _world.Send(CurrencyChangedEvent.Changed(Currency.Stars, _stars.GetBalance(), -theme.UnlockCost));
+            // CurrencySyncSystem shows the debit and saves it; the unlock needs a save of its own, for a free theme too.
             _world.Send<SaveDataEvent>();
             return PurchaseResult.Unlocked;
         }
+
+        // Debits the price. A free theme costs nothing; a negative price is a config error and never unlocks.
+        private bool Pay(int price) => price == 0 || (price > 0 && _stars.Spend(price));
     }
 }

@@ -128,6 +128,7 @@ namespace Scripts
                 .Add(new EnergyRecoverySystem(_energyService))
                 .Add(new UISystem(_rootLayer, _popUpLayer, _screens))
                 .Add(new SoundSystem(_soundService))
+                .Add(new CurrencySyncSystem(_starService, _energyService)) // after every spender, before the header and the save
                 .Add(new CommonUIHeaderPanelSystem(_header, _energyService, _starService))
                 .Add(new StorageSystem(Storables));
         }

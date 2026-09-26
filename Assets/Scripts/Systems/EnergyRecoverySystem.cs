@@ -1,16 +1,13 @@
 using System;
 using Leopotam.Ecs;
-using Scripts.Components;
-using Scripts.Models;
 using Scripts.Services;
-using UnityEngine;
 using Scripts.Services.Interfaces;
 
 namespace Scripts.Systems
 {
+    /// <summary>Recovers energy when the next unit is due; CurrencySyncSystem reports the change.</summary>
     public class EnergyRecoverySystem : IEcsRunSystem, IEcsInitSystem
     {
-        private readonly EcsWorld _world;
         private readonly EnergyService _energyService;
         private readonly IFrameTime _time = null;
 
@@ -34,13 +31,7 @@ namespace Scripts.Systems
 
         private void RecoverAndScheduleNextCheck()
         {
-            var recoveredAmount = _energyService.RecoverEnergy();
-            if (recoveredAmount > 0)
-            {
-                _world.Send(CurrencyChangedEvent.Changed(Currency.Energy, _energyService.GetBalance(), recoveredAmount));
-                _world.Send<SaveDataEvent>();
-            }
-
+            _energyService.RecoverEnergy();
             _nextCheckTime = _time.Time + GetNextCheckDelay();
         }
 
