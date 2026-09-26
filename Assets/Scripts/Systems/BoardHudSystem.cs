@@ -28,7 +28,7 @@ namespace Scripts.Systems
 
             ref var history = ref _boards.Get1(0);
             var board = _boards.GetEntity(0);
-            var ready = !board.Has<BoardSolvedTag>();
+            var ready = !board.Has<BoardSolvedComponent>();
             var hud = new BoardHud(history.Seed, history.Moves.Count, ready && history.Moves.Count > 0,
                 ready && !board.Has<BoardHintComponent>(), _balance.HintPrice);
 

@@ -5,19 +5,23 @@ using Fives.Domain;
 using Leopotam.Ecs;
 using Scripts.Components;
 using Scripts.Configs;
+using Scripts.Helpers;
 using Scripts.Models;
+using Scripts.Services;
 using Scripts.Systems;
 
 namespace Fives.Runtime.Tests
 {
-    /// <summary>A live board entity with tile views and the input → projection → movement → win pipeline.</summary>
+    /// <summary>A live board entity with tile views and the input → projection → movement → win → completion pipeline.</summary>
     internal sealed class BoardFixture : IDisposable
     {
         public readonly TestObjects Objects = new TestObjects();
         public readonly EcsWorld World = new EcsWorld();
         public readonly FakeFrameTime Time = new FakeFrameTime();
         public readonly GameSession Session;
-        public readonly EcsEntity State;
+        public readonly PlayerProgressService Progress;
+        /// <summary>The puzzle being played.</summary>
+        public readonly PuzzleData Puzzle;
         public EcsSystems Systems;
         public EcsEntity Board;
         public BoardState Layout;
@@ -25,11 +29,13 @@ namespace Fives.Runtime.Tests
 
         public BoardFixture(int columns = 3, int rows = 3)
         {
-            Session = new GameSession(new GameBalance(Objects.Config()));
+            var config = Objects.Config();
+            Session = new GameSession(new GameBalance(config));
             Session.SetGameMode(Objects.Mode(columns, rows));
+            Puzzle = Objects.Puzzles("dogs", "Rex")[0];
+            Session.SetSelectedImage(Puzzle, null);
             Session.BeginRun();
-            State = World.NewEntity();
-            State.Replace(new GameStateComponent { CurrentState = GameStateType.Playing });
+            Progress = new PlayerProgressService(new PlayerDataSaveHelper(new MemoryStorage(), config, new GameBalance(config)));
         }
 
         public List<Swap> Moves => Board.Get<BoardHistoryComponent>().Moves;
@@ -55,11 +61,12 @@ namespace Fives.Runtime.Tests
             return this;
         }
 
-        /// <summary>The gameplay pipeline as GameStartup orders it, with WinCheckSystem after the group.</summary>
+        /// <summary>The gameplay group as GameStartup orders it.</summary>
         public BoardFixture WithGameplaySystems()
         {
             Systems = new EcsSystems(World)
                 .Add(new BoardInputSystem()).Add(new BoardProjectionSystem()).Add(new TileMoveSystem()).Add(new WinCheckSystem())
+                .Add(new PuzzleCompletionSystem(Progress))
                 .OneFrame<TileClickEvent>().OneFrame<TileSwipeEvent>().OneFrame<BoardControlEvent>().OneFrame<BoardChangedEvent>()
                 .Inject(Session).Inject(Time);
             Systems.Init();

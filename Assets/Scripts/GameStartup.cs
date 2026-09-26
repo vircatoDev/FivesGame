@@ -125,7 +125,6 @@ namespace Scripts
             _mainSystems
                 .Add(new GamePlayManagementSystem(_mainSystems))
                 .Add(AddGamePlaySystems())
-                .Add(new WinCheckSystem())
                 .Add(new BoardRevealSystem())
                 .Add(new BoardDestroySystem())
                 .Add(new GameStateSystem(_stateMachine))
@@ -148,6 +147,8 @@ namespace Scripts
                 .Add(new BoardProjectionSystem())
                 .Add(new TileHighlightSystem())
                 .Add(new TileMoveSystem())
+                .Add(new WinCheckSystem())
+                .Add(new PuzzleCompletionSystem(_progressService))
                 .Add(new BoardHudSystem(_boardHud));
             return gamePlaySystems;
         }

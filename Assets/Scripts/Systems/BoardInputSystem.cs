@@ -12,7 +12,7 @@ namespace Scripts.Systems
     public class BoardInputSystem : IEcsRunSystem
     {
         private readonly EcsWorld _world = null;
-        private readonly EcsFilter<BoardComponent, BoardHistoryComponent>.Exclude<BoardSolvedTag> _boards = null;
+        private readonly EcsFilter<BoardComponent, BoardHistoryComponent>.Exclude<BoardSolvedComponent> _boards = null;
         private readonly EcsFilter<TileClickEvent> _clicks = null;
         private readonly EcsFilter<TileSwipeEvent> _swipes = null;
         private readonly EcsFilter<BoardControlEvent> _controls = null;

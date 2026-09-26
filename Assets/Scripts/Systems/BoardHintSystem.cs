@@ -16,7 +16,7 @@ namespace Scripts.Systems
     {
         private readonly EcsWorld _world = null;
         private readonly GameBalance _balance = null;
-        private readonly EcsFilter<BoardComponent>.Exclude<BoardSolvedTag> _boards = null;
+        private readonly EcsFilter<BoardComponent>.Exclude<BoardSolvedComponent> _boards = null;
         private readonly EcsFilter<BoardControlEvent> _controls = null;
         private readonly EcsFilter<BoardChangedEvent> _changes = null;
         private readonly EcsFilter<TileComponent, MoveComponent> _moves = null;
