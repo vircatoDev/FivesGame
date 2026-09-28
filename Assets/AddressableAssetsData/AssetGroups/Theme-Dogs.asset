@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Theme-Dogs
+  m_EditorClassIdentifier: 
+  m_GroupName: Theme-Dogs
+  m_GUID: 15381e7bd2caf4373b99da81adf54baf
+  m_SerializeEntries:
+  - m_GUID: 473ee4e95179d4e4f89fb4038ba07e1d
+    m_Address: theme/dogs/pug
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e7e238a9ed33f7343b30c6190c52ee8a
+    m_Address: theme/dogs/corgi
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e87be115a26bb294f82445b98f153229
+    m_Address: theme/dogs/shepherd
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d0f4f138fb87a44509798bfb5f5d530b, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: b424ce0b1dfe74a7cbf3a490bcdae997, type: 2}
+    - {fileID: 11400000, guid: 1bb3619e049a2449982f8625f097199d, type: 2}

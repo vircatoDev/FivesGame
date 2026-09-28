@@ -1,0 +1,59 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Fives.Components;
+using Fives.Domain;
+using Fives.Models;
+using UnityEngine;
+
+namespace Fives.UI.Views
+{
+    // Screen contracts that presenters and systems depend on. MonoBehaviour views implement them;
+    // tests substitute plain fakes, so presentation logic runs without scenes or prefabs.
+
+    public interface IView
+    {
+        /// <summary>Cancelled when the screen is destroyed: presenters tie their loads and waits to it.</summary>
+        CancellationToken Lifetime { get; }
+
+        /// <summary>Cancelled, not completed, if the screen is destroyed while it plays.</summary>
+        UniTask PlayShowAnimation();
+
+        /// <summary>Cancelled, not completed, if the screen is destroyed while it plays.</summary>
+        UniTask PlayHideAnimation();
+    }
+
+    public interface IMainMenuView : IView
+    {
+        bool IsSliding { get; }
+        void ShowThemes(in ThemeCard previous, in ThemeCard current, in ThemeCard next, int direction, bool canBrowse);
+    }
+
+    public interface ISelectMenuView : IView
+    {
+        void UpdateViewContent(MenuItemData[] newContent, string titleText, Action<string> onClick, bool playAnimation, int centeredItem = 0);
+        void UnlockThemeItemByName(MenuItemData itemData, Action<string> onTileClick);
+    }
+
+    public interface IGamePlayView : IView
+    {
+        void UpdateViewContent(Sprite image, string title, string about);
+        void UpdateControls(string moves, string hintPrice, bool canUndo, bool canHint);
+    }
+
+    public interface IGameResultView : IView
+    {
+        void UpdateViewContent(string stars, string stats, string themeName, ThemeProgress progress);
+
+        /// <summary>The x2 button: hidden where there are no ads, enabled while an ad is loaded.</summary>
+        void ShowDoubleReward(bool offered, bool ready);
+    }
+
+    public interface IHeaderPanelView
+    {
+        void UpdateViewContent(string starsAmount, string energyAmount);
+        void UpdateCurrency(in CurrencyChangedEvent evt);
+        /// <summary>Shows the screen's header button; the callback stays in the presentation layer.</summary>
+        void ShowButton(HeaderBtnType type, Action onClick);
+    }
+}

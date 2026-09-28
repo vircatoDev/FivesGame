@@ -1,0 +1,31 @@
+{
+    "name": "Fives.Runtime",
+    "rootNamespace": "Fives",
+    "references": [
+        "Fives.Domain",
+        "DOTween.Modules",
+        "UniTask",
+        "UniTask.DOTween",
+        "Leopotam.Ecs",
+        "VContainer",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "SimpleScrollSnap",
+        "Unity.Localization",
+        "Unity.ResourceManager",
+        "Unity.Addressables",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication",
+        "Unity.Services.RemoteConfig",
+        "Unity.LevelPlay"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

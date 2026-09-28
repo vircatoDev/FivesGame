@@ -1,0 +1,30 @@
+{
+    "name": "Fives.Runtime.Tests",
+    "rootNamespace": "Fives.Runtime.Tests",
+    "references": [
+        "Fives.Runtime",
+        "Fives.Domain",
+        "Leopotam.Ecs",
+        "UniTask",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.Addressables",
+        "VContainer",
+        "Fives.Tests.Support"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

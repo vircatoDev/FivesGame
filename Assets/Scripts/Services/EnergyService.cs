@@ -1,0 +1,74 @@
+using System;
+using Fives.Configs;
+using Fives.Domain;
+using Fives.Models;
+
+namespace Fives.Services
+{
+    public class EnergyService : IStorable
+    {
+        private readonly int _maxEnergy;
+        private readonly TimeSpan _recoveryInterval;
+        private readonly IClock _clock;
+        private EnergyWallet _wallet;
+
+        public EnergyService(GameBalance balance, PlayerSave save, IClock clock)
+        {
+            _maxEnergy = balance.MaxEnergy;
+            _recoveryInterval = TimeSpan.FromHours(balance.EnergyRecoveryHours);
+            _clock = clock;
+            SetDataFromSave(save.GetPlayerData().Energy);
+        }
+
+        public int GetBalance()
+        {
+            return _wallet.Balance;
+        }
+
+        public void Add(int amount)
+        {
+            if (!_wallet.TryCredit(amount, _clock.UtcNow))
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount));
+            }
+        }
+
+        public bool Spend(int amount)
+        {
+            return _wallet.TrySpend(amount);
+        }
+
+        public int RecoverEnergy()
+        {
+            return _wallet.Recover(_clock.UtcNow);
+        }
+
+        public DateTime GetLastRecoveryTime()
+        {
+            return _wallet.LastRecoveryUtc;
+        }
+
+        public TimeSpan GetTimeUntilNextRecovery()
+        {
+            return _wallet.TimeUntilNextRecovery(_clock.UtcNow);
+        }
+
+        /// <summary>Expects data normalized by <see cref="PlayerSave"/>.</summary>
+        public void SetDataFromSave(EnergyData data) =>
+            _wallet = new EnergyWallet(data.CurrentEnergy, _maxEnergy, _recoveryInterval, data.LastRecoveryTime);
+
+        public void UpdatePlayerData(GameSaveData playerData)
+        {
+            playerData.Energy ??= new EnergyData();
+            playerData.Energy.CurrentEnergy = _wallet.Balance;
+            playerData.Energy.LastRecoveryTime = _wallet.LastRecoveryUtc;
+        }
+    }
+
+    [System.Serializable]
+    public class EnergyData
+    {
+        public int CurrentEnergy;
+        public DateTime LastRecoveryTime;
+    }
+}
